@@ -1,0 +1,1 @@
+#check taht there are no duplicate flags
