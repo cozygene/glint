@@ -1,2 +1,2 @@
-import bla
-import refactor
+from refactor_parser import RefactorParser
+from ewas_parser import EWASParser
