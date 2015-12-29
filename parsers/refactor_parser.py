@@ -26,14 +26,12 @@ class RefactorParser( object ):
         refactor.add_argument('--fs',       type = str, default = 'normal',  help = "feature selection mode (for the first step of refactor)  - normal (defualt) (the standard refactor feature selection; default value), controls (by using the controls only; possible only if a binary phenotype is provided), phenotype (by using a subspace orthogonal to the phenotype)")
 
 
-    def __init__(self, args, data, output_perfix = ""):
+    def __init__(self, args, meth_data, output_perfix = ""):
         # validate required args
-        if not args.k:
-            logging.error("-k option must be specified with the --refactor flag")
-            sys.exit(2) 
+        self._validate_required_args(args)
 
         # init module to validate other args format
-        self.module  = refactor.Refactor(O = data, 
+        self.module  = refactor.Refactor(methylation_data = meth_data, 
                               K = args.k, 
                               t = args.t, 
                               feature_selection = args.fs.lower().strip(), 
@@ -42,6 +40,13 @@ class RefactorParser( object ):
                               covar = args.covar,
                               ranked_output_filename = output_perfix + refactor.RANKED_FILENAME, 
                               components_output_filename  = output_perfix + refactor.COMPONENTS_FILENAME)
+
+    def _validate_required_args(self, args):
+        if not args.k:
+            logging.error("-k option must be specified with the --refactor flag")
+            sys.exit(2) 
+
+        return True
 
     def run( self ):
         self.module.run()

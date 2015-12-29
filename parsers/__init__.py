@@ -1,2 +1,3 @@
 from refactor_parser import RefactorParser
 from ewas_parser import EWASParser
+from methylation_data_parser import MethylationDataParser

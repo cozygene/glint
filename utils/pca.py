@@ -8,3 +8,4 @@ class PCA( object ):
 
         self.U = pca_res.components_.transpose() # loadings
         self.P = pca_res.transform( scaled )     # scores
+
