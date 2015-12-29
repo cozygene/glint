@@ -1,6 +1,7 @@
 import os
 import sys
 import logging
+import copy
 from numpy import loadtxt, delete, isnan, nanvar, where
 from numpy.ma import average, masked_array
 from module import Module
@@ -47,13 +48,9 @@ class MethylationData( Module ):
             sys.exit(2) 
         return num
 
-    def get_copy_of_data(self):
-        """
-        returns a copy of the data.
-        if you want a copy of the object just run copy.deepcopy(you_object)
-        """
-        return self.data.copy()
-        
+    def copy(self):
+        return copy.deepcopy(self)
+
     """
     validates that all cpgs are uniqe and appears in datafile
     """

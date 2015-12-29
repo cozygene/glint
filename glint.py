@@ -2,7 +2,6 @@ import argparse
 import os
 import sys
 import logging
-import copy
 from numpy import genfromtxt ,loadtxt
 from utils import GlintArgumentParser
 from parsers import RefactorParser, EWASParser, MethylationDataParser  #dont remove this is imported in,,,
@@ -32,7 +31,9 @@ def run ( args ):
 
     # init modules (the init verifies the arguments)
     if args.refactor:
-        refactor_meth_data = copy.deepcopy(meth_data)
+        refactor_meth_data = meth_data.copy()#
+        import pdb
+        pdb.set_trace()
         optional_args.extend(RefactorParser.ALL_ARGS)
         modules_to_run.append(RefactorParser(args, refactor_meth_data))
 

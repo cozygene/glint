@@ -4,23 +4,21 @@ import sys
 class GlintMutuallyExclusiveGroup(argparse._MutuallyExclusiveGroup):
         def add_argument( self,  *args, **kwargs ):
             for option_string in args:
-                if option_string in self._option_string_actions: #TODO check that they are equal
-                    old = self._option_string_actions.pop(option_string) #will remove this from thew list so argparse won;t except on duplicate
+                if option_string in self._option_string_actions: #TODO check that they are identical
+                    old = self._option_string_actions.pop(option_string) # will remove this from thew list so argparse won;t except on duplicate
                     
             return super(GlintMutuallyExclusiveGroup, self).add_argument( *args, **kwargs)
 
             
 
 class GlintArgumentGroup(argparse._ArgumentGroup):
-        #TODO check if equal 
-
-        # print argparse._StoreAction(**kwargs) == self._option_string_actions[option_string]
+        #TODO check if duplicate flags are identical
 
         def add_argument( self,  *args, **kwargs ):
             for option_string in args:
                 if option_string in self._option_string_actions: #TODO check that they are equal
                     self._option_string_actions.pop(option_string) 
-            # doc: this will reenter the last one and wont delete it from description
+            # this will reenter the last one and wont delete it from description
             return super(GlintArgumentGroup, self).add_argument( *args, **kwargs)
 
 
@@ -49,7 +47,7 @@ class GlintArgumentParser(argparse.ArgumentParser):#,argparse._ActionsContainer,
 
     def add_argument( self,  *args, **kwargs ):
         for option_string in args:
-            if option_string in self._option_string_actions: #TODO check that they are equal
+            if option_string in self._option_string_actions: #TODO check that they are identical
                 old = self._option_string_actions.pop(option_string) #will remove this from thew list so argparse won;t except on duplicate
                 
         return super(GlintArgumentParser, self).add_argument( *args, **kwargs)
