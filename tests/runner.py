@@ -6,7 +6,6 @@ import sys
 import argparse 
 import time
 import tableprinter
-
 TESTS_DIR = "."
 
 class Runner( object ):

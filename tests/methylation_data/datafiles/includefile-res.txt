@@ -1,0 +1,4 @@
+IDS sample_1    sample_2    sample_3    sample_4
+cp2 0.6 0.4 0.2 0.1
+cp4 0.254   nan nan 0.2424
+cp6 0.11    0.656   0.698   0.6546

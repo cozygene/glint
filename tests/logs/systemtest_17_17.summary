@@ -1,0 +1,3 @@
+SUCCESS: ./methylation_data/test_remove_lowest_variance_sites.py
+SUCCESS: ./methylation_data/test_remove_missing_values_sites.py
+SUCCESS: ./methylation_data/test_replace_missing_values_by_mean.py

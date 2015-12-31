@@ -14,7 +14,7 @@ class MethylationData( Module ):
     """
     def __init__(self, datafile, missing_values_th = 0.3, lowest_variance_th = 0.5, includefile = None, excludefile = None, keepfile = None, removefile = None):
         data = self._validate_str_matrix_file(datafile) 
-        self.samples_ids = data[0,:][1:]        # extract samples ID
+        self.samples_ids = data[0,:][1:]         # extract samples ID
         self.cpgnames = data[:,0][1:]           # extract methylation sites names
 
         # remove sample ID and sites names from matrix
@@ -164,6 +164,8 @@ class MethylationData( Module ):
         remove sites that have many missing values
         many is self.missing_values_th from the values
         """
+
+        self.missing_values_th = 0.012 #TODO remove this
         max_missing_values = self.missing_values_th * self.samples_size
         nan_quantity_per_site = isnan(self.data).sum(axis=1)
         many_nan_indices = where(nan_quantity_per_site > max_missing_values)
