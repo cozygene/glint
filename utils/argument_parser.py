@@ -40,7 +40,6 @@ class GlintArgumentParser(argparse.ArgumentParser):#,argparse._ActionsContainer,
         return group
 
     def add_mutually_exclusive_group(self, **kwargs):
-        print "!@#$!$!@#$!@$!@$!@#$#!$!@$#!$!#!#$#$##$$#"
         group = GlintMutuallyExclusiveGroup(self, **kwargs)
         self._mutually_exclusive_groups.append(group)
         return group

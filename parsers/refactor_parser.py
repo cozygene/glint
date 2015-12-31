@@ -1,10 +1,10 @@
 """""
 ReFactor
 """""
-import logging
 import os
 import sys
 import argparse
+import logging
 from modules import refactor
 
 class RefactorParser( object ):
@@ -49,5 +49,8 @@ class RefactorParser( object ):
         return True
 
     def run( self ):
+      try:
         self.module.run()
-
+      except Exception :
+        logging.exception("in refactor")
+      

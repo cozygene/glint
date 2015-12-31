@@ -34,6 +34,7 @@ class Refactor( Module ):
         methylation_data is a MethylationData object
         TODO add class doc here
         """
+        
         self.meth_data = methylation_data
         self.meth_data.data = self.meth_data.data
         feature_selection = feature_selection.lower().strip()
@@ -53,24 +54,24 @@ class Refactor( Module ):
         if phenofile:
             pheno = self._validate_matrix_ids_and_reorder(phenofile)
             if len(pheno[0]) != 2:
-                print("the phenotype file provided is not in the right format. should be 2 columns: 1 - sample id, 2 - phenotype") #TODO is this right?
+                logging.error("the phenotype file provided is not in the right format. should be 2 columns: 1 - sample id, 2 - phenotype") #TODO is this right?
                 sys.exit(2)
 
             pheno = pheno[:,1:].astype(float) # TODO should check if can convert  to float
             
             if feature_selection == 'normal':
-                print("[WARNING] provided phenotype file without fs") #TODO should we warn?
+                logging.warning("provided phenotype file without fs") #TODO should we warn?
 
         return pheno
 
     def _validate_covar(self, covariates):
         covar = None
         if not covariates:
-            print("[WARNING] didn't supply covariates file")
+            logging.warning("didn't supply covariates file")
         else:
             covar = self._validate_matrix_ids_and_reorder(covariates)
             if len(covar[0]) < 2:
-                print("the covariates file provided is not in the right format. should be at least 2 columns") #TODO is this right?
+                logging.error("the covariates file provided is not in the right format. should be at least 2 columns") #TODO is this right?
                 sys.exit(2)
 
             covar = covar[:,1:].astype(float)
@@ -85,22 +86,22 @@ class Refactor( Module ):
     """
     def _validate_matrix_ids_and_reorder(self, matrix_file_path):
         if not os.path.exists(matrix_file_path) :
-            print("The file '%s' doesn't exist. Exiting" % matrix_file_path)
+            logging.error("The file '%s' doesn't exist. Exiting" % matrix_file_path)
             sys.exit(2)
 
         data = loadtxt(matrix_file_path, dtype = str)
         if len(data) != len(self.meth_data.samples_ids):
-            print("the file provided %s doesn't include all sample ids" % matrix_file_path)
+            logging.error("the file provided %s doesn't include all sample ids" % matrix_file_path)
             sys.exit(2)
 
         matrix_sample_ids = data[:,0]
 
         if not (self.meth_data.samples_ids == matrix_sample_ids).all(): #todo check this is not by order
             if len(set(self.meth_data.samples_ids)^set(matrix_sample_ids)) != 0:
-                print("sample ids in phenotype file are not the same as in the data file")
+                logging.error("sample ids in phenotype file are not the same as in the data file")
                 sys.exit(2)
             
-            print("sample ids in phenotype file are not in the same order as in the datafile, reordering...")
+            logging.info("sample ids in phenotype file are not in the same order as in the datafile, reordering...")
             sample_to_row = dict()
             for sample in data:
                 sample_to_row[sample[0]] = sample
@@ -117,13 +118,13 @@ class Refactor( Module ):
     """
     def _validate_fs(self, feature_selection):
         if feature_selection not in self.FEATURE_SELECTION:
-            print("choose fs from feature_selection options: %s (selected fs: %s)" % ( self.FEATURE_SELECTION, feature_selection ))
+            logging.error("choose fs from feature_selection options: %s (selected fs: %s)" % ( self.FEATURE_SELECTION, feature_selection ))
             sys.exit(2)
         elif feature_selection != 'normal' and self.phenotype is None:
-            print("must provide a phenotype file when selected feature 'controls'")
+            logging.error("must provide a phenotype file when selected feature 'controls'")
             sys.exit(2)
         elif feature_selection == 'controls' and not self._is_binary_vector(self.phenotype):
-            print("must provide a phenotype file in a binary format when selected feature 'controls'")
+            logging.error("must provide a phenotype file in a binary format when selected feature 'controls'")
             sys.exit(2)
 
         return getattr(self, self.FEATURE_FUNC_NAME_FORMAT.format(feature_option_name=feature_selection))
@@ -133,7 +134,7 @@ class Refactor( Module ):
     """
     def _validate_k(self,k):
         if not (k >= 2 and k <= self.meth_data.samples_size):
-            print("k must be at least 2 and smaller than samples size. k = %s, samples = %s" % (k, self.meth_data.samples_size))
+            logging.error("k must be at least 2 and smaller than samples size. k = %s, samples = %s" % (k, self.meth_data.samples_size))
             sys.exit(2) 
 
         return k
@@ -144,7 +145,7 @@ class Refactor( Module ):
     """
     def _validate_t(self,t):
         if t > self.meth_data.sites_size or t < self.k : 
-            print("t cannot be greater than number of sites or smaller than k . t = %s, sites = %s, k = %s" % (t, self.meth_data.sites_size, self.k))
+            logging.error("t cannot be greater than number of sites or smaller than k . t = %s, sites = %s, k = %s" % (t, self.meth_data.sites_size, self.k))
             sys.exit(2) 
 
         return t
@@ -155,7 +156,7 @@ class Refactor( Module ):
     """
     def _validate_num_comp(self,num_comp):
         if num_comp and not (num_comp >= self.k and num_comp <= self.meth_data.samples_size):
-            print("number of components must be at least k and smaller than samples size. num_comp = %s, samples = %s, k = %s" % (t, self.meth_data.samples_size, self.k))
+            logging.error("number of components must be at least k and smaller than samples size. num_comp = %s, samples = %s, k = %s" % (t, self.meth_data.samples_size, self.k))
             sys.exit(2) 
 
         return num_comp if num_comp else self.k
@@ -182,6 +183,7 @@ class Refactor( Module ):
     def run( self ):
         logging.info('Starting ReFACTor v%s...' % self.VERSION);
         self.components, self.ranked_sites = self._refactor()
+        logging.info('ReFACTor Done!')
 
    
     """
@@ -229,7 +231,7 @@ class Refactor( Module ):
             for i,site in enumerate(self.meth_data.data):
                 lin_reg = LinearRegression(site, self.covar)
                 if len(lin_reg.residuals) != len(site):
-                    print "ERROR" #TODO move to test?
+                    logging.error( "ERROR" )#TODO move to test?
                 O_reg[i] = lin_reg.residuals
             self.meth_data.data = O_reg
 
@@ -250,7 +252,7 @@ class Refactor( Module ):
         for i,site in enumerate(self.meth_data.data):
             lin_reg = LinearRegression(site, self.phenotype)
             if len(lin_reg.residuals) != len(site): #TODO move to test?
-                print "ERROR"
+                logging.error( "ERROR")
             O_tag[i] = lin_reg.residuals
 
         return O_tag
@@ -262,7 +264,7 @@ class Refactor( Module ):
     def _controls_feature_handler( self ):   
         controls_samples_indices = [i for i, control in enumerate(self.phenotype) if control == 0]
         if (self.k > controls_samples_indices):
-            print("k cannot be greater than controls sample")
+            logging.error("k cannot be greater than controls sample")
             sys.exit(2)
         self.meth_data.data = self.meth_data.data[:, controls_samples_indices]
         return self.meth_data.data

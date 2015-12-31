@@ -1,24 +1,23 @@
 import argparse
 import os
 import sys
+from configuration import configurelogging
+configurelogging.configureLogging('') #todo should seperate each module to a different folder to have different "namespaces"?
 import logging
 from numpy import genfromtxt ,loadtxt
 from utils import GlintArgumentParser
 from parsers import RefactorParser, EWASParser, MethylationDataParser  #dont remove this is imported in,,,
 
-
 MODULES_PARSERS = ['MethylationDataParser', 'RefactorParser', 'EWASParser'] 
-
 ALL_ARGS = ['--refactor', '--ewas', '--out']
+
 def add_arguments(parser):       
     parser.add_argument('--refactor', action='store_true', help = "help")
     parser.add_argument('--ewas',     action='store_true', help = "help" )
     parser.add_argument('--out',      type = str,  default ="",    help = "changes the prefix of the output file ")
-
     
     for m in MODULES_PARSERS:
         globals()[m].init_args(parser)
-
 
 # TODO make it be posiible to run from import
 def run ( args ):
@@ -31,16 +30,17 @@ def run ( args ):
 
     # init modules (the init verifies the arguments)
     if args.refactor:
+        logging.info("Validating refactor...")
         refactor_meth_data = meth_data.copy()#
-        import pdb
-        pdb.set_trace()
         optional_args.extend(RefactorParser.ALL_ARGS)
         modules_to_run.append(RefactorParser(args, refactor_meth_data))
 
     if args.ewas:
+        logging.info("Validating ewas...")
         optional_args.extend(EWASParser.ALL_ARGS)
         modules_to_run.append(EWASParser(args))
-    
+
+
     # run every module
     for m in modules_to_run:
         m.run()
@@ -49,7 +49,6 @@ def run ( args ):
 
 
 if __name__ == '__main__':
-
     parser = GlintArgumentParser(prog=os.path.basename(sys.argv[0]),
                                  description = "<< add help before >>",
                                  epilog = "<< add help after >>")# conflict_handler='resolve')
@@ -61,12 +60,12 @@ if __name__ == '__main__':
     selected_args = [arg for arg in sys.argv if arg.startswith("-")]
 
     args = parser.parse_args() # modules validation is here
-
+    logging.info("Starting glint...")
     optional_args = run(args)
 
     differ = set(selected_args).difference(set(optional_args))
     if differ:
-        print "ERROR: selected unused argument" + str(differ)
+        logging.error("selected unused argument" + str(differ))
 
 
 

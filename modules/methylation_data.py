@@ -1,7 +1,7 @@
 import os
 import sys
-import logging
 import copy
+import logging
 from numpy import loadtxt, delete, isnan, nanvar, where
 from numpy.ma import average, masked_array
 from module import Module
@@ -13,9 +13,8 @@ class MethylationData( Module ):
     TODO add class doc here
     """
     def __init__(self, datafile, missing_values_th = 0.3, lowest_variance_th = 0.5, includefile = None, excludefile = None, keepfile = None, removefile = None):
-        print includefile
         data = self._validate_str_matrix_file(datafile) 
-        self.samples_ids = data[0,:][1:]         # extract samples ID
+        self.samples_ids = data[0,:][1:]        # extract samples ID
         self.cpgnames = data[:,0][1:]           # extract methylation sites names
 
         # remove sample ID and sites names from matrix
@@ -44,7 +43,7 @@ class MethylationData( Module ):
 
     def _validate_percentage(self, num):
         if not (num <= 1 and num >=0):
-            print("must be a float between 0 and 1")
+            logging.error("must be a float between 0 and 1")
             sys.exit(2) 
         return num
 
@@ -165,8 +164,6 @@ class MethylationData( Module ):
         remove sites that have many missing values
         many is self.missing_values_th from the values
         """
-
-        self.missing_values_th = 0.012 #TODO remove this
         max_missing_values = self.missing_values_th * self.samples_size
         nan_quantity_per_site = isnan(self.data).sum(axis=1)
         many_nan_indices = where(nan_quantity_per_site > max_missing_values)
@@ -180,5 +177,4 @@ class MethylationData( Module ):
         sites_mean = average(masked_data, axis=1)
         nan_indices = where(masked_data.mask)
         self.data[nan_indices] = sites_mean[nan_indices[0]]
-        print isnan(self.data).sum()
 

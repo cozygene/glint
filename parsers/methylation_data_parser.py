@@ -1,3 +1,4 @@
+import logging
 from modules import methylation_data
 
 class MethylationDataParser(object):
@@ -18,8 +19,11 @@ class MethylationDataParser(object):
 
     def __init__(self, args):
         # init module to validate other args format
-        self.module  = methylation_data.MethylationData(datafile = args.datafile,
+        try:
+            self.module  = methylation_data.MethylationData(datafile = args.datafile,
                                                         includefile = args.include,
                                                         excludefile = args.exclude,
                                                         keepfile = args.keep,
                                                         removefile = args.remove)
+        except Exception:
+            logging.exception("in methylation data")
