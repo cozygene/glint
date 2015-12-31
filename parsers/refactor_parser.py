@@ -53,4 +53,5 @@ class RefactorParser( object ):
         self.module.run()
       except Exception :
         logging.exception("in refactor")
+        raise
       

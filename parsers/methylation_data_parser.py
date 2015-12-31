@@ -27,3 +27,4 @@ class MethylationDataParser(object):
                                                         removefile = args.remove)
         except Exception:
             logging.exception("in methylation data")
+            raise
