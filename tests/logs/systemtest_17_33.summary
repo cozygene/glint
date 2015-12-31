@@ -1,8 +1,0 @@
-FAILURE: ./methylation_data/test_exclude.py
-SUCCESS: ./methylation_data/test_include.py
-SUCCESS: ./methylation_data/test_keep.py
-SUCCESS: ./methylation_data/test_remove.py
-SUCCESS: ./methylation_data/test_remove_lowest_variance_sites.py
-SUCCESS: ./methylation_data/test_remove_missing_values_sites.py
-SUCCESS: ./methylation_data/test_replace_missing_values_by_mean.py
-SUCCESS: ./refactor/test_controls_feature.py
