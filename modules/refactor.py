@@ -54,7 +54,7 @@ class Refactor( Module ):
         if phenofile:
             pheno = self._validate_matrix_ids_and_reorder(phenofile)
             if len(pheno[0]) != 2:
-                logging.error("the phenotype file provided is not in the right format. should be 2 columns: 1 - sample id, 2 - phenotype") #TODO is this right?
+                logging.error("must provided only one phenotype. should be 2 columns: 1 - sample id, 2 - phenotype") #TODO is this right?
                 sys.exit(2)
 
             pheno = pheno[:,1:].astype(float) # TODO should check if can convert  to float
