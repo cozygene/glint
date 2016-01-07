@@ -6,28 +6,15 @@ from pickle import dump
 from numpy import loadtxt, delete, isnan, nanvar, where
 from numpy.ma import average, masked_array
 from module import Module
-COMPRESSED_FILENAME = "methylation_data"
 
-class MethylationDataInfo(object):
+COMPRESSED_FILENAME = "methylation_data"
 
 class MethylationData( Module ):
     """
-    includefile and excludefile cannot be set together
-    keepfile and removefile cannot be set together
     TODO add class doc here
-                 datafile - the methylation data file path
-                 missing_values_th -  if set, the percentage of sites with the highest number of missing values to remove. a number between 0 and 1
-                 lowest_variance_th - if set, the percentage of sites with the lowest variance to remove. a number between 0 and 1
-                 min_value -          if set, will remove sites with mean value lower than this. a number between 0 and 1
-                 max_value -          if set, will remove sites with mean value higher than this. a number between 0 and 1
-                 includefile -        file with a list of sites name to include in the data
-                 excludefile -        file with a list of sites name to exclude from data
-                 keepfile -           file with list of samples_ids to keep in data
-                 removefile -         file with list of samples ids to remove from data
-                 methylation_data_filename -    the file to save the serialized methylation data, "Glint" format
     """
     def __init__(self, datafile):
-        data = self._load_and_validate_file_of_dimentions(datafile, 2)  # TODO reut should move this inside parser????
+        data = self._load_and_validate_file_of_dimentions(datafile, 2) 
         self.samples_ids = data[0,:][1:]                 # extract samples ID
         self.cpgnames = data[:,0][1:]                    # extract methylation sites names
 

@@ -36,7 +36,6 @@ class Refactor( Module ):
         """
         
         self.meth_data = methylation_data
-        self.meth_data.data = self.meth_data.data
         feature_selection = feature_selection.lower().strip()
         
         # validate and process all variables
