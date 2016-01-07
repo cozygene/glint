@@ -13,17 +13,14 @@ class RefactorParser( object ):
 
     @staticmethod
     def init_args( parser ):
-        refactor = parser.add_argument_group('refactor', 'add refactor description here')
+        refactor = parser.add_argument_group('Additional options if --refactor is selected','\n')
 
-        refactor.add_argument('--pheno',    type = str,  help = "a phenotype file for the association test (can include multiple phenotypes)")
-        refactor.add_argument('-k',         type = int,   help = "the number of assumed cell types (must be given if --refactor is used)")
-        refactor.add_argument('-t',         type = int, default = 500,  help = "the number of sites refactor uses for computing the components. Default is 500") #   monte_carlo_size
-   
-        #TODO what type is this
-        refactor.add_argument('--covar',                                help="for including covariates; these will be used for computing the refactor components as well as for running association test (if --linreg or --logreg are selected)")
-        refactor.add_argument('--numcomp',  type = int,                 help = "the number of refactor components to output. Default is K")
-
-        refactor.add_argument('--fs',       type = str, default = 'normal',  help = "feature selection mode (for the first step of refactor)  - normal (defualt) (the standard refactor feature selection; default value), controls (by using the controls only; possible only if a binary phenotype is provided), phenotype (by using a subspace orthogonal to the phenotype)")
+        refactor.add_argument('-k',         type = int,   help = "The number of assumed cell types")
+        refactor.add_argument('-t',         type = int, default = 500,  help = "The number of sites to use for computing the ReFACtor components (DEFAULT=500)")
+        refactor.add_argument('--numcomp', type = int, help = "The number of ReFACTor components to output (DEFAULT=K)")
+        refactor.add_argument('--fs',       type = str, default = 'normal',  help = "feature selection mode; options: normal, controls, phenotype (DEFAULT=normal)")
+        refactor.add_argument('--covar', type = str, help="A covariates file")
+        refactor.add_argument('--pheno',    type = str,  help = "A phenotype file")
 
 
     def __init__(self, args, meth_data, output_perfix = ""):
