@@ -40,6 +40,7 @@ class RefactorParser( object ):
                               covar = args.covar,
                               ranked_output_filename = output_perfix + refactor.RANKED_FILENAME, 
                               components_output_filename  = output_perfix + refactor.COMPONENTS_FILENAME)
+        # TODO consider handling flags out of refactor (as done in methylation_data)
 
     def _validate_required_args(self, args):
         if not args.k:

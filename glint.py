@@ -25,8 +25,9 @@ def run ( args ):
     optional_args = ALL_ARGS
     modules_to_run = []
 
+    logging.info("Validating methylation data...")
     optional_args.extend(MethylationDataParser.ALL_ARGS)
-    meth_data = MethylationDataParser(args).module
+    meth_data = MethylationDataParser(args).data
 
     # init modules (the init verifies the arguments)
     if args.refactor:
@@ -49,6 +50,7 @@ def run ( args ):
 
 
 if __name__ == '__main__':
+    logging.info("Starting glint...")
     parser = GlintArgumentParser(prog=os.path.basename(sys.argv[0]),
                                  description = "<< add help before >>",
                                  epilog = "<< add help after >>")# conflict_handler='resolve')
@@ -60,7 +62,6 @@ if __name__ == '__main__':
     selected_args = [arg for arg in sys.argv if arg.startswith("-")]
 
     args = parser.parse_args() # modules validation is here
-    logging.info("Starting glint...")
     optional_args = run(args)
 
     differ = set(selected_args).difference(set(optional_args))
