@@ -10,13 +10,12 @@ class EWASParser(object):
     def init_args( parser ):
         all_args = []
         ewas = parser.add_argument_group('ewas', 'add ewas description here')
-        ewas.add_argument('--pheno',     type = str,       help = "skkk")
-        ewas.add_argument('--covar',     type = str,        help="for including covariates; these will be used for computing the refactor components as well as for running association test (if --linreg or --logreg are selected)")
-
+        ewas.add_argument('--pheno', type = str, help = "A phenotype file")
+        ewas.add_argument('--covar', type = str, help="A covariates file")
 
         group_reg = ewas.add_mutually_exclusive_group(required = False) #TODO this is not working!
-        group_reg.add_argument('--linreg',        help = "performs a linear regression. If selecting that option must provide a phenotype (--phenofile)")
-        group_reg.add_argument('--logreg',        help = "performs a logistic regression. If selecting that option must get a phenotype (--phenofile), and it must be a binary phenotype.")
+        group_reg.add_argument('--linreg', help = "Run a linear regression analysis; --pheno must be provided (executed by default if --ewas is selected)")
+        group_reg.add_argument('--logreg', help = "Run a logistic regression analysis; --pheno must be provided and be a binary phenotype")
         
     def __init__( self, args ):
 
