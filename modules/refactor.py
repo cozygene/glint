@@ -214,11 +214,11 @@ class Refactor( Module ):
         score = pca_out.P
 
         logging.info('Saving a ranked list of the data features...')
-        data = '\n'.join(['%s\t%s'% (index, self.meth_data.cpgnames[index]) for index in ranked_list])
+        data = '\n'.join(['%s\t%s'% (index + 1, self.meth_data.cpgnames[index]) for index in ranked_list])
         self._write_file(self.ranked_output_filename, data)
 
         logging.info('Saving the ReFACTor components...')
-        data = '\n'.join(['\t'.join([str(i) for i in line]) for line in score[:,0:self.k]])
+        data = '\n'.join(['\t'.join([str(i) for i in line]) for line in score[:,0:self.num_components]])
         self._write_file(self.components_output_filename, data)
         
         return score[:,0:self.num_components], ranked_list
