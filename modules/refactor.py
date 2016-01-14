@@ -131,7 +131,7 @@ class Refactor( Module ):
     """
     def _validate_k(self,k):
         if not (k >= 2 and k <= self.meth_data.samples_size):
-            logging.error("k must be at least 2 and smaller than samples size. k = %s, samples = %s" % (k, self.meth_data.samples_size))
+            logging.error("k must be at least 2 and smaller than the number of samples size. k = %s, samples = %s" % (k, self.meth_data.samples_size))
             common.terminate(self.__class__.__name__) 
 
         return k
@@ -142,7 +142,7 @@ class Refactor( Module ):
     """
     def _validate_t(self,t):
         if t > self.meth_data.sites_size or t < self.k : 
-            logging.error("t cannot be greater than number of sites or smaller than k . t = %s, sites = %s, k = %s" % (t, self.meth_data.sites_size, self.k))
+            logging.error("t cannot be greater than the number of sites or smaller than k . t = %s, sites = %s, k = %s" % (t, self.meth_data.sites_size, self.k))
             common.terminate(self.__class__.__name__) 
 
         return t
@@ -153,7 +153,7 @@ class Refactor( Module ):
     """
     def _validate_num_comp(self,num_comp):
         if num_comp and not (num_comp >= self.k and num_comp <= self.meth_data.samples_size):
-            logging.error("number of components must be at least k and smaller than samples size. num_comp = %s, samples = %s, k = %s" % (t, self.meth_data.samples_size, self.k))
+            logging.error("number of components must be at least k and smaller than the number of samples size. num_comp = %s, samples = %s, k = %s" % (t, self.meth_data.samples_size, self.k))
             common.terminate(self.__class__.__name__) 
 
         return num_comp if num_comp else self.k
@@ -178,9 +178,10 @@ class Refactor( Module ):
         return True
 
     def run( self ):
-        logging.info('Starting ReFACTor v%s...' % self.VERSION);
+        # TODO use module name from config file instead of "ReFACTor"
+        logging.info('Starting ReFACTor v%s...' % self.VERSION); 
         self.components, self.ranked_sites = self._refactor()
-        logging.info('ReFACTor Done!')
+        logging.info('ReFACTor is Done!')
 
    
     """
@@ -189,7 +190,7 @@ class Refactor( Module ):
     """
     def _write_file( self, filepath, data):   
         if  os.path.exists(filepath):
-            os.remove(filepath) #TODO dont remove.. do other thing..!
+            os.remove(filepath) #TODO move the last file to other place?
         with open(filepath, 'w') as f:
             f.write(data)
 
@@ -206,7 +207,7 @@ class Refactor( Module ):
         O_find_best_sites = self.feature_selection_handler() #TODO change name of O_find_best_sites
         ranked_list = self._calc_low_rank_approx_distances(O_find_best_sites, self.k)
 
-        logging.info('Compute ReFACTor components...')
+        logging.info('Computing the ReFACTor components...')
         sites = ranked_list[0:self.t]
 
         pca_out = pca.PCA(self.meth_data.data[sites,:])
@@ -276,7 +277,7 @@ class Refactor( Module ):
         # PCA calc is here so we don't need to pass P and U as arguments to this function. That way this func can be called from feature selection    pca_out = pca.PCA(self.meth_data.data.transpose()) 
         pca_out = pca.PCA(O.transpose()) 
 
-        logging.info('Compute a low rank approximation of input data and rank sites...')
+        logging.info('Computing a low rank approximation of the input data and ranking sites...')
         x = tools.low_rank_approximation(pca_out.P, pca_out.U, i)
        
         An = preprocessing.StandardScaler( with_mean = True, with_std = False ).fit(O.transpose()).transform(O.transpose()) #TODO move transpose out?
