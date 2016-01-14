@@ -1,5 +1,6 @@
 import sys
 import logging
+from utils import common
 """""
 EWAS
 """""
@@ -25,11 +26,11 @@ class EWASParser(object):
 
         if args.logreg and not args.pheno: # this won't happen since pheno is required
             logging.error("must specify phenofile with logreg")
-            sys.exit(2)
+            common.terminate(self.__class__.__name__)
 
         if args.linreg and not args.pheno:
             logging.error("must specify phenofile with linreg")
-            sys.exit(2)
+            common.terminate(self.__class__.__name__)
 
         self.module = None
 

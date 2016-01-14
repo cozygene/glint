@@ -6,6 +6,7 @@ from pickle import dump
 from numpy import loadtxt, delete, isnan, nanvar, where
 from numpy.ma import average, masked_array
 from module import Module
+from utils import common
 
 COMPRESSED_FILENAME = "methylation_data"
 
@@ -31,7 +32,7 @@ class MethylationData( Module ):
     def _validate_file_path(self, filepath):
         if not os.path.exists(filepath) :
             logging.error("The file '%s' doesn't exist. Exiting" % filepath)
-            sys.exit(2)
+            common.terminate(self.__class__.__name__)
 
     def _load_and_validate_file_of_dimentions(self, filepath, dim):
         """
@@ -47,7 +48,7 @@ class MethylationData( Module ):
 
         if len(data.shape) != dim:
             logging.error("The file '%s' is not a %sd matrix" % (filepath, dim))
-            sys.exit(2)
+            common.terminate(self.__class__.__name__)
 
         return data
 
@@ -179,7 +180,7 @@ class MethylationData( Module ):
         mean_per_site = self.get_mean_per_site()
 
         # TODO is masked_data.mask equal to nan_indices? if so, we don't need to run this "where" line and just use masked_data.mask instead of nan_indices
-        nan_indices = where(masked_data.mask))                    # find nan values indices
+        nan_indices = where(masked_data.mask)                    # find nan values indices
 
         self.data[nan_indices] = mean_per_site[nan_indices[0]]    # replace nan values by the mean of each site
 

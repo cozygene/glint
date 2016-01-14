@@ -2,11 +2,11 @@
 # X is an n*d matrix (numpy's ndarray)
 
 from sklearn import linear_model
-from numpy import column_stack, zeros    
+from numpy import column_stack, ones    
 
 class LinearRegression(object):
-    def __init__(self, y, x):
-        zeros_vector =  zeros((len(x),  1))
+    def __init__(self, y, x): # y is vector x matrix
+        zeros_vector =  ones(len(x))
     
         newx = column_stack((zeros_vector, x))
 

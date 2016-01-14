@@ -5,7 +5,7 @@ import os
 import sys
 import argparse
 import logging
-from modules import refactor
+from modules import refactor, common
 
 class RefactorParser( object ):
 
@@ -42,7 +42,7 @@ class RefactorParser( object ):
     def _validate_required_args(self, args):
         if not args.k:
             logging.error("-k option must be specified with the --refactor flag")
-            sys.exit(2) 
+            common.terminate(self.__class__.__name__)
 
         return True
 

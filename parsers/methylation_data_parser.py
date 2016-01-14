@@ -1,6 +1,6 @@
 import logging
 from pickle import load
-from modules import methylation_data
+from modules import methylation_data, common
 
 GLINT_FORMATTED_EXTENSION = ".glint" #TODO move to a config file
 
@@ -28,7 +28,7 @@ class MethylationDataParser(object):
     def _validate_file_exists(self, filepath):
         if not os.path.exists(filepath) :
             logging.error("The file '%s' doesn't exist. Exiting" % filepath)
-            sys.exit(2)
+            common.terminate(self.__class__.__name__)
 
     def _load_and_validate_file_of_dimentions(self, filepath, dim):
         """
@@ -41,7 +41,7 @@ class MethylationDataParser(object):
 
         if len(data.shape) != dim:
             logging.error("The file '%s' is not a %sd vector" % (filepath, dim))
-            sys.exit(2)
+            common.terminate(self.__class__.__name__)
 
         return data
 
@@ -91,7 +91,7 @@ class MethylationDataParser(object):
         if min_value is not None and max_value is not None:
             if max_value <= min_value:
                 logging.error("min value %s is greater than max value %s" % (min_value, max_value))
-                sys.exit(2) 
+                common.terminate(self.__class__.__name__) 
 
 
     def __init__(self, args, output_perfix = ""):
