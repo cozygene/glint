@@ -20,7 +20,7 @@ def add_arguments(parser):
         globals()[m].init_args(parser)
 
 # TODO make it be posiible to run from import
-def run ( args ):
+def run ( args, selected_args):
     output_file_prefix = args.out
     optional_args = ALL_ARGS
     modules_to_run = []
@@ -32,7 +32,7 @@ def run ( args ):
     # init modules (the init verifies the arguments)
     if args.refactor:
         logging.info("Validating refactor...")
-        refactor_meth_data = meth_data.copy()#
+        refactor_meth_data = meth_data.copy()
         optional_args.extend(RefactorParser.ALL_ARGS)
         modules_to_run.append(RefactorParser(args, refactor_meth_data))
 
@@ -41,12 +41,14 @@ def run ( args ):
         optional_args.extend(EWASParser.ALL_ARGS)
         modules_to_run.append(EWASParser(args))
 
+    # validate that the user didnt select an argument that is not an option
+    differ = set(selected_args).difference(set(optional_args))
+    if differ:
+        logging.error("selected unused argument" + str(differ))
 
     # run every module
     for m in modules_to_run:
         m.run()
-
-    return optional_args
 
 
 if __name__ == '__main__':
@@ -59,14 +61,11 @@ if __name__ == '__main__':
 
     # parse arguments
     # TODO should we call any module parse?
-    selected_args = [arg for arg in sys.argv if arg.startswith("-")]
+    selected_args = [arg for arg in sys.argv if arg.startswith("-")] #TODO startwith "--"? (there are no arguments that starts with -)
 
     args = parser.parse_args() # modules validation is here
-    optional_args = run(args)
+    run(args, selected_args)
 
-    differ = set(selected_args).difference(set(optional_args))
-    if differ:
-        logging.error("selected unused argument" + str(differ))
 
 
 

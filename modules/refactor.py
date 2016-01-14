@@ -250,7 +250,7 @@ class Refactor( Module ):
         for i,site in enumerate(self.meth_data.data):
             lin_reg = LinearRegression(site, self.phenotype)
             if len(lin_reg.residuals) != len(site): #TODO move to test?
-                logging.error( "ERROR")
+                logging.error("ERROR")
             O_tag[i] = lin_reg.residuals
 
         return O_tag

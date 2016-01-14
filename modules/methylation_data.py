@@ -190,3 +190,6 @@ class MethylationData( Module ):
         returns a copy of the object
         """
         return copy.deepcopy(self)
+
+    def run():
+        pass

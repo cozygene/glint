@@ -1,6 +1,7 @@
 import logging
 from pickle import load
-from modules import methylation_data, common
+from modules import methylation_data
+from utils import common
 
 GLINT_FORMATTED_EXTENSION = ".glint" #TODO move to a config file
 
