@@ -11,10 +11,20 @@ from parsers import RefactorParser, EWASParser, MethylationDataParser  #dont rem
 MODULES_PARSERS = ['MethylationDataParser', 'RefactorParser', 'EWASParser'] 
 ALL_ARGS = ['--refactor', '--ewas', '--out']
 
-def add_arguments(parser):       
-    parser.add_argument('--refactor', action='store_true', help = "help")
-    parser.add_argument('--ewas',     action='store_true', help = "help" )
-    parser.add_argument('--out',      type = str,  default ="",    help = "changes the prefix of the output file ")
+
+def add_arguments(parser): 
+    # Notice to add arguments by the order you want them to be printed in --help
+
+    MethylationDataParser.init_args(parser)
+
+    optional = parser.add_argument_group('3.Optional arguments')
+    optional.add_argument('-h', '--help', action='help', help = "print this help") # add help here so it will be under same group with all other optional argument
+    optional.add_argument('--out', type = str,  default = "",   help = "changes the prefix of the output file ")
+
+    modules = parser.add_argument_group('4.Glint modules')
+    modules.add_argument('--refactor', action='store_true', help = "<todo add help here>")
+    modules.add_argument('--ewas',     action='store_true', help = "<todo add help here>" )
+    
     
     for m in MODULES_PARSERS:
         globals()[m].init_args(parser)
@@ -52,10 +62,10 @@ def run ( args, selected_args):
 
 
 if __name__ == '__main__':
-    logging.info("Starting glint...")
     parser = GlintArgumentParser(prog=os.path.basename(sys.argv[0]),
-                                 description = "<< add help before >>",
-                                 epilog = "<< add help after >>")# conflict_handler='resolve')
+                                 description = "<<todo add help before >>",
+                                 epilog = "<< todo add help after >>",
+                                 add_help=False) # don't add help because it is added in 'optional group'
     
     add_arguments(parser)
 

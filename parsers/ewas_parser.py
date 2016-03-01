@@ -14,7 +14,7 @@ class EWASParser(object):
         ewas.add_argument('--pheno', type = str, help = "A phenotype file")
         ewas.add_argument('--covar', type = str, help="A covariates file")
 
-        group_reg = ewas.add_mutually_exclusive_group(required = False) #TODO this is not working!
+        group_reg = ewas.add_mutually_exclusive_group(required = False)
         group_reg.add_argument('--linreg', help = "Run a linear regression analysis; --pheno must be provided (executed by default if --ewas is selected)")
         group_reg.add_argument('--logreg', help = "Run a logistic regression analysis; --pheno must be provided and be a binary phenotype")
         
