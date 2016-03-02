@@ -23,37 +23,11 @@ class RefactorParser( ModuleParser ):
 
       super(RefactorParser, self).__init__(refactor)
 
-    # def __init__(self, args, meth_data, output_perfix = ""):
-    #     # validate required args
-    #     self.validate_required_args(args)
-
-    #     # init module to validate other args format
-    #     self.module  = refactor.Refactor(methylation_data = meth_data, 
-    #                           K = args.k, 
-    #                           t = args.t, 
-    #                           feature_selection = args.fs.lower().strip(), 
-    #                           num_components = args.numcomp, 
-    #                           phenofile = args.pheno,
-    #                           covar = args.covar,
-    #                           ranked_output_filename = output_perfix + refactor.RANKED_FILENAME, 
-    #                           components_output_filename  = output_perfix + refactor.COMPONENTS_FILENAME)
-    #     # TODO consider handling flags out of refactor (as done in methylation_data)
-# 
-    # def validate_required_args(self, args):
-    #     if not args.k:
-    #         logging.error("-k option must be specified with the --refactor flag")
-    #         common.terminate(self.__class__.__name__)
-
-    #     return True
-
-
-
-
 
     def run(self, args, meth_data, output_perfix = ""):
       try:
         self.module  = refactor.Refactor(methylation_data = meth_data, 
-                              K = args.k, 
+                              k = args.k, 
                               t = args.t, 
                               feature_selection = args.fs.lower().strip(), 
                               num_components = args.numcomp, 

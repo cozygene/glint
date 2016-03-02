@@ -171,7 +171,8 @@ class MethylationData( Module ):
         """
         logging.debug("Replacing missing values by site's mean")
         mean_per_site = self.get_mean_per_site()
-
+        import pdb
+        pdb.set_trace()
         # TODO is masked_data.mask equal to nan_indices? if so, we don't need to run this "where" line and just use masked_data.mask instead of nan_indices
         nan_indices = where(masked_data.mask)                    # find nan values indices
 

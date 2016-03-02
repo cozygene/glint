@@ -20,21 +20,6 @@ class EWASParser(ModuleParser):
         
         super(EWASParser, self).__init__(ewas)
         
-        ## put here parser checks
-        ## call here ewas so it check its own
-
-    # def 
-
-    #     if args.logreg and not args.pheno: # this won't happen since pheno is required
-    #         logging.error("must specify phenofile with logreg")
-    #         common.terminate(self.__class__.__name__)
-
-    #     if args.linreg and not args.pheno:
-    #         logging.error("must specify phenofile with linreg")
-    #         common.terminate(self.__class__.__name__)
-
-    #     self.module = None
 
     def run(self):
-        # self.module.run()
         pass
