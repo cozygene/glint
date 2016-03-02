@@ -40,7 +40,7 @@ class ModuleParser(object):
         """
         errors if there is an argument in argument list (args) that is set but it's dependent argument are not set int that list
         """
-        for arg, dependencies in self.group.get_args_dependencies().iteritems():
+        for arg, dependencies in group.get_args_dependencies().iteritems():
             if contains_arg(args, arg):
                 for dependency in dependencies:
                     if not contains_arg(args, dependency):

@@ -6,6 +6,7 @@ class GlintMutuallyExclusiveGroup(argparse._MutuallyExclusiveGroup):
         def __init__(self, container, required=False):
             super(GlintMutuallyExclusiveGroup, self).__init__(container, required)
             self._all_args = set()
+            self._arguments_dependencies = {}
 
         def add_mutually_exclusive_group(self, **kwargs):
             raise Exception("NOT SUPPORTED: func add_mutually_exclusive_group in GlintMutuallyExclusiveGroup")
@@ -17,6 +18,8 @@ class GlintMutuallyExclusiveGroup(argparse._MutuallyExclusiveGroup):
         def add_argument( self,  *args, **kwargs ):
 
             arg = self.argname(args[0])
+            if 'dependencies' in kwargs:
+                self._arguments_dependencies[arg] = [self.argname(dependency) for dependency in kwargs.pop('dependencies')]
 
             self._all_args.add(args[0])
     
@@ -29,6 +32,9 @@ class GlintMutuallyExclusiveGroup(argparse._MutuallyExclusiveGroup):
 
         def get_all_args(self):
             return self._all_args
+
+        def get_args_dependencies(self):
+            return self._arguments_dependencies
 
 
 class GlintArgumentGroup(argparse._ArgumentGroup):
@@ -77,6 +83,8 @@ class GlintArgumentGroup(argparse._ArgumentGroup):
             return self._required_arguments
 
         def get_args_dependencies(self):
+            for group in self._glint_mutually_exclusive_groups :
+                self._arguments_dependencies.update(group.get_args_dependencies())
             return self._arguments_dependencies
 
         def get_all_args(self):
