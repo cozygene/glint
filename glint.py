@@ -54,7 +54,7 @@ def run ( args, selected_args):
     # validate that the user didnt select an argument that is not an option
     differ = set(selected_args).difference(set(optional_args))
     if differ:
-        logging.error("selected unused argument" + str(differ))
+        logging.error("selected redundent argument" + str(differ))
 
     # run every module
     for m in modules_to_run:

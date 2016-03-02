@@ -51,13 +51,9 @@ class Refactor( Module ):
         if phenofile:
             pheno = self._validate_matrix_ids_and_reorder(phenofile)
             if len(pheno[0]) != 2:
-                logging.error("must provided only one phenotype. should be 2 columns: 1 - sample id, 2 - phenotype") #TODO is this right?
-                common.terminate(self.__class__.__name__) # todo move module name to config file
- 
-            pheno = pheno[:,1:].astype(float) # TODO should check if can convert  to float
-            
-            if feature_selection == 'normal':
-                logging.warning("provided phenotype file without fs") #TODO should we warn?
+                logging.warning("more than one phenotype is not supported. will use only the first phenotype (first column)")
+
+            pheno = pheno[:,1].astype(float) # use only the first phenotype # TODO should check if can convert  to float
 
         return pheno
 
