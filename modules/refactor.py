@@ -82,9 +82,6 @@ class Refactor( Module ):
     if they are the same but in different order, reorder matrix rows as in sample_ids
     """
     def _validate_matrix_ids_and_reorder(self, matrix_file_path):
-        if not os.path.exists(matrix_file_path) :
-            logging.error("The file '%s' doesn't exist. Exiting" % matrix_file_path)
-            common.terminate(self.__class__.__name__)
 
         data = loadtxt(matrix_file_path, dtype = str)
         if len(data) != len(self.meth_data.samples_ids):

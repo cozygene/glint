@@ -23,8 +23,8 @@ class RefactorParser( object ):
         refactor.add_argument('--t',         type = int, default = 500,  help = "The number of sites to use for computing the ReFACtor components (DEFAULT=500)")
         refactor.add_argument('--numcomp', type = int, help = "The number of ReFACTor components to output (DEFAULT=K)")
         refactor.add_argument('--fs',       type = str, default = 'normal',  help = "feature selection mode; options: normal, controls, phenotype (DEFAULT=normal)")
-        refactor.add_argument('--covar', type = str, help="A covariates file")
-        refactor.add_argument('--pheno',    type = str,  help = "A phenotype file")
+        refactor.add_argument('--covar', type = argparse.FileType('r'), help="A covariates file")
+        refactor.add_argument('--pheno',  type = argparse.FileType('r'),   help = "A phenotype file")
 
 
     def __init__(self, args, meth_data, output_perfix = ""):

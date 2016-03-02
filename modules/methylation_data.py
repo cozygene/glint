@@ -25,23 +25,16 @@ class MethylationData( Module ):
         self.data = data[1:,1:].astype(float) 
         self.sites_size, self.samples_size = self.data.shape
 
-
         logging.debug("Got methylation data with %s sites and %s samples id" % (self.sites_size, self.samples_size))
 
 
-    def _validate_file_path(self, filepath):
-        if not os.path.exists(filepath) :
-            logging.error("The file '%s' doesn't exist. Exiting" % filepath)
-            common.terminate(self.__class__.__name__)
-
     def _load_and_validate_file_of_dimentions(self, filepath, dim):
         """
-        validates that a file exists and that it is a matrix from dimentions dim
+        validates that the file contains a matrix from dimentions dim
         """
         if filepath is None:
             return None
 
-        self._validate_file_path(filepath)
         logging.info("Loading file %s..." % filepath)
         data = loadtxt(filepath, dtype = str)#, converters = lambda x: x if x != 'NA' else 'nan')#,delimiter=';', missing_values='NA', filling_values=nan)# = lambda x: x if x != 'NA' else nan)#, missing_values = '???', filling_values = 0)
         # data = genfromtxt(args.datafile, dtype = str , delimiter=';', usemask = 'True', missing_values = 'NA', filling_values = "???")
@@ -67,7 +60,6 @@ class MethylationData( Module ):
     def get_mean_per_site(self):
         """
         returns array that contains the mean value (average) for each methylation site
-        if the function called more than once, it won't calculate the average again
         """
         masked_data = masked_array(self.data, isnan(self.data)) # create masked array
         return average(masked_data, axis=1)

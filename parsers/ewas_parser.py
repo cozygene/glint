@@ -11,8 +11,8 @@ class EWASParser(object):
     def init_args( parser ):
         all_args = []
         ewas = parser.add_argument_group('ewas', 'add ewas description here')
-        ewas.add_argument('--pheno', type = str, help = "A phenotype file")
-        ewas.add_argument('--covar', type = str, help="A covariates file")
+        ewas.add_argument('--pheno', type = argparse.FileType('r'), help = "A phenotype file")
+        ewas.add_argument('--covar', type = argparse.FileType('r'), help = "A covariates file")
 
         group_reg = ewas.add_mutually_exclusive_group(required = False)
         group_reg.add_argument('--linreg', help = "Run a linear regression analysis; --pheno must be provided (executed by default if --ewas is selected)")

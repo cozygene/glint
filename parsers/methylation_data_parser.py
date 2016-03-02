@@ -12,32 +12,26 @@ class MethylationDataParser(object):
     @staticmethod
     def init_args( parser ):
         required = parser.add_argument_group('1.Required arguments') # numbering in the group name because help print it by abc order
-        required.add_argument('--datafile', required=True, help = "A data matrix file of beta-normalized methylation levels or a .glint file")
-    
+        required.add_argument('--datafile', required=True, type = argparse.FileType('r'),  help = "A data matrix file of beta-normalized methylation levels or a .glint file")
+
         optional = parser.add_argument_group('2.Data management options ')
         group1 = optional.add_mutually_exclusive_group(required = False)
-        group1.add_argument('--include', type = str,  help = "A list of sites to include in the data; removes the rest of the sites")
-        group1.add_argument('--exclude', type = str,   help = "A list of sites to exclude from the data; includes the rest of the sites")
+        group1.add_argument('--include', type = argparse.FileType('r'), help = "A list of sites to include in the data; removes the rest of the sites")
+        group1.add_argument('--exclude', type = argparse.FileType('r'), help = "A list of sites to exclude from the data; includes the rest of the sites")
 
         group2 = optional.add_mutually_exclusive_group(required = False)
-        group2.add_argument('--keep',   type = str, help = "A list of samples to include in the data; removes the rest of the samples")
-        group2.add_argument('--remove', type = str, help = "A list of samples to exclude in the data; includes the rest of the samples")
+        group2.add_argument('--keep',   type = argparse.FileType('r'), help = "A list of samples to include in the data; removes the rest of the samples")
+        group2.add_argument('--remove', type = argparse.FileType('r'), help = "A list of samples to exclude in the data; includes the rest of the samples")
 
         optional.add_argument('--excludemin', type = float, help = "A threshold for the minimal mean methylation level to consider")
         optional.add_argument('--excludemax', type = float, help = "A threshold for the maximal mean methylation level to consider")
 
         optional.add_argument('--gsave', action='store_true', help = "Save the data in a glint format; makes following executions faster")
 
-    def _validate_file_exists(self, filepath):
-        if not os.path.exists(filepath) :
-            logging.error("The file '%s' doesn't exist. Exiting" % filepath)
-            common.terminate(self.__class__.__name__)
-
     def _load_and_validate_file_of_dimentions(self, filepath, dim):
         """
-        validates that a file exists and that it is a vector of dimentions dim
+        validates that the file contains a vector of dimentions dim
         """
-        self._validate_file_exists(filepath)
         logging.info("Loading file %s..." % filepath)
         data = loadtxt(filepath, dtype = str)#, converters = lambda x: x if x != 'NA' else 'nan')#,delimiter=';', missing_values='NA', filling_values=nan)# = lambda x: x if x != 'NA' else nan)#, missing_values = '???', filling_values = 0)
         # data = genfromtxt(args.datafile, dtype = str , delimiter=';', usemask = 'True', missing_values = 'NA', filling_values = "???")
@@ -100,14 +94,7 @@ class MethylationDataParser(object):
     def __init__(self, args, output_perfix = ""):
         try:
             # validate arguments
-            if args.include is not None:
-                self._validate_file_exists(args.include) # TODO seperate file exsits and after module load than validate cpgnames
-            if args.exclude is not None:
-                self._validate_file_exists(args.exclude)
-            if args.keep is not None:
-                self._validate_file_exists(args.keep)
-            if args.remove is not None:
-                self._validate_file_exists(args.remove) 
+
             if args.excludemin is not None:
                 self._validate_methylation_value(args.excludemin)
             if args.excludemax is not None:
