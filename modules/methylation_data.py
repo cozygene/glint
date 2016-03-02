@@ -28,19 +28,20 @@ class MethylationData( Module ):
         logging.debug("Got methylation data with %s sites and %s samples id" % (self.sites_size, self.samples_size))
 
 
-    def _load_and_validate_file_of_dimentions(self, filepath, dim):
+
+    def _load_and_validate_file_of_dimentions(self, fileobj, dim):
         """
         validates that the file contains a matrix from dimentions dim
         """
-        if filepath is None:
+        if fileobj is None:
             return None
 
-        logging.info("Loading file %s..." % filepath)
-        data = loadtxt(filepath, dtype = str)#, converters = lambda x: x if x != 'NA' else 'nan')#,delimiter=';', missing_values='NA', filling_values=nan)# = lambda x: x if x != 'NA' else nan)#, missing_values = '???', filling_values = 0)
+        logging.info("Loading file %s..." % fileobj.name)
+        data = loadtxt(fileobj, dtype = str)#, converters = lambda x: x if x != 'NA' else 'nan')#,delimiter=';', missing_values='NA', filling_values=nan)# = lambda x: x if x != 'NA' else nan)#, missing_values = '???', filling_values = 0)
         # data = genfromtxt(args.datafile, dtype = str , delimiter=';', usemask = 'True', missing_values = 'NA', filling_values = "???")
 
         if len(data.shape) != dim:
-            logging.error("The file '%s' is not a %sd matrix" % (filepath, dim))
+            logging.error("The file '%s' is not a %sd matrix" % (fileobj.name, dim))
             common.terminate(self.__class__.__name__)
 
         return data
