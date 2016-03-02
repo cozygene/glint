@@ -4,9 +4,14 @@ import sys
 
 class GlintMutuallyExclusiveGroup(argparse._MutuallyExclusiveGroup):
         def __init__(self, container, required=False):
+            if required:
+                # TODO add support for required mutually exclusive group: only one arg from the group needs to be specified
+                raise Exception("NOT SUPPORTED: required mutually exclusive group")
+
             super(GlintMutuallyExclusiveGroup, self).__init__(container, required)
             self._all_args = set()
             self._arguments_dependencies = {}
+
 
         def add_mutually_exclusive_group(self, **kwargs):
             raise Exception("NOT SUPPORTED: func add_mutually_exclusive_group in GlintMutuallyExclusiveGroup")
