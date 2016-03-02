@@ -110,10 +110,10 @@ class Refactor( Module ):
         if feature_selection not in self.FEATURE_SELECTION:
             logging.error("choose fs from feature_selection options: %s (selected fs: %s)" % ( self.FEATURE_SELECTION, feature_selection ))
             common.terminate(self.__class__.__name__)
-        elif feature_selection != 'normal' and self.phenotype is None:
-            logging.error("must provide a phenotype file when selected feature 'controls'")
+        elif feature_selection == 'phenotype' and self.phenotype is None:
+            logging.error("must provide a phenotype file when selected feature 'phenotype'")
             common.terminate(self.__class__.__name__)
-        elif feature_selection == 'controls' and not self._is_binary_vector(self.phenotype):
+        elif feature_selection == 'controls' and (self.phenotype is None or not self._is_binary_vector(self.phenotype)):
             logging.error("must provide a phenotype file in a binary format when selected feature 'controls'")
             common.terminate(self.__class__.__name__)
 
