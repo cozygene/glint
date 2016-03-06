@@ -192,7 +192,7 @@ class Refactor( Module ):
     """
     def _refactor( self ):
         self.meth_data.remove_missing_values_sites()
-        self.meth_data.remove_lowest_variance_sites()
+        self.meth_data.remove_lowest_std_sites()
         self.meth_data.replace_missing_values_by_mean()
         self._remove_covariates()
 

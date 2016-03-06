@@ -140,20 +140,20 @@ class MethylationData( Module ):
             dump(self, f)
 
 
-    def remove_lowest_variance_sites(self, lowest_variance_th):
+    def remove_lowest_std_sites(self, lowest_std_th = 0.02):
         """
         removes the sites with the lowest variance.
-        removes self.lowest_variance_th from the sites.
-        lowest_variance_th is float between 0 and 1
+        removes self.lowest_std_th from the sites.
+        lowest_std_th is float between 0 and 1
         """
         sites_variance = nanvar(self.data, axis=1) # calc variance consider NaN
         var_sorted_indices = sites_variance.argsort() # sort the sites_variance and return an array that holds the indices of the sorted values
-        quantity_to_remove = int(lowest_variance_th * self.sites_size)
+        quantity_to_remove = int(lowest_std_th * self.sites_size)
         logging.debug("Removing %s out of %s sites with the lowest variance" % (quantity_to_remove, self.sites_size))
         lowest_variance_indices = var_sorted_indices[:quantity_to_remove]
         self._exclude_sites_from_data(lowest_variance_indices)
     
-    def remove_missing_values_sites(self, missing_values_th):
+    def remove_missing_values_sites(self, missing_values_th = 0.03):
         """
         remove sites that have many missing values
         many is self.missing_values_th from the values

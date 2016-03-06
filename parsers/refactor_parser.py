@@ -14,11 +14,11 @@ class RefactorParser( ModuleParser ):
     def __init__(self, parser):
       refactor = parser.add_argument_group('Additional options if --refactor is selected','\n')
 
-      refactor.add_argument('--k',       type = int, required=True, help = "The number of assumed cell types")
+      refactor.add_argument('--k',       type = int, required = True, help = "The number of assumed cell types")
       refactor.add_argument('--t',       type = int, default = 500, help = "The number of sites to use for computing the ReFACtor components (DEFAULT=500)")
       refactor.add_argument('--numcomp', type = int, help = "The number of ReFACTor components to output (DEFAULT=K)")
       refactor.add_argument('--fs',      type = str, default = 'normal', help = "feature selection mode; options: normal, controls, phenotype (DEFAULT=normal)")
-      refactor.add_argument('--covar',   type = argparse.FileType('r'), help="A covariates file")
+      refactor.add_argument('--covar',   type = argparse.FileType('r'), help = "A covariates file")
       refactor.add_argument('--pheno',   type = argparse.FileType('r'), help = "A phenotype file")
 
       super(RefactorParser, self).__init__(refactor)
