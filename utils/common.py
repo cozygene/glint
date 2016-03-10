@@ -2,6 +2,6 @@ import sys
 import logging
 import inspect
 
-def terminate(module_name):
-    logging.info("%s was terminated" % module_name)
+def terminate(error_msg):
+    logging.error(error_msg)
     sys.exit(2)

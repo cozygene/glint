@@ -49,8 +49,7 @@ class MethylationDataParser(ModuleParser):
         # data = genfromtxt(args.datafile, dtype = str , delimiter=';', usemask = 'True', missing_values = 'NA', filling_values = "???")
 
         if len(data.shape) != dim:
-            logging.error("The file '%s' is not a %sd vector" % (filepath, dim))
-            common.terminate(self.__class__.__name__)
+            common.terminate("The file '%s' is not a %sd vector" % (filepath, dim))
 
         return data
 
@@ -99,9 +98,8 @@ class MethylationDataParser(ModuleParser):
         """
         if min_value is not None and max_value is not None:
             if max_value <= min_value:
-                logging.error("min value %s is greater than max value %s" % (min_value, max_value))
-                common.terminate(self.__class__.__name__) 
-
+                common.terminate("min value %s is greater than max value %s" % (min_value, max_value))
+                
     def init_data(self, args):
         try:
             meth_data = None

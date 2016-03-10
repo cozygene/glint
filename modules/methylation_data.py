@@ -41,9 +41,8 @@ class MethylationData( Module ):
         # data = genfromtxt(args.datafile, dtype = str , delimiter=';', usemask = 'True', missing_values = 'NA', filling_values = "???")
 
         if len(data.shape) != dim:
-            logging.error("The file '%s' is not a %sd matrix" % (fileobj.name, dim))
-            common.terminate(self.__class__.__name__)
-
+            common.terminate("The file '%s' is not a %sd matrix" % (fileobj.name, dim))
+            
         return data
 
     def _exclude_sites_from_data(self, sites_indicies_list):
