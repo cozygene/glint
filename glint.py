@@ -4,6 +4,7 @@ import sys
 from configuration import configurelogging
 configurelogging.configureLogging('') #todo should seperate each module to a different folder to have different "namespaces"?
 import logging
+from utils import common
 from numpy import genfromtxt ,loadtxt
 from utils import GlintArgumentParser
 from parsers import ModuleParser, RefactorParser, EWASParser, MethylationDataParser  #dont remove this is imported in,,,
@@ -78,10 +79,16 @@ class ModulesArgumentParsers(object):
 
 
     def check_selected_args(self, optional_args):
-        # validate that the user didnt select an argument that is not an option
+        """
+        validates that the user selected "action" argument (and didn't supply just a datafile) 
+        and that the user didnt select an argument that is not an option for him (argument from a module that wasn't selected)
+        """
+        if len(self.selected_args) == 1:
+            common.terminate("Nothing to do with the data, select argument from the options (select --help for help)")
+
         differ = set(self.selected_args).difference(set(optional_args))
         if differ:
-            logging.error("selected redundent argument" + str(differ))
+            common.terminate("selected redundent argument" + str(differ))
 
 
     def run(self):
