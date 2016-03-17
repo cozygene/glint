@@ -230,6 +230,7 @@ class Refactor( Module ):
     Note: function name must be of the format FEATURE_FUNC_NAME_FORMAT
     """
     def _phenotype_feature_handler( self ):
+        logging.info("Running phenotype feature selection...")
         O_tag = empty_like(self.meth_data.data)
         for i,site in enumerate(self.meth_data.data):
             lin_reg = LinearRegression(site, self.phenotype)
@@ -243,7 +244,8 @@ class Refactor( Module ):
     TODO add doc
     Note: function name must be of the format FEATURE_FUNC_NAME_FORMAT
     """
-    def _controls_feature_handler( self ):   
+    def _controls_feature_handler( self ):  
+        logging.info("Running controls feature selection...")
         controls_samples_indices = [i for i, control in enumerate(self.phenotype) if control == 0]
         if (self.k > controls_samples_indices):
             common.terminate("k cannot be greater than controls sample")

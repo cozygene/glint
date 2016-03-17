@@ -12,7 +12,7 @@ from module_parser import ModuleParser
 class RefactorParser( ModuleParser ):
 
     def __init__(self, parser):
-      refactor = parser.add_argument_group('Additional options if --refactor is selected','\n')
+      refactor = parser.add_argument_group('refactor', 'Additional options if --refactor is selected')
 
       refactor.add_argument('--k',       type = int, required = True, help = "The number of assumed cell types")
       refactor.add_argument('--t',       type = int, default = 500, help = "The number of sites to use for computing the ReFACtor components (DEFAULT=500)")

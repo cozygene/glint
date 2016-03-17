@@ -29,20 +29,18 @@ class MethylationData( Module ):
 
 
 
-    def _load_and_validate_file_of_dimentions(self, fileobj, dim):
+    def _load_and_validate_file_of_dimentions(self, datafile, dim):
         """
         validates that the file contains a matrix from dimentions dim
         """
-        if fileobj is None:
-            return None
-
-        logging.info("Loading file %s..." % fileobj.name)
-        data = loadtxt(fileobj, dtype = str)#, converters = lambda x: x if x != 'NA' else 'nan')#,delimiter=';', missing_values='NA', filling_values=nan)# = lambda x: x if x != 'NA' else nan)#, missing_values = '???', filling_values = 0)
+        
+        logging.info("Loading file %s..." % datafile)
+        data = loadtxt(datafile, dtype = str)#, converters = lambda x: x if x != 'NA' else 'nan')#,delimiter=';', missing_values='NA', filling_values=nan)# = lambda x: x if x != 'NA' else nan)#, missing_values = '???', filling_values = 0)
         # data = genfromtxt(args.datafile, dtype = str , delimiter=';', usemask = 'True', missing_values = 'NA', filling_values = "???")
 
         if len(data.shape) != dim:
-            common.terminate("The file '%s' is not a %sd matrix" % (fileobj.name, dim))
-            
+            common.terminate("The file '%s' is not a %sd matrix" % (datafile, dim))
+
         return data
 
     def _exclude_sites_from_data(self, sites_indicies_list):

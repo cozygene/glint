@@ -49,7 +49,8 @@ class MethylationDataParser(ModuleParser):
         # data = genfromtxt(args.datafile, dtype = str , delimiter=';', usemask = 'True', missing_values = 'NA', filling_values = "???")
 
         if len(data.shape) != dim:
-            common.terminate("The file '%s' is not a %sd vector" % (filepath, dim))
+            logging.error("The file '%s' is not a %sd vector" % (filepath, dim))
+            common.terminate(self.__class__.__name__)
 
         return data
 
