@@ -1,9 +1,0 @@
-IDS sample_3
-cp1 0.4 
-cp2 0.2
-cp3 nan
-cp4 nan
-cp5 nan 
-cp6 0.698
-cp7 0.222
-cp8 0.3 0.4
