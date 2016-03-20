@@ -25,6 +25,7 @@ class Refactor( Module ):
                   methylation_data,
                   k,
                   t = 500,
+                  stdth = 0.02,
                   num_components = None, 
                   phenofile = None,
                   covar = None,
@@ -42,6 +43,7 @@ class Refactor( Module ):
         self.feature_selection_handler =  self._validate_fs(feature_selection) 
         self.k =                          self._validate_k(k)
         self.t =                          self._validate_t(t)
+        self.stdth =                      self._validate_stdth(stdth)
         self.num_components =             self._validate_num_comp(num_components)
         self.ranked_output_filename =     self._validate_filepath(ranked_output_filename)
         self.components_output_filename = self._validate_filepath(components_output_filename)
@@ -133,6 +135,14 @@ class Refactor( Module ):
         return t
 
     """
+    0 < stdth < 1
+    """
+    def _validate_stdth(stdth):
+        if stdth > 1 or stdth < 0:
+            common.terminate("stdth cannot be greater than 1 and smaller than 0. stdth = %s" % stdth)
+        return stdth
+
+    """
     k <= num_comp  <= samples size
     must be called after _validate_k
     """
@@ -142,9 +152,6 @@ class Refactor( Module ):
 
         return num_comp if num_comp else self.k
 
-    def _validate_filepath(self, filepath):
-        # TODO add a varification, try to open the file? 
-        return filepath
 
     """
     gets a vector of ints/doubles and checks:
@@ -183,7 +190,7 @@ class Refactor( Module ):
     """
     def _refactor( self ):
         self.meth_data.remove_missing_values_sites()
-        self.meth_data.remove_lowest_std_sites()
+        self.meth_data.remove_lowest_std_sites(self.stdth)
         self.meth_data.replace_missing_values_by_mean()
         self._remove_covariates()
 

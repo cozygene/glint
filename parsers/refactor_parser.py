@@ -20,6 +20,7 @@ class RefactorParser( ModuleParser ):
       refactor.add_argument('--fs',      type = str, default = 'normal', help = "feature selection mode; options: normal, controls, phenotype (DEFAULT=normal)")
       refactor.add_argument('--covar',   type = argparse.FileType('r'), help = "A covariates file")
       refactor.add_argument('--pheno',   type = argparse.FileType('r'), help = "A phenotype file")
+      refactor.add_argument('--stdth',   type = float, default = 0.02, help = "threshold for excluding low variance sites")
 
       super(RefactorParser, self).__init__(refactor)
 
@@ -29,6 +30,7 @@ class RefactorParser( ModuleParser ):
         self.module  = refactor.Refactor(methylation_data = meth_data, 
                               k = args.k, 
                               t = args.t, 
+                              stdth = args.stdth,
                               feature_selection = args.fs.lower().strip(), 
                               num_components = args.numcomp, 
                               phenofile = args.pheno,

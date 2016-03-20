@@ -33,7 +33,7 @@ class MethylationData( Module ):
         """
         validates that the file contains a matrix from dimentions dim
         """
-        
+
         logging.info("Loading file %s..." % datafile)
         data = loadtxt(datafile, dtype = str)#, converters = lambda x: x if x != 'NA' else 'nan')#,delimiter=';', missing_values='NA', filling_values=nan)# = lambda x: x if x != 'NA' else nan)#, missing_values = '???', filling_values = 0)
         # data = genfromtxt(args.datafile, dtype = str , delimiter=';', usemask = 'True', missing_values = 'NA', filling_values = "???")
@@ -146,7 +146,7 @@ class MethylationData( Module ):
         sites_variance = nanvar(self.data, axis=1) # calc variance consider NaN
         var_sorted_indices = sites_variance.argsort() # sort the sites_variance and return an array that holds the indices of the sorted values
         quantity_to_remove = int(lowest_std_th * self.sites_size)
-        logging.debug("Removing %s out of %s sites with the lowest variance" % (quantity_to_remove, self.sites_size))
+        logging.debug("Removing %s out of %s sites with the variance lower than %s" % (quantity_to_remove, self.sites_size, lowest_std_th))
         lowest_variance_indices = var_sorted_indices[:quantity_to_remove]
         self._exclude_sites_from_data(lowest_variance_indices)
     
@@ -167,14 +167,13 @@ class MethylationData( Module ):
         replaces nan values with the mean of the site
         """
         logging.debug("Replacing missing values by site's mean")
-        mean_per_site = self.get_mean_per_site()
-        import pdb
-        pdb.set_trace()
+
+        # mean_per_site = self.get_mean_per_site()
+        masked_data = masked_array(self.data, isnan(self.data)) 
+        mean_per_site = average(masked_data, axis=1)  
         # TODO is masked_data.mask equal to nan_indices? if so, we don't need to run this "where" line and just use masked_data.mask instead of nan_indices
         nan_indices = where(masked_data.mask)                    # find nan values indices
-
         self.data[nan_indices] = mean_per_site[nan_indices[0]]    # replace nan values by the mean of each site
-
 
     def copy(self):
         """
