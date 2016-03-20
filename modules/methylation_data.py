@@ -3,10 +3,10 @@ import sys
 import copy
 import logging
 from pickle import dump
-from numpy import loadtxt, delete, isnan, nanvar, where
+from numpy import loadtxt, delete, isnan, nanstd, where
 from numpy.ma import average, masked_array
 from module import Module
-from utils import common
+from utils import common, search
 
 COMPRESSED_FILENAME = "methylation_data"
 
@@ -43,6 +43,7 @@ class MethylationData( Module ):
 
         return data
 
+
     def _exclude_sites_from_data(self, sites_indicies_list):
         """
         this function removes from the data the cpg sites which indices found in sites_indicies_list
@@ -70,6 +71,9 @@ class MethylationData( Module ):
         logging.info("Including %s out of %s sites..." % (len(include_list), self.sites_size))
         indices_list = [i for i, site in enumerate(self.cpgnames) if site in include_list]
         self.data = self.data[indices_list, :]
+        # TODO remove this test if it didnt fail
+        if sorted(indices_list) != indices_list:
+            common.terminate("indices_list must be sorted in order to do self.cpgnames[indices_list]")
         self.cpgnames = self.cpgnames[indices_list]
         self.sites_size = len(self.cpgnames)
         logging.debug("methylation data new size is %s" % self.data.shape)
@@ -92,6 +96,9 @@ class MethylationData( Module ):
         """
         logging.info("Keeping %s out of %s samples..." % (len(keep_list), self.samples_size))
         indices_list = [i for i, id in enumerate(self.samples_ids) if site in keep_list]
+        # TODO remove this test if it didnt fail
+        if sorted(indices_list) != indices_list:
+            common.terminate("indices_list must be sorted in order to do self.cpgnames[indices_list]")
         self.data =  self.data[:, indices_list] 
         self.samples_ids = self.samples_ids[indices_list]
         self.samples_size = len(self.samples_ids)
@@ -137,19 +144,25 @@ class MethylationData( Module ):
             dump(self, f)
 
 
+
     def remove_lowest_std_sites(self, lowest_std_th = 0.02):
         """
-        removes the sites with the lowest variance.
-        removes self.lowest_std_th from the sites.
+        input: lowest_std_th threshold for excluding low variance sites, all sites with std lower than lowest_std_th will be excluded 
         lowest_std_th is float between 0 and 1
         """
-        sites_variance = nanvar(self.data, axis=1) # calc variance consider NaN
-        var_sorted_indices = sites_variance.argsort() # sort the sites_variance and return an array that holds the indices of the sorted values
-        quantity_to_remove = int(lowest_std_th * self.sites_size)
-        logging.debug("Removing %s out of %s sites with the variance lower than %s" % (quantity_to_remove, self.sites_size, lowest_std_th))
-        lowest_variance_indices = var_sorted_indices[:quantity_to_remove]
-        self._exclude_sites_from_data(lowest_variance_indices)
-    
+        # get std for each site
+        sites_std = nanstd(self.data, axis=1) # calc variance consider NaN
+        # sort std and get sites index for each std (sorted, so indices of the lowest std sites will be to the left) 
+        std_sorted_indices = sites_std.argsort() # sort the sites_variance and return an array that holds the indices of the sorted values
+        # get std list sorted
+        std_sorted = sites_std[std_sorted_indices]
+        # get the first index in the sorted list which have std higher than lowest_std_th and include all indices started from it
+        include_from_index = search.BinarySearch.find_gt(std_sorted, lowest_std_th)
+        exclude_sites_indices = std_sorted_indices[:include_from_index]
+
+        # exclude all sites with low std
+        self._exclude_sites_from_data(std_sorted_indices[:include_from_index])
+
     def remove_missing_values_sites(self, missing_values_th = 0.03):
         """
         remove sites that have many missing values

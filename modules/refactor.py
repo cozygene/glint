@@ -45,8 +45,8 @@ class Refactor( Module ):
         self.t =                          self._validate_t(t)
         self.stdth =                      self._validate_stdth(stdth)
         self.num_components =             self._validate_num_comp(num_components)
-        self.ranked_output_filename =     self._validate_filepath(ranked_output_filename)
-        self.components_output_filename = self._validate_filepath(components_output_filename)
+        self.ranked_output_filename =     ranked_output_filename
+        self.components_output_filename = components_output_filename
 
     def _validate_phenotype(self, phenofile, feature_selection):
         pheno = None
@@ -137,7 +137,7 @@ class Refactor( Module ):
     """
     0 < stdth < 1
     """
-    def _validate_stdth(stdth):
+    def _validate_stdth(self, stdth):
         if stdth > 1 or stdth < 0:
             common.terminate("stdth cannot be greater than 1 and smaller than 0. stdth = %s" % stdth)
         return stdth
