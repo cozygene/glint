@@ -208,12 +208,12 @@ class Refactor( Module ):
 
     def _remove_covariates(self):
         if self.covar is not None:
+            logging.info("Removing covariates...")
             O_reg = empty_like(self.meth_data.data)   
             for i,site in enumerate(self.meth_data.data):
                 lin_reg = LinearRegression(site, self.covar)
-                if len(lin_reg.residuals) != len(site):
-                    logging.error( "ERROR" )#TODO move to test?
                 O_reg[i] = lin_reg.residuals
+
             self.meth_data.data = O_reg
 
 
@@ -233,8 +233,6 @@ class Refactor( Module ):
         O_tag = empty_like(self.meth_data.data)
         for i,site in enumerate(self.meth_data.data):
             lin_reg = LinearRegression(site, self.phenotype)
-            if len(lin_reg.residuals) != len(site): #TODO move to test?
-                logging.error("ERROR")
             O_tag[i] = lin_reg.residuals
 
         return O_tag

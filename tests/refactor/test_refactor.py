@@ -48,25 +48,59 @@ class FeatureSelectionTester():
         logging.info("Testing phenotype feature selection...")
         refactor_meth_data = self.fs_meth_data.copy()
 
-        phenotype = loadtxt(self.FAKE_CONTROL, dtype = str)[:,1].astype(float)
-
         module  = refactor.Refactor(methylation_data = refactor_meth_data, 
                       k = 2, 
                       feature_selection = "phenotype",
                       phenofile = self.FAKE_CONTROL,
                       t=5)
 
+        phenotype = module._validate_phenotype(self.FAKE_CONTROL, "phenotype")
         # validate phenotype feature selection output (res_data) is correlated to our linear regression for (site, phenotype)
         res_data = module.feature_selection_handler()
-        for i,site in enumerate(refactor_meth_data.data):
+        for i,site in enumerate(self.fs_meth_data.data):
             lin_reg = LinearRegression(site, phenotype)
             assert len(lin_reg.residuals) == len(site)
             cor = corrcoef(lin_reg.residuals, res_data[i])
+            # validate our residuals are corelated to res_data
+            assert abs( 1- cor[0][1]) < 1e-4 
+
+        logging.info("PASS")
+
+class RefactorTester():
+    DEMO_DATA  = "tests/refactor/files/demofiles/datafile"
+    DEMO_COVAR = "tests/refactor/files/demofiles/covariates"
+    DEMO_PHENO = "tests/refactor/files/demofiles/phenotype"
+    DEMO_CELLPRO = "tests/refactor/files/demofiles/cellproportions"
+
+    def __init__(self):
+        self.meth_data = methylation_data.MethylationData(datafile = self.DEMO_DATA)
+        self.test_remove_covariates()
+
+    def test_remove_covariates(self):
+        logging.info("Testing removing covariates...")
+        covar_meth_data = self.meth_data.copy()
+
+        module  = refactor.Refactor(methylation_data = covar_meth_data, 
+                      k = 2, 
+                      covar = self.DEMO_COVAR,
+                      t=500)
+
+        coavr = module._validate_covar(self.DEMO_COVAR,)
+        # remove from refactor_meth_data
+        module._remove_covariates()
+
+        # remove "manually"
+        for i,site in enumerate(self.meth_data.data):
+            lin_reg = LinearRegression(site, coavr)
+            assert len(lin_reg.residuals) == len(site)
+            cor = corrcoef(lin_reg.residuals, covar_meth_data.data[i])
 
             # validate our residuals are corelated to res_data
             assert abs( 1- cor[0][1]) < 1e-4 
 
         logging.info("PASS")
+
+    
 
     
         
