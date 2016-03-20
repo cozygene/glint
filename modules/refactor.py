@@ -51,7 +51,7 @@ class Refactor( Module ):
     def _validate_phenotype(self, phenofile, feature_selection):
         pheno = None
         if phenofile:
-            pheno = self._validate_matrix_ids_and_reorder(phenofile)
+            pheno = self._validate_matrix_ids(phenofile)
             if len(pheno[0]) != 2:
                 logging.warning("more than one phenotype is not supported. will use only the first phenotype (first column)")
 
@@ -64,7 +64,7 @@ class Refactor( Module ):
         if not covariates:
             logging.warning("didn't supply covariates file")
         else:
-            covar = self._validate_matrix_ids_and_reorder(covariates)
+            covar = self._validate_matrix_ids(covariates)
             if len(covar[0]) < 2:
                 common.terminate("the covariates file provided is not in the right format. should be at least 2 columns") #TODO is this right?
 
@@ -76,9 +76,9 @@ class Refactor( Module ):
     reads matrix from matrix_file_path
     validates that the matrix has number of rows as the number of sample ids
     checks that the sample ids in matrix (the first column) are the same ids as in sample_ids list
-    if they are the same but in different order, reorder matrix rows as in sample_ids
+    and in the same order
     """
-    def _validate_matrix_ids_and_reorder(self, matrix_file_path):
+    def _validate_matrix_ids(self, matrix_file_path):
 
         data = loadtxt(matrix_file_path, dtype = str)
         if len(data) != len(self.meth_data.samples_ids):
@@ -90,15 +90,7 @@ class Refactor( Module ):
             if len(set(self.meth_data.samples_ids)^set(matrix_sample_ids)) != 0:
                 common.terminate("sample ids in phenotype file are not the same as in the data file")
             
-            logging.info("sample ids in phenotype file are not in the same order as in the datafile, reordering...")
-            sample_to_row = dict()
-            for sample in data:
-                sample_to_row[sample[0]] = sample
-
-            orderd_data = empty_like(data)  
-            for i,sid in enumerate(self.meth_data.samples_ids):
-                orderd_data[i,:] = sample_to_row[sid]
-            return orderd_data
+            common.terminate("sample ids in phenotype file are not in the same order as in the datafile")
 
         return data
 
