@@ -189,9 +189,9 @@ class Refactor( Module ):
     TODO add doc
     """
     def _refactor( self ):
-        self.meth_data.remove_missing_values_sites()
+        # self.meth_data.remove_missing_values_sites() # nan are not supported TODO uncomment when supported
         self.meth_data.remove_lowest_std_sites(self.stdth)
-        self.meth_data.replace_missing_values_by_mean()
+        # self.meth_data.replace_missing_values_by_mean() # nan are not supported TODO uncomment when supported
         self._remove_covariates()
 
         # feature selection

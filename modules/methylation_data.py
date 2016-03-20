@@ -24,10 +24,15 @@ class MethylationData( Module ):
         # Note that assignment like self.O = O will not create a copy
         self.data = data[1:,1:].astype(float) 
         self.sites_size, self.samples_size = self.data.shape
-
+        self._validate_no_missing_values() #TODO remove when missing values are supported
         logging.debug("Got methylation data with %s sites and %s samples id" % (self.sites_size, self.samples_size))
 
-
+    def _validate_no_missing_values(self):
+        """
+        nan are not supported for version 1.0
+        """
+        if  isnan(self.data).sum() > 0:
+            common.terminate("missing values are not supported at this version")
 
     def _load_and_validate_file_of_dimentions(self, datafile, dim):
         """
@@ -163,30 +168,37 @@ class MethylationData( Module ):
         # exclude all sites with low std
         self._exclude_sites_from_data(std_sorted_indices[:include_from_index])
 
+    
     def remove_missing_values_sites(self, missing_values_th = 0.03):
-        """
-        remove sites that have many missing values
-        many is self.missing_values_th from the values
-        missing_values_th is float between 0 and 1
-        """
-        max_missing_values = int(missing_values_th * self.samples_size)
-        nan_quantity_per_site = isnan(self.data).sum(axis=1) 
-        many_nan_indices = where(nan_quantity_per_site > max_missing_values)
-        logging.debug("Removing %s out of %s sites with more than %s missing values" % (len(many_nan_indices), self.sites_size, max_missing_values))
-        self._exclude_sites_from_data(many_nan_indices)
+        pass
+        # was not tested!! 
+        # nan are not supported for version 1.0
+        # """
+        # remove sites that have many missing values
+        # many is self.missing_values_th from the values
+        # missing_values_th is float between 0 and 1
+        # """
+        # max_missing_values = int(missing_values_th * self.samples_size)
+        # nan_quantity_per_site = isnan(self.data).sum(axis=1) 
+        # many_nan_indices = where(nan_quantity_per_site > max_missing_values)
+        # logging.debug("Removing %s out of %s sites with more than %s missing values" % (len(many_nan_indices), self.sites_size, max_missing_values))
+        # self._exclude_sites_from_data(many_nan_indices)
 
     def replace_missing_values_by_mean(self):
-        """
-        replaces nan values with the mean of the site
-        """
-        logging.debug("Replacing missing values by site's mean")
+        pass
+        # was not tested!! 
+        # nan are not supported for version 1.0
+        # """
+        # replaces nan values with the mean of the site
+        # """
+        # logging.debug("Replacing missing values by site's mean")
 
-        # mean_per_site = self.get_mean_per_site()
-        masked_data = masked_array(self.data, isnan(self.data)) 
-        mean_per_site = average(masked_data, axis=1)  
-        # TODO is masked_data.mask equal to nan_indices? if so, we don't need to run this "where" line and just use masked_data.mask instead of nan_indices
-        nan_indices = where(masked_data.mask)                    # find nan values indices
-        self.data[nan_indices] = mean_per_site[nan_indices[0]]    # replace nan values by the mean of each site
+        # # mean_per_site = self.get_mean_per_site()
+        # masked_data = masked_array(self.data, isnan(self.data)) 
+        # mean_per_site = average(masked_data, axis=1)  
+        # # TODO is masked_data.mask equal to nan_indices? if so, we don't need to run this "where" line and just use masked_data.mask instead of nan_indices
+        # nan_indices = where(masked_data.mask)                    # find nan values indices
+        # self.data[nan_indices] = mean_per_site[nan_indices[0]]    # replace nan values by the mean of each site
 
     def copy(self):
         """
