@@ -1,12 +1,12 @@
 from numpy import dot, sqrt
+import pca
 
-
-def low_rank_approximation(A, B, i):
+def low_rank_approximation(O, k):
     """
-    calculates low rank approximation between the first i columns of two n X m matrixes A and B 
-    Note: Both A and B dimensions are n X m 
+    O dimensions are n X m
     """
-    return dot(A[:,0:i], B[:,0:i].transpose())
+    pca_out = pca.PCA(O)
+    return dot(pca_out.P[:,0:k], pca_out.U[:,0:k].transpose())
 
 def euclidean_distance(A, B):
     """

@@ -203,8 +203,8 @@ class Refactor( Module ):
         self._remove_covariates()
 
         # feature selection
-        O_find_best_sites = self.feature_selection_handler() #TODO change name of O_find_best_sites
-        ranked_list = self._calc_low_rank_approx_distances(O_find_best_sites, self.k)
+        distances = self.feature_selection_handler()
+        ranked_list = self._calc_low_rank_approx_distances(distances, self.k)
 
         logging.info('Computing the ReFACTor components...')
         sites = ranked_list[0:self.t]
@@ -271,17 +271,15 @@ class Refactor( Module ):
     """
     TODO add explanation
     """
-    def _calc_low_rank_approx_distances( self, O, i ):
+    def _calc_low_rank_approx_distances(self):
+        logging.info('Computing low rank approximation of the input data and ranking sites...')
 
-        logging.info('Running a standard PCA...')
-        # PCA calc is here so we don't need to pass P and U as arguments to this function. That way this func can be called from feature selection    pca_out = pca.PCA(self.meth_data.data.transpose()) 
-        pca_out = pca.PCA(O.transpose()) 
+        x = tools.low_rank_approximation(self.meth_data.data.transpose(), self.k)
+        x = x.transpose()
 
-        logging.info('Computing a low rank approximation of the input data and ranking sites...')
-        x = tools.low_rank_approximation(pca_out.P, pca_out.U, i)
-       
-        An = preprocessing.StandardScaler( with_mean = True, with_std = False ).fit(O.transpose()).transform(O.transpose()) #TODO move transpose out?
-        Bn = preprocessing.StandardScaler( with_mean = True, with_std = False ).fit(x).transform(x)
+        An = preprocessing.StandardScaler( with_mean = True, with_std = False ).fit(self.meth_data.data.transpose()).transform(self.meth_data.data.transpose())
+        Bn = preprocessing.StandardScaler( with_mean = True, with_std = False ).fit(x.transpose()).transform(x.transpose())
+
         # normalization
         An = An * ( 1 / sqrt((An**2).sum(axis=0)) ) 
         Bn = Bn * ( 1 / sqrt((Bn**2).sum(axis=0)) )
