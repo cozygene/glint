@@ -209,13 +209,9 @@ class Refactor( Module ):
     def _remove_covariates(self):
         if self.covar is not None:
             logging.info("Removing covariates...")
-            O_reg = empty_like(self.meth_data.data)   
-            for i,site in enumerate(self.meth_data.data):
-                lin_reg = LinearRegression(site, self.covar)
-                O_reg[i] = lin_reg.residuals
 
-            self.meth_data.data = O_reg
-
+            lin_reg = LinearRegression(self.meth_data.data, self.covar)
+            self.meth_data.data = lin_reg.residuals
 
     """
     TODO add doc
@@ -230,12 +226,10 @@ class Refactor( Module ):
     """
     def _phenotype_feature_handler( self ):
         logging.info("Running phenotype feature selection...")
-        O_tag = empty_like(self.meth_data.data)
-        for i,site in enumerate(self.meth_data.data):
-            lin_reg = LinearRegression(site, self.phenotype)
-            O_tag[i] = lin_reg.residuals
+        
+        lin_reg = LinearRegression(self.meth_data.data, self.phenotype)
+        return lin_reg.residuals
 
-        return O_tag
     
     """
     TODO add doc
