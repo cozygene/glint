@@ -66,14 +66,15 @@ class FeatureSelectionTester():
         logging.info("PASS")
 
 class RefactorTester():
-    DEMO_DATA  = "tests/refactor/files/demofiles/datafile"
+    DEMO_SMALL_DATA = "tests/refactor/files/demofiles/datafile2"
     DEMO_COVAR = "tests/refactor/files/demofiles/covariates"
     DEMO_PHENO = "tests/refactor/files/demofiles/phenotype"
     DEMO_CELLPRO = "tests/refactor/files/demofiles/cellproportions"
 
     def __init__(self):
-        self.meth_data = methylation_data.MethylationData(datafile = self.DEMO_DATA)
+        self.meth_data = methylation_data.MethylationData(datafile = self.DEMO_SMALL_DATA)
         self.test_remove_covariates()
+        self.test_low_rank_approx_distances()
 
     def test_remove_covariates(self):
         logging.info("Testing removing covariates...")
@@ -96,6 +97,21 @@ class RefactorTester():
             # validate our residuals are corelated to res_data
             assert tools.correlation(lin_reg.residuals, covar_meth_data.data[i])
 
+        logging.info("PASS")
+
+
+    def test_low_rank_approx_distances(self):
+        """
+        tests that number of distances is as the number of sites (distance for every site)
+        """
+        logging.info("Testing low rank approx distances...")
+        dis_meth_data = self.meth_data.copy()
+
+        module  = refactor.Refactor(methylation_data = dis_meth_data, 
+                                    k = 5)
+
+        distances = module._calc_low_rank_approx_distances()
+        assert distances.size == dis_meth_data.sites_size, "there must be distances as the number of sites"
         logging.info("PASS")
 
     
