@@ -209,7 +209,7 @@ class Refactor( Module ):
         logging.info('Computing the ReFACTor components...')
         sites = ranked_list[0:self.t]
 
-        pca_out = pca.PCA(self.meth_data.data[sites,:])
+        pca_out = pca.PCA(self.meth_data.data[sites,:].transpose())
         score = pca_out.P
 
         logging.info('Saving a ranked list of the data features...')
