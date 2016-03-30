@@ -1,8 +1,8 @@
 from modules import refactor,methylation_data
-from numpy import loadtxt, array_equal, corrcoef
+from numpy import loadtxt, array_equal
 from utils import LinearRegression
 import logging
-
+from tests import tools
 class FeatureSelectionTester():
     FAKE_DATA  = "tests/refactor/files/feature_selection/data"
     FAKE_CONTROL = "tests/refactor/files/feature_selection/control"
@@ -60,9 +60,8 @@ class FeatureSelectionTester():
         for i,site in enumerate(self.fs_meth_data.data):
             lin_reg = LinearRegression(site, phenotype)
             assert len(lin_reg.residuals) == len(site)
-            cor = corrcoef(lin_reg.residuals, res_data[i])
             # validate our residuals are corelated to res_data
-            assert abs( 1- cor[0][1]) < 1e-4 
+            assert tools.correlation(lin_reg.residuals, res_data[i])
 
         logging.info("PASS")
 
@@ -93,10 +92,9 @@ class RefactorTester():
         for i,site in enumerate(self.meth_data.data):
             lin_reg = LinearRegression(site, coavr)
             assert len(lin_reg.residuals) == len(site)
-            cor = corrcoef(lin_reg.residuals, covar_meth_data.data[i])
 
             # validate our residuals are corelated to res_data
-            assert abs( 1- cor[0][1]) < 1e-4 
+            assert tools.correlation(lin_reg.residuals, covar_meth_data.data[i])
 
         logging.info("PASS")
 

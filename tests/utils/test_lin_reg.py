@@ -1,6 +1,6 @@
-
-from numpy import loadtxt, corrcoef, empty_like
-from utils import tools, pca, LinearRegression, common
+from tests import tools
+from numpy import loadtxt
+from utils import LinearRegression
 import logging
 
 class LinearRegressionTester():
@@ -16,11 +16,9 @@ class LinearRegressionTester():
         x = loadtxt(self.LIN_REG_X)
         residuals = loadtxt(self.LIN_REG_RESIDUALS)
 
-         
         if len(y.shape) == 1:
             lin_reg = LinearRegression(y, x)
-            cor = corrcoef(lin_reg.residuals, residuals)
-            assert abs( 1- cor[0][1]) < 1e-4 
+            assert tools.correlation(lin_reg.residuals, residuals)
             assert len(lin_reg.residuals) == len(x)
 
         elif len(y.shape) == 2:  
