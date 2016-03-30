@@ -89,7 +89,7 @@ class ModulesArgumentParsers(object):
 
         differ = set(self.selected_args).difference(set(optional_args))
         if differ:
-            common.terminate("selected redundent argument" + str(differ))
+            common.terminate("selected redundent argument" + str(differ)) # TODO: tell which module the arguments belong to, to user might forgot to specify --module and that msg can be confusing
 
 
     def run(self):

@@ -4,10 +4,9 @@ from utils import common
 
 class LinearRegression(object):
     def __init__(self, y, x):
-        y_dim = len(y.shape)
-        if y_dim == 1: # y is a vector
+        if y.ndim == 1: # y is a vector
             self.residuals = self._regress_out_from_vector(y, x)
-        elif y_dim == 2: # y is a matrix
+        elif y.ndim == 2: # y is a matrix
             self.residuals = self._regress_out_from_matrix(y, x)
 
     def _regress_out_from_vector(self, y, x): 

@@ -44,13 +44,14 @@ class MethylationDataParser(ModuleParser):
         """
         validates that the file contains a vector of dimentions dim
         """
+        if not isinstance(fileobj, file):
+            fileobj = open(fileobj, 'r')
         logging.info("Loading file %s..." % fileobj.name)
         data = loadtxt(fileobj, dtype = str)#, converters = lambda x: x if x != 'NA' else 'nan')#,delimiter=';', missing_values='NA', filling_values=nan)# = lambda x: x if x != 'NA' else nan)#, missing_values = '???', filling_values = 0)
         # data = genfromtxt(args.datafile, dtype = str , delimiter=';', usemask = 'True', missing_values = 'NA', filling_values = "???")
- 
-        if len(data.shape) != dim:
-            logging.error("The file '%s' is not a %sd vector" % (fileobj.name, dim))
-            common.terminate(self.__class__.__name__)
+
+        if data.ndim != dim:
+            common.terminate("The file '%s' is not a %sd vector" % (fileobj.name, dim))
 
         return data
 
@@ -73,7 +74,7 @@ class MethylationDataParser(ModuleParser):
 
     def _validate_methylation_value(self, num):
         if not (num <= 1 and num >=0):
-            logging.error("must be a standard methylation value (float number between 0 and 1)")
+            common.terminate("excludemin/excludemax must be a standard methylation value (float number between 0 and 1)")
 
     def _validate_min_and_max_mean_values(self, min_value, max_value):
         """

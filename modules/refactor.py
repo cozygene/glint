@@ -154,7 +154,7 @@ class Refactor( Module ):
         bad_sites = loadtxt(bad_probes_file, dtype = str)
         dim = 1
 
-        if len(bad_sites.shape) != dim:
+        if bad_sites.ndim != dim:
             common.terminate("The file %s is not a %sd vector" % (bad_probes_file, dim))
 
         return bad_sites
@@ -167,7 +167,7 @@ class Refactor( Module ):
     """
     def _is_binary_vector(self, vector):
         values = self.phenotype.squeeze()
-        if len(values.shape) != 1: # two dimentions is not a vector
+        if values.ndim != 1: # two dimentions is not a vector
             return False
 
         if set(values) != set([0,1]): #has values that are not 0 or 1

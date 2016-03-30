@@ -16,12 +16,12 @@ class LinearRegressionTester():
         x = loadtxt(self.LIN_REG_X)
         residuals = loadtxt(self.LIN_REG_RESIDUALS)
 
-        if len(y.shape) == 1:
+        if y.ndim == 1:
             lin_reg = LinearRegression(y, x)
             assert tools.correlation(lin_reg.residuals, residuals)
             assert len(lin_reg.residuals) == len(x)
 
-        elif len(y.shape) == 2:  
+        elif y.ndim == 2:  
             raise("TEST WASNT IMPLEMENTED")
 
         logging.info("PASS")
