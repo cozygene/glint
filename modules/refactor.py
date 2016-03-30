@@ -29,6 +29,7 @@ class Refactor( Module ):
                   num_components = None, 
                   phenofile = None,
                   covar = None,
+                  bad_probes_file = None,
                   feature_selection = 'normal',
                   ranked_output_filename = RANKED_FILENAME,
                   components_output_filename = COMPONENTS_FILENAME
@@ -45,6 +46,7 @@ class Refactor( Module ):
         self.t =                          self._validate_t(t)
         self.stdth =                      self._validate_stdth(stdth)
         self.num_components =             self._validate_num_comp(num_components)
+        self.bad_probes =                 self._validate_bad_probes(bad_probes_file)
         self.ranked_output_filename =     ranked_output_filename
         self.components_output_filename = components_output_filename
 
@@ -145,6 +147,19 @@ class Refactor( Module ):
         return num_comp if num_comp else self.k
 
 
+    def _validate_bad_probes(self, bad_probes_file):
+        if bad_probes_file is None:
+            return []
+
+        bad_sites = loadtxt(bad_probes_file, dtype = str)
+        dim = 1
+
+        if len(bad_sites.shape) != dim:
+            common.terminate("The file %s is not a %sd vector" % (bad_probes_file, dim))
+
+        return bad_sites
+
+
     """
     gets a vector of ints/doubles and checks:
         if that is a vector
@@ -181,6 +196,7 @@ class Refactor( Module ):
     TODO add doc
     """
     def _refactor( self ):
+        self._exclude_bad_probes()
         # self.meth_data.remove_missing_values_sites() # nan are not supported TODO uncomment when supported
         self.meth_data.remove_lowest_std_sites(self.stdth)
         # self.meth_data.replace_missing_values_by_mean() # nan are not supported TODO uncomment when supported
@@ -205,6 +221,13 @@ class Refactor( Module ):
         self._write_file(self.components_output_filename, data)
         
         return score[:,0:self.num_components], ranked_list
+
+    def _exclude_bad_probes(self):
+        """
+        excludes bad sites from data
+        """
+        logging.info("excluding bad sites...")
+        self.meth_data.exclude(self.bad_probes)
 
     def _remove_covariates(self):
         if self.covar is not None:
