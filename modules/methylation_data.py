@@ -38,8 +38,7 @@ class MethylationData( Module ):
         """
         validates that the file contains a matrix from dimentions dim
         """
-
-        logging.info("Loading file %s..." % datafile)
+        logging.info("Loading file %s..." % datafile.name)
         data = loadtxt(datafile, dtype = str)#, converters = lambda x: x if x != 'NA' else 'nan')#,delimiter=';', missing_values='NA', filling_values=nan)# = lambda x: x if x != 'NA' else nan)#, missing_values = '???', filling_values = 0)
         # data = genfromtxt(args.datafile, dtype = str , delimiter=';', usemask = 'True', missing_values = 'NA', filling_values = "???")
 

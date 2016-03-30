@@ -40,16 +40,16 @@ class MethylationDataParser(ModuleParser):
         self._validate_min_and_max_mean_values(args.excludemin, args.excludemax)
 
 
-    def _load_and_validate_file_of_dimentions(self, filepath, dim):
+    def _load_and_validate_file_of_dimentions(self, fileobj, dim):
         """
         validates that the file contains a vector of dimentions dim
         """
-        logging.info("Loading file %s..." % filepath)
-        data = loadtxt(filepath, dtype = str)#, converters = lambda x: x if x != 'NA' else 'nan')#,delimiter=';', missing_values='NA', filling_values=nan)# = lambda x: x if x != 'NA' else nan)#, missing_values = '???', filling_values = 0)
+        logging.info("Loading file %s..." % fileobj.name)
+        data = loadtxt(fileobj, dtype = str)#, converters = lambda x: x if x != 'NA' else 'nan')#,delimiter=';', missing_values='NA', filling_values=nan)# = lambda x: x if x != 'NA' else nan)#, missing_values = '???', filling_values = 0)
         # data = genfromtxt(args.datafile, dtype = str , delimiter=';', usemask = 'True', missing_values = 'NA', filling_values = "???")
-
+ 
         if len(data.shape) != dim:
-            logging.error("The file '%s' is not a %sd vector" % (filepath, dim))
+            logging.error("The file '%s' is not a %sd vector" % (fileobj.name, dim))
             common.terminate(self.__class__.__name__)
 
         return data
@@ -67,26 +67,9 @@ class MethylationDataParser(ModuleParser):
 
         diff =  data_set.difference(set(optional_ids_list))
         if diff != set([]):
-            logging.warning("The file %s contains ids that are not found in the datafile: %s" % diff)
+            logging.warning("The file %s contains ids that are not found in the datafile: %s" % (filepath, diff))
 
         return data
-
-    def _load_sites_file(self, filepath):
-        """
-        loads file contianing cpgnames list
-        warns if there are duplicate sites or sites that are not found in the methylation data
-        must be called after meth_data is initialized
-        """
-        return self._load_and_validate_ids_in_file(filepath, meth_data.cpgnames)
-
-    
-    def _load_sample_ids_file(self, filepath):
-        """
-        loads file contianing sample ids list
-        warns if there are duplicate sample ids or samples ids that are not found in the methylation data
-        must be called after meth_data is initialized
-        """
-        return self._load_and_validate_ids_in_file(filepath, meth_data.samples_ids)
 
     def _validate_methylation_value(self, num):
         if not (num <= 1 and num >=0):
@@ -114,16 +97,16 @@ class MethylationDataParser(ModuleParser):
 
             # load remove/keep sites/samples files and remove/keep values
             if args.include is not None:
-                include_list = self._load_sites_file(args.include)
+                include_list = self._load_and_validate_ids_in_file(args.include, meth_data.cpgnames)
                 meth_data.include(include_list)
             if args.exclude is not None:
-                exclude_list = self._load_sites_file(args.exclude)
+                exclude_list = self._load_and_validate_ids_in_file(args.exclude, meth_data.cpgnames)
                 meth_data.exclude(exclude_list)
             if args.keep is not None:
-                keep_list = self._load_sample_ids_file(args.keep)
+                keep_list = self._load_and_validate_ids_in_file(args.keep, meth_data.samples_ids)
                 meth_data.keep(keep_list)
             if args.remove is not None:
-                remove_list = self._load_sample_ids_file(args.remove)
+                remove_list = self._load_and_validate_ids_in_file(args.remove, meth_data.samples_ids)
                 meth_data.remove(remove_list)
 
             # exclude min/max values
