@@ -57,9 +57,8 @@ class MethylationData( Module ):
         self.data = delete(self.data, sites_indicies_list, axis = 0)
         self.cpgnames = delete(self.cpgnames, sites_indicies_list)
         self.sites_size = len(self.cpgnames)
-        logging.debug("methylation data new size is %s" % str(self.data.shape))
         if (self.data.shape[0] != self.sites_size):
-            logging.error("After excluding sites, methylation data sites size is %s but we got %s" % (self.data.shape[0], self.sites_size))
+            common.terminate("After excluding sites, methylation data sites size is %s but we got %s" % (self.data.shape[0], self.sites_size))
 
     def get_mean_per_site(self):
         """
@@ -73,7 +72,7 @@ class MethylationData( Module ):
         this function removes the cpg sites not found in include_list list from the data
         it updates the sites_size, the cpgnames list and the list holds the average value per site
         """
-        logging.info("Including %s out of %s sites..." % (len(include_list), self.sites_size))
+        logging.info("including sites...")
         indices_list = [i for i, site in enumerate(self.cpgnames) if site in include_list]
         self.data = self.data[indices_list, :]
         # TODO remove this test if it didnt fail
@@ -83,23 +82,25 @@ class MethylationData( Module ):
         self.sites_size = len(self.cpgnames)
         logging.debug("methylation data new size is %s" % self.data.shape)
         if (self.data.shape[0] != self.sites_size):
-            logging.error("After including sites, methylation data sites size is %s but we got %s" % (self.data.shape[0], self.sites_size))
+            common.terminate("After including sites, methylation data sites size is %s but we got %s" % (self.data.shape[0], self.sites_size))
+        logging.debug("%s sites were included" % len(indices_list))
 
     def exclude(self, exclude_list):
         """
         this function removes the cpg sites found in self.exclude list from the data
         it updates the sites_size, the cpgnames list and the list holds the average value per site
         """
-        logging.info("Excluding %s out of %s sites..." % (len(exclude_list), self.sites_size))
+        logging.info("excluding sites...")
         indices_list = [i for i, site in enumerate(self.cpgnames) if site in exclude_list]
         self._exclude_sites_from_data(indices_list)
+        logging.debug("%s sites were excluded" % len(indices_list))
 
     def keep(self, keep_list):
         """
         this function removes the samples ids not found in keep_list list from the data
         it updates the samples_size and the samples_ids list 
         """
-        logging.info("Keeping %s out of %s samples..." % (len(keep_list), self.samples_size))
+        logging.info("keeping samples...")
         indices_list = [i for i, id in enumerate(self.samples_ids) if site in keep_list]
         # TODO remove this test if it didnt fail
         if sorted(indices_list) != indices_list:
@@ -108,36 +109,40 @@ class MethylationData( Module ):
         self.samples_ids = self.samples_ids[indices_list]
         self.samples_size = len(self.samples_ids)
         if (self.data.shape[1] != self.samples_size):
-            logging.error("After kepping samples, methylation data samples size is %s but we got %s" % (self.data.shape[1], self.samples_size))
+            common.terminate("After kepping samples, methylation data samples size is %s but we got %s" % (self.data.shape[1], self.samples_size))
+        logging.debug("kept %s samples. data size is now %s" % (len(indices_list), self.samples_size))
 
     def remove(self, remove_list):
         """
         this function removes the samples ids found in remove_list from the data
         it updates the samples_size and the samples_ids list 
         """
-        logging.info("Removing %s out of %s samples..." % (len(remove_list), self.samples_size))
+        logging.info("removing samples...")
         indices_list = [i for i, id in enumerate(self.samples_ids) if site in remove_list]
         self.data = delete(self.data, indices_list, axis = 1)
         self.samples_ids = delete(self.samples_ids, indices_list)
         self.samples_size = len(self.samples_ids)
         if (self.data.shape[1] != self.samples_size):
-            logging.error("After removing samples, methylation data samples size is %s but we got %s" % (self.data.shape[1], self.samples_size))
+            common.terminate("After removing samples, methylation data samples size is %s but we got %s" % (self.data.shape[1], self.samples_size))
+        logging.debug("%s samples were removed" % len(remove_list))
 
     def exclude_sites_with_low_mean(self, min_value):
         """
         removes sites with mean < min_value
         """
+        logging.info("excluding sites with mean lower than %s..." % min_value)
         min_values_indices = where(self.get_mean_per_site() < min_value)  
-        logging.info("Removing %s out of %s sites with mean lower than %s" % (len(min_values_indices),  self.sites_size, min_value))
         self._exclude_sites_from_data(min_values_indices)
+        logging.debug("%s sites were excluded" % len(min_values_indices))
 
     def exclude_sites_with_high_mean(self, max_value):
         """
         removes sites with mean > max_value
         """
+        logging.info("removing sites with mean greater than %s..." % max_value)
         max_values_indices = where(self.get_mean_per_site() > max_value)
-        logging.info("Removing %s out of %s sites with mean greater than %s" % (len(max_values_indices),  self.sites_size, max_value))
         self._exclude_sites_from_data(max_values_indices)
+        logging.debug("%s sites were excluded" % len(max_values_indices))
 
     def save(self, methylation_data_filename):
         """
@@ -148,13 +153,12 @@ class MethylationData( Module ):
             logging.info("Saving methylation data as glint format at %s" % methylation_data_filename)
             dump(self, f)
 
-
-
     def remove_lowest_std_sites(self, lowest_std_th = 0.02):
         """
         input: lowest_std_th threshold for excluding low variance sites, all sites with std lower than lowest_std_th will be excluded 
         lowest_std_th is float between 0 and 1
         """
+        logging.info("excluding site with variance lower than %s..." % lowest_std_th)
         # get std for each site
         sites_std = nanstd(self.data, axis=1) # calc variance consider NaN
         # sort std and get sites index for each std (sorted, so indices of the lowest std sites will be to the left) 
@@ -167,6 +171,8 @@ class MethylationData( Module ):
 
         # exclude all sites with low std
         self._exclude_sites_from_data(std_sorted_indices[:include_from_index])
+        logging.debug("%s sites were excluded" % len(std_sorted_indices[:include_from_index]))
+
 
     
     def remove_missing_values_sites(self, missing_values_th = 0.03):
@@ -183,6 +189,7 @@ class MethylationData( Module ):
         # many_nan_indices = where(nan_quantity_per_site > max_missing_values)
         # logging.debug("Removing %s out of %s sites with more than %s missing values" % (len(many_nan_indices), self.sites_size, max_missing_values))
         # self._exclude_sites_from_data(many_nan_indices)
+        # logging.debug("%s sites were excluded" % len(many_nan_indices)
 
     def replace_missing_values_by_mean(self):
         pass
