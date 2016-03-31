@@ -83,7 +83,7 @@ class MethylationData( Module ):
             common.terminate("indices_list must be sorted in order to do self.cpgnames[indices_list]")
         self.cpgnames = self.cpgnames[indices_list]
         self.sites_size = len(self.cpgnames)
-        logging.debug("methylation data new size is %s" % self.data.shape)
+        logging.debug("methylation data new size is %s" % str(self.data.shape))
         if (self.data.shape[0] != self.sites_size):
             common.terminate("After including sites, methylation data sites size is %s but we got %s" % (self.data.shape[0], self.sites_size))
         logging.debug("%s sites were included" % len(indices_list))
@@ -104,7 +104,7 @@ class MethylationData( Module ):
         it updates the samples_size and the samples_ids list 
         """
         logging.info("keeping samples...")
-        indices_list = [i for i, id in enumerate(self.samples_ids) if site in keep_list]
+        indices_list = [i for i, site in enumerate(self.samples_ids) if site in keep_list]
         # TODO remove this test if it didnt fail
         if sorted(indices_list) != indices_list:
             common.terminate("indices_list must be sorted in order to do self.cpgnames[indices_list]")
@@ -121,7 +121,7 @@ class MethylationData( Module ):
         it updates the samples_size and the samples_ids list 
         """
         logging.info("removing samples...")
-        indices_list = [i for i, id in enumerate(self.samples_ids) if site in remove_list]
+        indices_list = [i for i, site in enumerate(self.samples_ids) if site in remove_list]
         self.data = delete(self.data, indices_list, axis = 1)
         self.samples_ids = delete(self.samples_ids, indices_list)
         self.samples_size = len(self.samples_ids)
