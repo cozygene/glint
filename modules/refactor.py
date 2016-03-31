@@ -2,7 +2,7 @@ import os
 import sys
 import logging
 from sklearn import preprocessing
-from numpy import dot, linalg, sqrt, hstack, loadtxt, empty_like, isnan
+from numpy import sqrt
 from utils import tools, pca, LinearRegression, common
 from module import Module
 
@@ -47,57 +47,6 @@ class Refactor( Module ):
         self.ranked_output_filename =     ranked_output_filename
         self.components_output_filename = components_output_filename
 
-    def _validate_phenotype(self, phenofile, feature_selection):
-        pheno = None
-        if phenofile:
-            pheno = self._validate_matrix_ids(phenofile)
-            if len(pheno[0]) != 2:
-                logging.warning("more than one phenotype is not supported. will use only the first phenotype (first column)")
-
-            pheno = pheno[:,1].astype(float) # use only the first phenotype # TODO should check if can convert  to float
-
-            if isnan(pheno).sum() > 0:
-                common.terminate("missing values in phenotype file are not supported at this version (file: %s)" % phenofile)
-
-        return pheno
-
-    def _validate_covar(self, covariates):
-        covar = None
-        if not covariates:
-            logging.warning("didn't supply covariates file")
-        else:
-            covar = self._validate_matrix_ids(covariates)
-            if len(covar[0]) < 2:
-                common.terminate("the covariates file provided is not in the right format. should be at least 2 columns") #TODO is this right?
-
-            covar = covar[:,1:].astype(float)
-
-            if isnan(covar).sum() > 0:
-                common.terminate("missing values on covariates file are not supported at this version (file: %s)" % covariates)
-
-        return covar
-
-    """
-    reads matrix from matrix_file_path
-    validates that the matrix has number of rows as the number of sample ids
-    checks that the sample ids in matrix (the first column) are the same ids as in sample_ids list
-    and in the same order
-    """
-    def _validate_matrix_ids(self, matrix_file_path):
-
-        data = loadtxt(matrix_file_path, dtype = str)
-        if len(data) != len(self.meth_data.samples_ids):
-            common.terminate("the file provided %s doesn't include all sample ids" % matrix_file_path)
-
-        matrix_sample_ids = data[:,0]
-
-        if not (self.meth_data.samples_ids == matrix_sample_ids).all(): #todo check this is not by order
-            if len(set(self.meth_data.samples_ids)^set(matrix_sample_ids)) != 0:
-                common.terminate("sample ids in phenotype file are not the same as in the data file")
-            
-            common.terminate("sample ids in phenotype file are not in the same order as in the datafile")
-
-        return data
 
     """
     must be called after _validate_phenotype

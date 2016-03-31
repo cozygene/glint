@@ -11,46 +11,118 @@ from bisect import bisect_right
 
 COMPRESSED_FILENAME = "methylation_data"
 
+def validate_no_missing_values(data):
+    """
+    nan are not supported for version 1.0
+    Note: data must be number and not string
+    """
+    if  isnan(data).sum() > 0:
+        common.terminate("missing values are not supported at this version")
+
+
 class MethylationData( Module ):
     """
     TODO add class doc here
     """
-    def __init__(self, datafile):
-        data = self._load_and_validate_file_of_dimentions(datafile, 2) 
-        self.samples_ids = data[0,:][1:]                 # extract samples ID
-        self.cpgnames = data[:,0][1:]                    # extract methylation sites names
+    def __init__(self, datafile, phenofile = None, covarfile = None):
 
-        # remove sample ID and sites names from matrix
-        # that kind of assignment will create a copy of O[1:,1:]
-        # Note that assignment like self.O = O will not create a copy
-        self.data = data[1:,1:].astype(float) 
+        self.data, self.samples_ids, self.cpgnames = self._load_and_validate_datafile(datafile)        
         self.sites_size, self.samples_size = self.data.shape
-        self._validate_no_missing_values() #TODO remove when missing values are supported
-        logging.debug("Got methylation data with %s sites and %s samples id" % (self.sites_size, self.samples_size))
+        logging.debug("got methylation data with %s sites and %s samples id" % (self.sites_size, self.samples_size))
 
-    def _validate_no_missing_values(self):
-        """
-        nan are not supported for version 1.0
-        """
-        if  isnan(self.data).sum() > 0:
-            common.terminate("missing values in datafile are not supported at this version")
+        self.phenotype = self._load_and_validate_phenotype(phenofile)
+        self.covar = self._load_and_validate_covar(covarfile)
 
     def _load_and_validate_file_of_dimentions(self, datafile, dim):
         """
         validates that the file contains a matrix from dimentions dim
+        datafile is not None
         """
         if not isinstance(datafile, file):
             datafile = open(datafile, 'r')
-        logging.info("Loading file %s..." % datafile.name)
+        logging.info("loading file %s..." % datafile.name)
 
         data = loadtxt(datafile, dtype = str)#, converters = lambda x: x if x != 'NA' else 'nan')#,delimiter=';', missing_values='NA', filling_values=nan)# = lambda x: x if x != 'NA' else nan)#, missing_values = '???', filling_values = 0)
         # data = genfromtxt(args.datafile, dtype = str , delimiter=';', usemask = 'True', missing_values = 'NA', filling_values = "???")
 
         if data.ndim != dim:
-            common.terminate("The file '%s' is not a %sd matrix" % (datafile.name, dim))
+            common.terminate("the file '%s' is not a %sd matrix" % (datafile.name, dim))
 
         return data
 
+    def _load_and_validate_datafile(self, datafile):
+        """
+        returns data (type=float without samples ids and cpgnames) and sample_ids list and cpgnames list
+        """
+        data = self._load_and_validate_file_of_dimentions(datafile, 2) 
+
+        samples_ids = data[0,:][1:]  # extract samples ID
+        cpgnames = data[:,0][1:]     # extract methylation sites names
+        # remove sample ID and sites names from matrix
+        # that kind of assignment will create a copy of O[1:,1:]
+        # Note that assignment like self.O = O will not create a copy
+        data = data[1:,1:].astype(float) 
+        
+        # must be called after convertion to float
+        logging.info("checking for missing values in datafile file...")
+        validate_no_missing_values(data) #TODO remove when missing values are supported
+
+        return data, sample_ids, cpgnames
+
+    """
+    reads matrix from matrix_file_path
+    validates that the matrix has number of rows as the number of sample ids
+    checks that the sample ids in matrix (the first column) are the same ids as in sample_ids list
+    and in the same order
+    """
+    def _validate_samples_ids(self, data):
+        if len(data) != len(self.samples_ids):
+            common.terminate("the file provided %s doesn't include all sample ids" % matrix_file_path)
+
+        matrix_sample_ids = data[:,0]
+
+        if not (self.samples_ids == matrix_sample_ids).all(): # TODO check this is not by order
+            if len(set(self.samples_ids)^set(matrix_sample_ids)) != 0:
+                common.terminate("sample ids are not identical to the sample ids in data file")
+            common.terminate("sample ids are not in the same order as in the datafile") # TODO should we terminate because of order?
+
+    def _load_and_validate_samples_info(self, samples_info):
+        """
+        samples_info - path to file containing information about samples (matrix where first column is sample_id)
+        samples_info assumed to hold path (not None)
+        """
+        data = self._load_and_validate_file_of_dimentions(samples_info, 2)
+        self._validate_samples_ids(data)
+
+        # remove sample IDs from matrix
+        # that kind of assignment will create a copy of data[:,1]
+        # Note that assignment like self.O = O will not create a copy
+        data = data[:,1:].astype(float) # use only the first phenotype # TODO should check if can convert  to float
+        validate_no_missing_values(data)
+        return data
+
+    def _load_and_validate_phenotype(self, phenofile):
+        """
+        returns phenotype data (type=float) without samples ids
+        """
+        if not phenotype:
+            return Nnoe
+        logging.info("validating phenotype file...")
+        pheno = self._load_and_validate_samples_info(phenofile)
+        if len(pheno[0]) != 1:
+            logging.warning("more than one phenotype is not supported. will use only the first phenotype (first column)")
+            pheno = pheno[:,1]
+        return pheno
+
+    def _load_and_validate_covar(self, covariates):
+        """
+        returns covariates data (type=float) without samples ids
+        """
+        if not covariates:
+            logging.warning("didn't supply covariates file")
+            return None
+        logging.info("validating covariates file...")
+        return self._load_and_validate_samples_info(covariates)
 
     def _exclude_sites_from_data(self, sites_indicies_list):
         """
