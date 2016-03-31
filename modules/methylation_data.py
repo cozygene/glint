@@ -7,6 +7,7 @@ from numpy import loadtxt, delete, isnan, nanstd, where
 from numpy.ma import average, masked_array
 from module import Module
 from utils import common, search
+from bisect import bisect_right
 
 COMPRESSED_FILENAME = "methylation_data"
 
@@ -168,7 +169,11 @@ class MethylationData( Module ):
         # get std list sorted
         std_sorted = sites_std[std_sorted_indices]
         # get the first index in the sorted list which have std higher than lowest_std_th and include all indices started from it
-        include_from_index = search.BinarySearch.find_gt(std_sorted, lowest_std_th)
+        include_from_index = bisect_right(std_sorted, lowest_std_th)
+        if (include_from_index == self.sites_size):
+            common.terminate("ERROR: the provided stdth parameter excludes all sites (stdth = %s)" % lowest_std_th)
+        if (include_from_index == 0):
+            logging.warning("the provided stdth parameter excludes no sites (stdth = %s)" % lowest_std_th)
         exclude_sites_indices = std_sorted_indices[:include_from_index]
 
         # exclude all sites with low std

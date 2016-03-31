@@ -204,7 +204,7 @@ class Refactor( Module ):
 
         # feature selection
         distances = self.feature_selection_handler()
-        ranked_list = self._calc_low_rank_approx_distances(distances, self.k)
+        ranked_list = self._calc_low_rank_approx_distances()
 
         logging.info('Computing the ReFACTor components...')
         sites = ranked_list[0:self.t]

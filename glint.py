@@ -6,10 +6,9 @@ from configuration import configurelogging
 configurelogging.configureLogging('') #todo should seperate each module to a different folder to have different "namespaces"?
 import logging
 from utils import common
-from numpy import genfromtxt ,loadtxt
+from numpy import loadtxt
 from utils import GlintArgumentParser
 from parsers import ModuleParser, RefactorParser, EWASParser, MethylationDataParser  #dont remove this is imported in,,,
-
 
 class GlintParser(ModuleParser):
     def __init__(self, parser):
@@ -98,7 +97,10 @@ class ModulesArgumentParsers(object):
 
         if self.args.refactor:
             refactor_meth_data = meth_data.copy()
-            estimates = self.refactor.run(self.args, refactor_meth_data, output_file_prefix)
+
+            estimates = self.refactor.run(args = self.args,
+                                          meth_data = refactor_meth_data,
+                                          output_perfix = output_file_prefix)
 
         if self.args.ewas:
             self.ewas.run(estimates)
