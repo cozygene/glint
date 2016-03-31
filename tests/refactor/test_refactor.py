@@ -3,6 +3,8 @@ from numpy import loadtxt, array_equal
 from utils import LinearRegression
 import logging
 from tests import tools
+from pickle import load
+
 class FeatureSelectionTester():
     FAKE_DATA  = "tests/refactor/files/feature_selection/data"
     FAKE_CONTROL = "tests/refactor/files/feature_selection/control"
@@ -67,14 +69,34 @@ class FeatureSelectionTester():
 
 class RefactorTester():
     DEMO_SMALL_DATA = "tests/refactor/files/demofiles/datafile2"
+    DEMO_DATA_NO_BAD_PROBES = "tests/refactor/files/demofiles/datafile2_no_bad_probes"
     DEMO_COVAR = "tests/refactor/files/demofiles/covariates"
     DEMO_PHENO = "tests/refactor/files/demofiles/phenotype"
     DEMO_CELLPRO = "tests/refactor/files/demofiles/cellproportions"
+    BAD_PROBES = "tests/refactor/files/demofiles/bad_probes"
+
+    # senarios output
+    COMP_K5_T400 = "tests/refactor/files/senarios_out/k5t400.out.components.txt"
+    RANK_K5_T400 = "tests/refactor/files/senarios_out/k5t400.out.rankedlist.txt"
+    
+    COMP_K5_T400_stdth01numcomp7 = "tests/refactor/files/senarios_out/k5t400stdth0.1numcomp7.out.components.txt"
+    RANK_K5_T400_stdth01numcomp7 = "tests/refactor/files/senarios_out/k5t400stdth0.1numcomp7.out.rankedlist.txt"
+    
+    COMP_K5_T400_stdth013 = "tests/refactor/files/senarios_out/k5t400stdth0.13.out.components.txt"
+    RANK_K5_T400_stdth013 = "tests/refactor/files/senarios_out/k5t400stdth0.13.out.rankedlist.txt"
+    
+    COMP_K5_T400_covar = "tests/refactor/files/senarios_out/k5t400covar.out.components.txt"
+    RANK_K5_T400_covar = "tests/refactor/files/senarios_out/k5t400covar.out.rankedlist.txt"
+  
+    COMP_K5_T400_stdth008covar = "tests/refactor/files/senarios_out/k5t400stdth0.08covar.out.components.txt"
+    RANK_K5_T400_stdth008covar = "tests/refactor/files/senarios_out/k5t400stdth0.08covar.out.rankedlist.txt"
 
     def __init__(self):
         self.meth_data = methylation_data.MethylationData(datafile = self.DEMO_SMALL_DATA)
         self.test_remove_covariates()
         self.test_low_rank_approx_distances()
+        self.test_exclude_bad_probes()
+        self.test_senarios()
 
     def test_remove_covariates(self):
         logging.info("Testing removing covariates...")
@@ -115,6 +137,125 @@ class RefactorTester():
         logging.info("PASS")
 
     
+    def test_exclude_bad_probes(self):
+        logging.info("Testing removing bad probes...")
+        probes_meth_data = self.meth_data.copy()
 
-    
-        
+        data_no_bad_probes = methylation_data.MethylationData(datafile = self.DEMO_DATA_NO_BAD_PROBES)
+
+        bad_probes = load(open(self.BAD_PROBES,'r'))
+        module  = refactor.Refactor(methylation_data = probes_meth_data, 
+                                    k = 5, 
+                                    bad_probes_list = bad_probes)
+
+        module._exclude_bad_probes()
+
+
+        assert array_equal(data_no_bad_probes.data, module.meth_data.data)
+
+        # tests sites list has changed
+        remove_count = len(bad_probes)
+        orig_sites_before = []
+        orig_sites_before.extend(self.meth_data.cpgnames)
+        orig_sites_after = []
+        orig_sites_after.extend(module.meth_data.cpgnames)
+        for i in bad_probes:
+            try:
+                orig_sites_before.remove(i)
+            except:
+                remove_count -= 1
+        assert orig_sites_after == orig_sites_before
+        # test sites size
+        assert self.meth_data.sites_size - remove_count == module.meth_data.sites_size
+
+        logging.info("PASS")
+
+    def test_senarios(self):
+
+        logging.info("Testing senario no.1...")
+        senario_meth_data = self.meth_data.copy()
+        module  = refactor.Refactor(methylation_data = senario_meth_data, 
+                                    k = 5, 
+                                    t = 400)
+        module.run()
+        comp = loadtxt(self.COMP_K5_T400)
+        assert module.components.shape == comp.shape
+
+        for i in range(module.components.shape[1]):
+            assert tools.correlation(module.components[:,i], comp[:,i])
+
+        assert array_equal(module.ranked_sites, loadtxt(self.RANK_K5_T400, dtype = str))
+        logging.info("PASS")
+
+        logging.info("Testing senario no.2...")
+        senario_meth_data = self.meth_data.copy()
+        module  = refactor.Refactor(methylation_data = senario_meth_data, 
+                                      k = 5, 
+                                      t = 400,
+                                      stdth = 0.1,
+                                      num_components = 7)
+        module.run()
+        comp = loadtxt(self.COMP_K5_T400_stdth01numcomp7)
+        assert module.components.shape == comp.shape
+
+        for i in range(module.components.shape[1]):
+            assert tools.correlation(module.components[:,i], comp[:,i])
+
+        assert array_equal(module.ranked_sites, loadtxt(self.RANK_K5_T400_stdth01numcomp7, dtype = str))
+        logging.info("PASS")
+
+        logging.info("Testing senario no.3...")
+        senario_meth_data = self.meth_data.copy()
+        module  = refactor.Refactor(methylation_data = senario_meth_data, 
+                                      k = 5, 
+                                      t = 400,
+                                      stdth = 0.13)
+        module.run()
+        comp = loadtxt(self.COMP_K5_T400_stdth013)
+        assert module.components.shape == comp.shape
+
+        for i in range(module.components.shape[1]):
+            assert tools.correlation(module.components[:,i], comp[:,i])
+
+        assert array_equal(module.ranked_sites, loadtxt(self.RANK_K5_T400_stdth013, dtype = str))
+        logging.info("PASS")
+
+
+
+        logging.info("Testing senario no.4...")
+        senario_meth_data = self.meth_data.copy()
+        module  = refactor.Refactor(methylation_data = senario_meth_data, 
+                                      k = 5, 
+                                      t = 400,
+                                      covar = self.DEMO_COVAR)
+        module.run()
+        comp = loadtxt(self.COMP_K5_T400_covar)
+        assert module.components.shape == comp.shape
+
+        for i in range(module.components.shape[1]):
+            assert tools.correlation(module.components[:,i], comp[:,i])
+
+        assert array_equal(module.ranked_sites, loadtxt(self.RANK_K5_T400_covar, dtype = str))
+        logging.info("PASS")
+
+
+        logging.info("Testing senario no.5...")
+        senario_meth_data = self.meth_data.copy()
+        module  = refactor.Refactor(methylation_data = senario_meth_data, 
+                                      k = 5, 
+                                      t = 400,
+                                      stdth = 0.08,
+                                      covar = self.DEMO_COVAR)
+        module.run()
+
+        comp = loadtxt(self.COMP_K5_T400_stdth008covar)
+        assert module.components.shape == comp.shape
+
+        for i in range(module.components.shape[1]):
+            assert tools.correlation(module.components[:,i], comp[:,i])
+
+        assert array_equal(module.ranked_sites, loadtxt(self.RANK_K5_T400_stdth008covar, dtype = str))
+        logging.info("PASS")
+
+  
+
