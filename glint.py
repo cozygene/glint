@@ -84,11 +84,11 @@ class ModulesArgumentParsers(object):
         and that the user didnt select an argument that is not an option for him (argument from a module that wasn't selected)
         """
         if len(self.selected_args) == 1:
-            common.terminate("ERROR:Nothing to do with the data, select argument from the options (select --help for help)")
+            common.terminate("Nothing to do with the data, select argument from the options (select --help for help)")
 
         differ = set(self.selected_args).difference(set(optional_args))
         if differ:
-            common.terminate("ERROR:selected redundent argument" + str(differ)) # TODO: tell which module the arguments belong to, to user might forgot to specify --module and that msg can be confusing
+            common.terminate("selected redundent argument" + str(differ)) # TODO: tell which module the arguments belong to, to user might forgot to specify --module and that msg can be confusing
 
 
     def run(self):

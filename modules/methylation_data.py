@@ -171,7 +171,7 @@ class MethylationData( Module ):
         # get the first index in the sorted list which have std higher than lowest_std_th and include all indices started from it
         include_from_index = bisect_right(std_sorted, lowest_std_th)
         if (include_from_index == self.sites_size):
-            common.terminate("ERROR: the provided stdth parameter excludes all sites (stdth = %s)" % lowest_std_th)
+            common.terminate("the provided stdth parameter excludes all sites (stdth = %s)" % lowest_std_th)
         if (include_from_index == 0):
             logging.warning("the provided stdth parameter excludes no sites (stdth = %s)" % lowest_std_th)
         exclude_sites_indices = std_sorted_indices[:include_from_index]
