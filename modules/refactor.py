@@ -6,12 +6,12 @@ from numpy import dot, linalg, sqrt, hstack, loadtxt, empty_like, isnan
 from utils import tools, pca, LinearRegression, common
 from module import Module
 
+RANKED_FILENAME =       'refactor.out.rankedlist.txt'
+COMPONENTS_FILENAME =   'refactor.out.components.txt'
 #NOTE remember to copy the matrix before making changes!!!!
 
 class Refactor( Module ):
     VERSION = 1.0 #TODO move to config file
-    RANKED_FILENAME =       'refactor.out.rankedlist.txt'
-    COMPONENTS_FILENAME =   'refactor.out.components.txt'
 
 
     # all feature selection options. Note: if you add more options you need to write a handler (function that is named by the FEATURE_FUNC_NAME_FORMAT) for each option and 
