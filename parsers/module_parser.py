@@ -1,6 +1,21 @@
 import logging
 from utils import common
 
+"""
+HOW TO write a new parser:
+1. create new class that inherits from ModuleParser
+2. in the __init__ function define all the arguments of this mudole, note that:
+    a. you first should declare on new argument group (or groups) (with add_argument_group). you can see the name you give when using --help
+    b. declare all arguments. associate them with the group 
+    c. You can declare required arguments ONLY if you associated the arguments with a uniqe group for this mudole (otherwise glint will require them any time and not only when module is selected)
+    d. arguments must begin with "--" (and not "-")
+    e. you can define dependencies list for each argument with the flag 'dependencies' (e.g dependencies = ["--pheno"]).
+      This will validate that if the user choose this argument, he must also choose the arguments in the dependencies list (e.g '--pheno')
+3. if you need to validate condition on your argument before passing them to the real module to handle them - do that on validate_args
+4. override function 'run', call and run your module there
+
+TODO - move this to instructions file
+"""
 
 def contains_arg(args, arg):
     """
