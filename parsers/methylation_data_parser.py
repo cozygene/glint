@@ -51,7 +51,7 @@ class MethylationDataParser(ModuleParser):
         # data = genfromtxt(args.datafile, dtype = str , delimiter=';', usemask = 'True', missing_values = 'NA', filling_values = "???")
 
         if data.ndim != dim:
-            common.terminate("The file '%s' is not a %sd vector" % (fileobj.name, dim))
+            common.terminate("ERROR: The file '%s' is not a %sd vector" % (fileobj.name, dim))
 
         return data
 
@@ -74,7 +74,7 @@ class MethylationDataParser(ModuleParser):
 
     def _validate_methylation_value(self, num):
         if not (num <= 1 and num >=0):
-            common.terminate("minmean/maxmean must be a standard methylation value (float number between 0 and 1)")
+            common.terminate("ERROR: minmean/maxmean must be a standard methylation value (float number between 0 and 1)")
 
     def _validate_min_and_max_mean_values(self, min_value, max_value):
         """
@@ -83,7 +83,7 @@ class MethylationDataParser(ModuleParser):
         """
         if min_value is not None and max_value is not None:
             if max_value <= min_value:
-                common.terminate("min value %s is greater than max value %s" % (min_value, max_value))
+                common.terminate("ERROR: min value %s is greater than max value %s" % (min_value, max_value))
                 
     def init_data(self, args):
         try:

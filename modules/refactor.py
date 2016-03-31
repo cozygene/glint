@@ -104,11 +104,11 @@ class Refactor( Module ):
     """
     def _validate_fs(self, feature_selection):
         if feature_selection not in self.FEATURE_SELECTION:
-            common.terminate("choose fs from feature_selection options: %s (selected fs: %s)" % ( self.FEATURE_SELECTION, feature_selection ))
+            common.terminate("ERROR: choose fs from feature_selection options: %s (selected fs: %s)" % ( self.FEATURE_SELECTION, feature_selection ))
         elif feature_selection == 'phenotype' and self.phenotype is None:
-            common.terminate("must provide a phenotype file when selected feature 'phenotype'")
+            common.terminate("ERROR: must provide a phenotype file when selected feature 'phenotype'")
         elif feature_selection == 'controls' and (self.phenotype is None or not self._is_binary_vector(self.phenotype)):
-            common.terminate("must provide a phenotype file in a binary format when selected feature 'controls'")
+            common.terminate("ERROR: must provide a phenotype file in a binary format when selected feature 'controls'")
 
         return getattr(self, self.FEATURE_FUNC_NAME_FORMAT.format(feature_option_name=feature_selection))
 
@@ -117,7 +117,7 @@ class Refactor( Module ):
     """
     def _validate_k(self,k):
         if not (k >= 2 and k <= self.meth_data.samples_size):
-            common.terminate("k must be at least 2 and smaller than the number of samples size. k = %s, samples = %s" % (k, self.meth_data.samples_size))
+            common.terminate("ERROR: k must be at least 2 and smaller than the number of samples size. k = %s, samples = %s" % (k, self.meth_data.samples_size))
 
         return k
 
@@ -127,7 +127,7 @@ class Refactor( Module ):
     """
     def _validate_t(self,t):
         if t > self.meth_data.sites_size or t < self.k : 
-            common.terminate("t cannot be greater than the number of sites or smaller than k . t = %s, sites = %s, k = %s" % (t, self.meth_data.sites_size, self.k))
+            common.terminate("ERROR: t cannot be greater than the number of sites or smaller than k . t = %s, sites = %s, k = %s" % (t, self.meth_data.sites_size, self.k))
 
         return t
 
@@ -136,7 +136,7 @@ class Refactor( Module ):
     """
     def _validate_stdth(self, stdth):
         if stdth > 1 or stdth < 0:
-            common.terminate("stdth cannot be greater than 1 and smaller than 0. stdth = %s" % stdth)
+            common.terminate("ERROR: minstd cannot be greater than 1 and smaller than 0. stdth = %s" % stdth)
         return stdth
 
     """
@@ -145,7 +145,7 @@ class Refactor( Module ):
     """
     def _validate_num_comp(self,num_comp):
         if num_comp and not (num_comp >= self.k and num_comp <= self.meth_data.samples_size):
-            common.terminate("number of components must be at least k and smaller than the number of samples size. num_comp = %s, samples = %s, k = %s" % (num_comp, self.meth_data.samples_size, self.k))
+            common.terminate("ERROR: number of components must be at least k and smaller than the number of samples size. num_comp = %s, samples = %s, k = %s" % (num_comp, self.meth_data.samples_size, self.k))
 
         return num_comp if num_comp else self.k
 
@@ -253,7 +253,7 @@ class Refactor( Module ):
         logging.info("Running controls feature selection...")
         controls_samples_indices = [i for i, control in enumerate(self.phenotype) if control == 0]
         if (self.k > controls_samples_indices):
-            common.terminate("k cannot be greater than controls sample")
+            common.terminate("ERROR: k cannot be greater than controls sample")
 
         self.meth_data.data = self.meth_data.data[:, controls_samples_indices]
         return self.meth_data.data

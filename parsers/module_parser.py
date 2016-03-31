@@ -43,7 +43,7 @@ class ModuleParser(object):
         """
         for arg in group.get_required_args():
             if not contains_arg(args, arg):
-                common.terminate("argument --%s is required" % arg)
+                common.terminate("ERROR: argument --%s is required" % arg)
 
     def validate_args_dependencies(self, args):
         for group in self.groups:
@@ -58,7 +58,7 @@ class ModuleParser(object):
             if contains_arg(args, arg):
                 for dependency in dependencies:
                     if not contains_arg(args, dependency):
-                        common.terminate("argument --%s requires argument --%s" % (arg, dependency))
+                        common.terminate("ERROR: argument --%s requires argument --%s" % (arg, dependency))
 
 
     def validate_args(self, args):
