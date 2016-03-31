@@ -22,8 +22,8 @@ class MethylationDataParser(ModuleParser):
         group2.add_argument('--keep',   type = argparse.FileType('r'), help = "A list of samples to include in the data; removes the rest of the samples")
         group2.add_argument('--remove', type = argparse.FileType('r'), help = "A list of samples to exclude in the data; includes the rest of the samples")
 
-        optional.add_argument('--excludemin', type = float, help = "A threshold for the minimal mean methylation level to consider")
-        optional.add_argument('--excludemax', type = float, help = "A threshold for the maximal mean methylation level to consider")
+        optional.add_argument('--minmean', type = float, help = "A threshold for the minimal mean methylation level to consider")
+        optional.add_argument('--maxmean', type = float, help = "A threshold for the maximal mean methylation level to consider")
 
         optional.add_argument('--gsave', action='store_true', help = "Save the data in a glint format; makes following executions faster")
 
@@ -33,11 +33,11 @@ class MethylationDataParser(ModuleParser):
         super(MethylationDataParser, self).validate_args(args)
 
         # validate arguments
-        if args.excludemin is not None:
-            self._validate_methylation_value(args.excludemin)
-        if args.excludemax is not None:
-            self._validate_methylation_value(args.excludemax) 
-        self._validate_min_and_max_mean_values(args.excludemin, args.excludemax)
+        if args.minmean is not None:
+            self._validate_methylation_value(args.minmean)
+        if args.maxmean is not None:
+            self._validate_methylation_value(args.maxmean) 
+        self._validate_min_and_max_mean_values(args.minmean, args.maxmean)
 
 
     def _load_and_validate_file_of_dimentions(self, fileobj, dim):
@@ -74,7 +74,7 @@ class MethylationDataParser(ModuleParser):
 
     def _validate_methylation_value(self, num):
         if not (num <= 1 and num >=0):
-            common.terminate("excludemin/excludemax must be a standard methylation value (float number between 0 and 1)")
+            common.terminate("minmean/maxmean must be a standard methylation value (float number between 0 and 1)")
 
     def _validate_min_and_max_mean_values(self, min_value, max_value):
         """
@@ -111,10 +111,10 @@ class MethylationDataParser(ModuleParser):
                 meth_data.remove(remove_list)
 
             # exclude min/max values
-            if args.excludemin is not None:
-                meth_data.exclude_sites_with_low_mean(args.excludemin)
-            if args.excludemax is not None:
-                meth_data.exclude_sites_with_high_mean(args.excludemax)
+            if args.minmean is not None:
+                meth_data.exclude_sites_with_low_mean(args.minmean)
+            if args.maxmean is not None:
+                meth_data.exclude_sites_with_high_mean(args.maxmean)
             
             # save methylation data in Glint format
             if args.gsave:

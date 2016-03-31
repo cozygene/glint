@@ -22,7 +22,7 @@ class Refactor( Module ):
                   methylation_data,
                   k,
                   t = 500,
-                  stdth = 0.02,
+                  minstd = 0.02,
                   num_components = None, 
                   phenofile = None,
                   covar = None,
@@ -41,7 +41,7 @@ class Refactor( Module ):
         self.feature_selection_handler =  self._validate_fs(feature_selection) 
         self.k =                          self._validate_k(k)
         self.t =                          self._validate_t(t)
-        self.stdth =                      self._validate_stdth(stdth)
+        self.minstd =                      self._validate_stdth(minstd)
         self.num_components =             self._validate_num_comp(num_components)
         self.bad_probes =                 bad_probes_list
         self.ranked_output_filename =     ranked_output_filename
@@ -189,7 +189,7 @@ class Refactor( Module ):
     def _refactor( self ):
         self._exclude_bad_probes()
         # self.meth_data.remove_missing_values_sites() # nan are not supported TODO uncomment when supported
-        self.meth_data.remove_lowest_std_sites(self.stdth)
+        self.meth_data.remove_lowest_std_sites(self.minstd)
         # self.meth_data.replace_missing_values_by_mean() # nan are not supported TODO uncomment when supported
         self._remove_covariates()
 

@@ -192,7 +192,7 @@ class RefactorTester():
         module  = refactor.Refactor(methylation_data = senario_meth_data, 
                                       k = 5, 
                                       t = 400,
-                                      stdth = 0.1,
+                                      minstd = 0.1,
                                       num_components = 7)
         module.run()
         comp = loadtxt(self.COMP_K5_T400_stdth01numcomp7)
@@ -209,7 +209,7 @@ class RefactorTester():
         module  = refactor.Refactor(methylation_data = senario_meth_data, 
                                       k = 5, 
                                       t = 400,
-                                      stdth = 0.13)
+                                      minstd = 0.13)
         module.run()
         comp = loadtxt(self.COMP_K5_T400_stdth013)
         assert module.components.shape == comp.shape
@@ -244,7 +244,7 @@ class RefactorTester():
         module  = refactor.Refactor(methylation_data = senario_meth_data, 
                                       k = 5, 
                                       t = 400,
-                                      stdth = 0.08,
+                                      minstd = 0.08,
                                       covar = self.DEMO_COVAR)
         module.run()
 
