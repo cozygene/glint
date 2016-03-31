@@ -8,6 +8,12 @@ import logging
 from modules import refactor
 from utils import common
 from module_parser import ModuleParser
+from numpy import loadtxt
+
+BAD_PROBES_FILES = [
+                    "assets/48639-non-specific-probes-Illumina450k.txt",
+                    "assets/artifacts_chen.2013.txt",
+                   ]
 
 class RefactorParser( ModuleParser ):
 
@@ -27,6 +33,9 @@ class RefactorParser( ModuleParser ):
 
     def run(self, args, meth_data, output_perfix = ""):
       try:
+
+        bad_probes_list = set()
+        [bad_probes_list.update(loadtxt(probes_file, dtype=str)) for probes_file in BAD_PROBES_FILES]
         self.module  = refactor.Refactor(methylation_data = meth_data, 
                               k = args.k, 
                               t = args.t, 
@@ -35,6 +44,7 @@ class RefactorParser( ModuleParser ):
                               num_components = args.numcomp, 
                               phenofile = args.pheno,
                               covar = args.covar,
+                              bad_probes_list = bad_probes_list,
                               ranked_output_filename = output_perfix + refactor.RANKED_FILENAME, 
                               components_output_filename  = output_perfix + refactor.COMPONENTS_FILENAME)
         self.module.run()

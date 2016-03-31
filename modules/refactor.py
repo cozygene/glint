@@ -29,7 +29,7 @@ class Refactor( Module ):
                   num_components = None, 
                   phenofile = None,
                   covar = None,
-                  bad_probes_file = None,
+                  bad_probes_list = [],
                   feature_selection = 'normal',
                   ranked_output_filename = RANKED_FILENAME,
                   components_output_filename = COMPONENTS_FILENAME
@@ -46,7 +46,7 @@ class Refactor( Module ):
         self.t =                          self._validate_t(t)
         self.stdth =                      self._validate_stdth(stdth)
         self.num_components =             self._validate_num_comp(num_components)
-        self.bad_probes =                 self._validate_bad_probes(bad_probes_file)
+        self.bad_probes =                 bad_probes_list
         self.ranked_output_filename =     ranked_output_filename
         self.components_output_filename = components_output_filename
 
@@ -142,22 +142,9 @@ class Refactor( Module ):
     """
     def _validate_num_comp(self,num_comp):
         if num_comp and not (num_comp >= self.k and num_comp <= self.meth_data.samples_size):
-            common.terminate("number of components must be at least k and smaller than the number of samples size. num_comp = %s, samples = %s, k = %s" % (t, self.meth_data.samples_size, self.k))
+            common.terminate("number of components must be at least k and smaller than the number of samples size. num_comp = %s, samples = %s, k = %s" % (num_comp, self.meth_data.samples_size, self.k))
 
         return num_comp if num_comp else self.k
-
-
-    def _validate_bad_probes(self, bad_probes_file):
-        if bad_probes_file is None:
-            return []
-
-        bad_sites = loadtxt(bad_probes_file, dtype = str)
-        dim = 1
-
-        if bad_sites.ndim != dim:
-            common.terminate("The file %s is not a %sd vector" % (bad_probes_file, dim))
-
-        return bad_sites
 
 
     """
