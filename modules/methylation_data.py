@@ -21,7 +21,7 @@ class MethylationData( Module ):
         self.cpgnames = data[:,0][1:]                    # extract methylation sites names
 
         # remove sample ID and sites names from matrix
-        # that kind of assignment will create a copy of O[1:,1:], TODO: do we need a new copy here? i don't think so
+        # that kind of assignment will create a copy of O[1:,1:]
         # Note that assignment like self.O = O will not create a copy
         self.data = data[1:,1:].astype(float) 
         self.sites_size, self.samples_size = self.data.shape
@@ -33,7 +33,7 @@ class MethylationData( Module ):
         nan are not supported for version 1.0
         """
         if  isnan(self.data).sum() > 0:
-            common.terminate("missing values are not supported at this version")
+            common.terminate("missing values in datafile are not supported at this version")
 
     def _load_and_validate_file_of_dimentions(self, datafile, dim):
         """

@@ -2,14 +2,11 @@ import os
 import sys
 import logging
 from sklearn import preprocessing
-from numpy import dot, linalg, sqrt, hstack, loadtxt, empty_like
+from numpy import dot, linalg, sqrt, hstack, loadtxt, empty_like, isnan
 from utils import tools, pca, LinearRegression, common
 from module import Module
 
-#TODO NOTE remember to copy the matrix before making changes!!!!
-
-RANKED_FILENAME =       'refactor.out.rankedlist.txt'
-COMPONENTS_FILENAME =   'refactor.out.components.txt'
+#NOTE remember to copy the matrix before making changes!!!!
 
 class Refactor( Module ):
     VERSION = 1.0 #TODO move to config file
@@ -59,6 +56,9 @@ class Refactor( Module ):
 
             pheno = pheno[:,1].astype(float) # use only the first phenotype # TODO should check if can convert  to float
 
+            if isnan(pheno).sum() > 0:
+                common.terminate("missing values in phenotype file are not supported at this version (file: %s)" % phenofile)
+
         return pheno
 
     def _validate_covar(self, covariates):
@@ -71,6 +71,9 @@ class Refactor( Module ):
                 common.terminate("the covariates file provided is not in the right format. should be at least 2 columns") #TODO is this right?
 
             covar = covar[:,1:].astype(float)
+
+            if isnan(covar).sum() > 0:
+                common.terminate("missing values on covariates file are not supported at this version (file: %s)" % covariates)
 
         return covar
 
