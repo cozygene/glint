@@ -135,6 +135,22 @@ class MethylationData( Module ):
         if (self.data.shape[0] != self.sites_size): # TODO remove this after tests
             common.terminate("After excluding sites, methylation data sites size is %s but we got %s" % (self.data.shape[0], self.sites_size))
 
+    def _exclude_samples_from_data(self, indices_list):
+        """
+        removes from the data the samples which indices found in indices_list
+        it updates the samples_size, the sample_ids lists
+        it also remove the sample from phenotype and covariates file if provided
+        """
+        self.data = delete(self.data, indices_list, axis = 1)
+        if self.phenotype is not None:
+            self.phenotype = delete(self.phenotype, indices_list, axis = 0)
+        if self.covar is not None:
+            self.covar = delete(self.covar, indices_list, axis = 0)
+        self.samples_ids = delete(self.samples_ids, indices_list)
+        self.samples_size = len(self.samples_ids)
+        if (self.data.shape[1] != self.samples_size): # TODO remove this after tests
+            common.terminate("After removing samples, methylation data samples size is %s but we got %s" % (self.data.shape[1], self.samples_size))
+    
     def get_mean_per_site(self):
         """
         returns array that contains the mean value (average) for each methylation site
@@ -176,16 +192,9 @@ class MethylationData( Module ):
         it updates the samples_size and the samples_ids list 
         """
         logging.info("keeping samples...")
-        indices_list = [i for i, site in enumerate(self.samples_ids) if site in keep_list]
-        # TODO remove this test if it didnt fail
-        if sorted(indices_list) != indices_list:
-            common.terminate("indices_list must be sorted in order to do self.cpgnames[indices_list]")
-        self.data =  self.data[:, indices_list] 
-        self.samples_ids = self.samples_ids[indices_list]
-        self.samples_size = len(self.samples_ids)
-        if (self.data.shape[1] != self.samples_size):
-            common.terminate("After kepping samples, methylation data samples size is %s but we got %s" % (self.data.shape[1], self.samples_size))
-        logging.debug("kept %s samples. data size is now %s" % (len(indices_list), self.samples_size))
+        remove_indices_list = [i for i, site in enumerate(self.samples_ids) if site not in keep_list]
+        self._exclude_samples_from_data(remove_indices_list)
+        logging.debug("%s samples were removed" % len(remove_indices_list))
 
     def remove(self, remove_list):
         """
@@ -194,11 +203,7 @@ class MethylationData( Module ):
         """
         logging.info("removing samples...")
         indices_list = [i for i, site in enumerate(self.samples_ids) if site in remove_list]
-        self.data = delete(self.data, indices_list, axis = 1)
-        self.samples_ids = delete(self.samples_ids, indices_list)
-        self.samples_size = len(self.samples_ids)
-        if (self.data.shape[1] != self.samples_size):
-            common.terminate("After removing samples, methylation data samples size is %s but we got %s" % (self.data.shape[1], self.samples_size))
+        self._exclude_samples_from_data(indices_list)
         logging.debug("%s samples were removed" % len(remove_list))
 
     def exclude_sites_with_low_mean(self, min_value):
