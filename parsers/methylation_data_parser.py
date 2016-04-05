@@ -12,8 +12,11 @@ class MethylationDataParser(ModuleParser):
     def __init__(self, parser):
         required = parser.add_argument_group('1.Required arguments') # numbering in the group name because help print it by abc order
         required.add_argument('--datafile', type = argparse.FileType('r'), required=True,  help = "A data matrix file of beta-normalized methylation levels or a .glint file")
-
+        
         optional = parser.add_argument_group('2.Data management options ')
+        optional.add_argument('--covar',   type = argparse.FileType('r'), help = "A covariates file")
+        optional.add_argument('--pheno',   type = argparse.FileType('r'), help = "A phenotype file")
+        
         group1 = optional.add_mutually_exclusive_group(required = False)
         group1.add_argument('--include', type = argparse.FileType('r'), help = "A list of sites to include in the data; removes the rest of the sites")
         group1.add_argument('--exclude', type = argparse.FileType('r'), help = "A list of sites to exclude from the data; includes the rest of the sites")
@@ -38,7 +41,6 @@ class MethylationDataParser(ModuleParser):
         if args.maxmean is not None:
             self._validate_methylation_value(args.maxmean) 
         self._validate_min_and_max_mean_values(args.minmean, args.maxmean)
-
 
     def _load_and_validate_file_of_dimentions(self, fileobj, dim):
         """
@@ -93,8 +95,14 @@ class MethylationDataParser(ModuleParser):
                     logging.info("Loading glint file: %s..." % args.datafile)
                     meth_data = load(f)
                     logging.debug("Got methylation data with %s sites and %s samples id" % (meth_data.sites_size, meth_data.samples_size))
+                # if phenotype or covariates supplied with metylation data, replace meth_data covar and pheno file with new ones
+                if args.pheno is not None:
+                    meth_data.upload_new_phenotype_file(args.pheno)
+                if args.covar is not None:
+                    meth_data.upload_new_covaritates_file(args.covar)
+
             else:
-                meth_data = methylation_data.MethylationData(datafile = args.datafile)
+                meth_data = methylation_data.MethylationData(datafile = args.datafile, covarfile = args.pheno, phenofile = args.covar)
 
             # load remove/keep sites/samples files and remove/keep values
             if args.include is not None:

@@ -297,5 +297,11 @@ class MethylationData( Module ):
         """
         return copy.deepcopy(self)
 
+    def upload_new_covaritates_file(self, covarfile):
+        self.covar = self._load_and_validate_covar(covarfile)
+
+    def upload_new_phenotype_file(self, phenofile):
+        self.phenotype = self._load_and_validate_phenotype(phenofile)
+
     def run():
         pass

@@ -5,11 +5,17 @@ from tests import tools
 
 class DataTester():
     FAKE_DATA  = "tests/methylation_data/files/data.txt"
+    FAKE_PHENO = "tests/methylation_data/files/pheno.txt"
+    FAKE_COVAR = "tests/methylation_data/files/covar.txt"
     FAKE_DATA_STDTH = "tests/methylation_data/files/data_after_std_0.25.txt"
     FAKE_DATA_INC = "tests/methylation_data/files/data_inc_1_2_3.txt"
     FAKE_DATA_EXC = "tests/methylation_data/files/data_ex_1_2_3.txt"
     FAKE_DATA_KEEP = "tests/methylation_data/files/data_keep_1_2_3.txt"
     FAKE_DATA_REMOVE = "tests/methylation_data/files/data_remove_1_2_3.txt"
+    FAKE_PHENO_KEEP = "tests/methylation_data/files/pheno_keep_1_2_3.txt"
+    FAKE_PHENO_REMOVE = "tests/methylation_data/files/pheno_remove_1_2_3.txt"
+    FAKE_COVAR_KEEP = "tests/methylation_data/files/covar_keep_1_2_3.txt"
+    FAKE_COVAR_REMOVE = "tests/methylation_data/files/covar_remove_1_2_3.txt"
     FAKE_DATA_MAX_MEANS = "tests/methylation_data/files/data_excluded_mean_above_0.5.txt"
     FAKE_DATA_MIN_MEANS = "tests/methylation_data/files/data_excluded_mean_below_0.5.txt"
     FAKE_DATA_MEANS= "tests/methylation_data/files/data_means.txt"
@@ -17,10 +23,10 @@ class DataTester():
     MAX_MEAN_TH = 0.5
     STDTH = 0.25
     INC_EXC = ['cg1', 'cg2', 'cg3']
-    KEPP_REM = ['sample1', 'sample2', 'sample3']
+    KEEP_REMOVE_INDICES = ['sample1', 'sample2', 'sample3']
 
     def __init__(self):
-        self.meth_data = methylation_data.MethylationData(datafile = self.FAKE_DATA)
+        self.meth_data = methylation_data.MethylationData(datafile = self.FAKE_DATA, covarfile = self.FAKE_COVAR, phenofile = self.FAKE_PHENO)
         self.test_remove_lowest_std_sites()
         self.test_get_mean_per_site()
         self.test_include()
@@ -58,18 +64,22 @@ class DataTester():
         
     def test_keep(self):
         logging.info("Testing keep...")
-        data_after = methylation_data.MethylationData(datafile = self.FAKE_DATA_KEEP)
+        data_after = methylation_data.MethylationData(datafile = self.FAKE_DATA_KEEP, covarfile = self.FAKE_COVAR_KEEP, phenofile = self.FAKE_PHENO_KEEP)
         data = self.meth_data.copy()
-        data.keep(self.KEPP_REM)
+        data.keep(self.KEEP_REMOVE_INDICES)
         assert array_equal(data_after.data, data.data)
+        assert array_equal(data_after.phenotype, data.phenotype)
+        assert array_equal(data_after.covar, data.covar)
         logging.info("PASS")
 
     def test_remove(self):
         logging.info("Testing remove...")
-        data_after = methylation_data.MethylationData(datafile = self.FAKE_DATA_REMOVE)
+        data_after = methylation_data.MethylationData(datafile = self.FAKE_DATA_REMOVE, covarfile = self.FAKE_COVAR_REMOVE, phenofile = self.FAKE_PHENO_REMOVE)
         data = self.meth_data.copy()
-        data.remove(self.KEPP_REM)
+        data.remove(self.KEEP_REMOVE_INDICES)
         assert array_equal(data_after.data, data.data)
+        assert array_equal(data_after.phenotype, data.phenotype)
+        assert array_equal(data_after.covar, data.covar)
         logging.info("PASS")
 
     def test_get_mean_per_site(self):

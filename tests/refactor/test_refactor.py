@@ -9,7 +9,7 @@ class FeatureSelectionTester():
     FAKE_DATA  = "tests/refactor/files/feature_selection/data"
     FAKE_CONTROL = "tests/refactor/files/feature_selection/control"
     def __init__(self):
-        self.fs_meth_data = methylation_data.MethylationData(datafile = self.FAKE_DATA)
+        self.fs_meth_data = methylation_data.MethylationData(datafile = self.FAKE_DATA, phenofile = self.FAKE_CONTROL)
         self.test_controls_fs()
         self.test_phenotype_fs()
 
@@ -26,7 +26,6 @@ class FeatureSelectionTester():
         module  = refactor.Refactor(methylation_data = refactor_meth_data, 
                       k = 2, 
                       feature_selection = "controls",
-                      phenofile = self.FAKE_CONTROL,
                       t=5)
         index =0
         res = module.feature_selection_handler()
@@ -53,10 +52,9 @@ class FeatureSelectionTester():
         module  = refactor.Refactor(methylation_data = refactor_meth_data, 
                       k = 2, 
                       feature_selection = "phenotype",
-                      phenofile = self.FAKE_CONTROL,
                       t=5)
 
-        phenotype = module._validate_phenotype(self.FAKE_CONTROL, "phenotype")
+        phenotype = refactor_meth_data._load_and_validate_phenotype(self.FAKE_CONTROL)
         # validate phenotype feature selection output (res_data) is correlated to our linear regression for (site, phenotype)
         res_data = module.feature_selection_handler()
         for i,site in enumerate(self.fs_meth_data.data):
@@ -92,7 +90,7 @@ class RefactorTester():
     RANK_K5_T400_stdth008covar = "tests/refactor/files/senarios_out/k5t400stdth0.08covar.out.rankedlist.txt"
 
     def __init__(self):
-        self.meth_data = methylation_data.MethylationData(datafile = self.DEMO_SMALL_DATA)
+        self.meth_data = methylation_data.MethylationData(datafile = self.DEMO_SMALL_DATA, covarfile = self.DEMO_COVAR, phenofile = self.DEMO_PHENO)
         self.test_remove_covariates()
         self.test_low_rank_approx_distances()
         self.test_exclude_bad_probes()
@@ -103,11 +101,10 @@ class RefactorTester():
         covar_meth_data = self.meth_data.copy()
 
         module  = refactor.Refactor(methylation_data = covar_meth_data, 
-                      k = 2, 
-                      covar = self.DEMO_COVAR,
-                      t=500)
+                                    k = 2, 
+                                    t = 500)
 
-        coavr = module._validate_covar(self.DEMO_COVAR,)
+        coavr = covar_meth_data._load_and_validate_covar(self.DEMO_COVAR)
         # remove from refactor_meth_data
         module._remove_covariates()
 
@@ -176,7 +173,8 @@ class RefactorTester():
         senario_meth_data = self.meth_data.copy()
         module  = refactor.Refactor(methylation_data = senario_meth_data, 
                                     k = 5, 
-                                    t = 400)
+                                    t = 400,
+                                    suppress_covars = True)
         module.run()
         comp = loadtxt(self.COMP_K5_T400)
         assert module.components.shape == comp.shape
@@ -190,10 +188,11 @@ class RefactorTester():
         logging.info("Testing senario no.2...")
         senario_meth_data = self.meth_data.copy()
         module  = refactor.Refactor(methylation_data = senario_meth_data, 
-                                      k = 5, 
-                                      t = 400,
-                                      minstd = 0.1,
-                                      num_components = 7)
+                                    k = 5, 
+                                    t = 400,
+                                    minstd = 0.1,
+                                    num_components = 7,
+                                    suppress_covars = True)
         module.run()
         comp = loadtxt(self.COMP_K5_T400_stdth01numcomp7)
         assert module.components.shape == comp.shape
@@ -207,9 +206,10 @@ class RefactorTester():
         logging.info("Testing senario no.3...")
         senario_meth_data = self.meth_data.copy()
         module  = refactor.Refactor(methylation_data = senario_meth_data, 
-                                      k = 5, 
-                                      t = 400,
-                                      minstd = 0.13)
+                                    k = 5, 
+                                    t = 400,
+                                    minstd = 0.13,
+                                    suppress_covars = True)
         module.run()
         comp = loadtxt(self.COMP_K5_T400_stdth013)
         assert module.components.shape == comp.shape
@@ -225,9 +225,8 @@ class RefactorTester():
         logging.info("Testing senario no.4...")
         senario_meth_data = self.meth_data.copy()
         module  = refactor.Refactor(methylation_data = senario_meth_data, 
-                                      k = 5, 
-                                      t = 400,
-                                      covar = self.DEMO_COVAR)
+                                    k = 5, 
+                                    t = 400)
         module.run()
         comp = loadtxt(self.COMP_K5_T400_covar)
         assert module.components.shape == comp.shape
@@ -242,10 +241,9 @@ class RefactorTester():
         logging.info("Testing senario no.5...")
         senario_meth_data = self.meth_data.copy()
         module  = refactor.Refactor(methylation_data = senario_meth_data, 
-                                      k = 5, 
-                                      t = 400,
-                                      minstd = 0.08,
-                                      covar = self.DEMO_COVAR)
+                                    k = 5, 
+                                    t = 400,
+                                    minstd = 0.08)
         module.run()
 
         comp = loadtxt(self.COMP_K5_T400_stdth008covar)

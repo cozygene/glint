@@ -24,9 +24,8 @@ class RefactorParser( ModuleParser ):
       refactor.add_argument('--t',       type = int, default = 500, help = "The number of sites to use for computing the ReFACtor components (DEFAULT=500)")
       refactor.add_argument('--numcomp', type = int, help = "The number of ReFACTor components to output (DEFAULT=K)")
       refactor.add_argument('--fs',      type = str, default = 'normal', help = "feature selection mode; options: normal, controls, phenotype (DEFAULT=normal)")
-      refactor.add_argument('--covar',   type = argparse.FileType('r'), help = "A covariates file")
-      refactor.add_argument('--pheno',   type = argparse.FileType('r'), help = "A phenotype file")
       refactor.add_argument('--minstd',   type = float, default = 0.02, help = "threshold for excluding low variance sites")
+      refactor.add_argument('--suppress_covars', type = bool, default = False, help = "set to True if you don't need to remove covariates ")
 
       super(RefactorParser, self).__init__(refactor)
 
@@ -41,9 +40,8 @@ class RefactorParser( ModuleParser ):
                               t = args.t, 
                               minstd = args.minstd,
                               feature_selection = args.fs.lower().strip(), 
-                              num_components = args.numcomp, 
-                              phenofile = args.pheno,
-                              covar = args.covar,
+                              num_components = args.numcomp,
+                              suppress_covars = args.suppress_covars,
                               bad_probes_list = bad_probes_list,
                               ranked_output_filename = output_perfix + refactor.RANKED_FILENAME, 
                               components_output_filename  = output_perfix + refactor.COMPONENTS_FILENAME)

@@ -35,8 +35,6 @@ class Refactor( Module ):
         feature_selection = feature_selection.lower().strip()
         
         # validate and process all variables
-        self.phenotype =                  self._validate_phenotype(phenofile, feature_selection)
-        self.covar =                      self._validate_covar(covar)
         self.feature_selection_handler =  self._validate_fs(feature_selection) 
         self.k =                          self._validate_k(k)
         self.t =                          self._validate_t(t)
@@ -45,17 +43,15 @@ class Refactor( Module ):
         self.bad_probes =                 bad_probes_list
         self.ranked_output_filename =     ranked_output_filename
         self.components_output_filename = components_output_filename
+        self.remove_covariates =          not suppress_covars
 
 
-    """
-    must be called after _validate_phenotype
-    """
     def _validate_fs(self, feature_selection):
         if feature_selection not in self.FEATURE_SELECTION:
             common.terminate("choose fs from feature_selection options: %s (selected fs: %s)" % ( self.FEATURE_SELECTION, feature_selection ))
-        elif feature_selection == 'phenotype' and self.phenotype is None:
+        elif feature_selection == 'phenotype' and self.meth_data.phenotype is None:
             common.terminate("must provide a phenotype file when selected feature 'phenotype'")
-        elif feature_selection == 'controls' and (self.phenotype is None or not self._is_binary_vector(self.phenotype)):
+        elif feature_selection == 'controls' and (self.meth_data.phenotype is None or not self._is_binary_vector(self.meth_data.phenotype)):
             common.terminate("must provide a phenotype file in a binary format when selected feature 'controls'")
 
         return getattr(self, self.FEATURE_FUNC_NAME_FORMAT.format(feature_option_name=feature_selection))
@@ -104,7 +100,7 @@ class Refactor( Module ):
         if all it's values are 0 or 1
     """
     def _is_binary_vector(self, vector):
-        values = self.phenotype.squeeze()
+        values = self.meth_data.phenotype.squeeze()
         if values.ndim != 1: # two dimentions is not a vector
             return False
 
@@ -169,10 +165,10 @@ class Refactor( Module ):
         self.meth_data.exclude(self.bad_probes)
 
     def _remove_covariates(self):
-        if self.covar is not None:
+        if self.remove_covariates and self.meth_data.covar is not None:
             logging.info("Removing covariates...")
 
-            lin_reg = LinearRegression(self.meth_data.data, self.covar)
+            lin_reg = LinearRegression(self.meth_data.data, self.meth_data.covar)
             self.meth_data.data = lin_reg.residuals
 
     """
@@ -189,7 +185,7 @@ class Refactor( Module ):
     def _phenotype_feature_handler( self ):
         logging.info("Running phenotype feature selection...")
         
-        lin_reg = LinearRegression(self.meth_data.data, self.phenotype)
+        lin_reg = LinearRegression(self.meth_data.data, self.meth_data.phenotype)
         return lin_reg.residuals
 
     
@@ -199,7 +195,7 @@ class Refactor( Module ):
     """
     def _controls_feature_handler( self ):  
         logging.info("Running controls feature selection...")
-        controls_samples_indices = [i for i, control in enumerate(self.phenotype) if control == 0]
+        controls_samples_indices = [i for i, control in enumerate(self.meth_data.phenotype) if control == 0]
         if (self.k > controls_samples_indices):
             common.terminate("k cannot be greater than controls sample")
 
