@@ -59,9 +59,8 @@ def configureLogging(namespace, syslog_host='localhost'):
     logger.addHandler(streamHandler)
 
 
-    fileHandler = handlers.RotatingFileHandler(LOG_FILE_PATH,
-                                      maxBytes=LOG_FILE_MAX_BYTES,
-                                      backupCount=LOG_FILE_BACKUP_COUNT)
+    fileHandler = logging.FileHandler(LOG_FILE_PATH,
+                                      mode='w')
     fileHandler.setLevel(LOGGING_LEVEL)
     fileHandler.setFormatter(_FileFormatter(namespace))
     logger.addHandler(fileHandler)

@@ -6,7 +6,7 @@ from pickle import dump
 from numpy import loadtxt, delete, isnan, nanstd, where
 from numpy.ma import average, masked_array
 from module import Module
-from utils import common, search
+from utils import common
 from bisect import bisect_right
 
 COMPRESSED_FILENAME = "methylation_data"
