@@ -46,7 +46,7 @@ class _ConsoleFormatter(_Formatter):
 
 
 
-def configureLogging(namespace, syslog_host='localhost'):
+def configureLogging(namespace, prefix = '', syslog_host='localhost'):
     logging.raiseExceptions = 0
     logging.captureWarnings(True)
 
@@ -59,7 +59,7 @@ def configureLogging(namespace, syslog_host='localhost'):
     logger.addHandler(streamHandler)
 
 
-    fileHandler = logging.FileHandler(LOG_FILE_PATH,
+    fileHandler = logging.FileHandler(os.path.join(os.path.dirname(LOG_FILE_PATH), prefix + os.path.basename(LOG_FILE_PATH)),
                                       mode='w')
     fileHandler.setLevel(LOGGING_LEVEL)
     fileHandler.setFormatter(_FileFormatter(namespace))
