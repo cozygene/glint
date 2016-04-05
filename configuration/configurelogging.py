@@ -6,7 +6,7 @@ import time
 import traceback
 
 LOGGING_LEVEL = logging.DEBUG
-LOG_FILE_PATH = 'example.log'
+LOG_FILE_PATH = 'glint.log' # TODO move to a configuration file
 LOG_FILE_MAX_BYTES = 10 * 1024
 LOG_FILE_BACKUP_COUNT = 5
 
@@ -33,7 +33,7 @@ class _FileFormatter(_Formatter):
         message = record.getMessage()
         exception = self.formatException(record)
         
-        return '{} glint {:<10} {:<10} {:<21} {}{}'.format(timestamp, self._namespace, record.levelname, source, message, exception)
+        return '{} glint {:<10} {:<10} {:<32} {}{}'.format(timestamp, self._namespace, record.levelname, source, message, exception)
 
 
 class _ConsoleFormatter(_Formatter):
