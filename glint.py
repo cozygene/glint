@@ -3,6 +3,7 @@ import argparse
 import os
 import sys
 from configuration import configurelogging
+configurelogging.configureLogging('') #todo should seperate each module to a different folder to have different "namespaces"?
 import logging
 from utils import common
 from numpy import loadtxt
@@ -111,7 +112,6 @@ if __name__ == '__main__':
     parser.add_arguments()
     args = parser.parse_args()
 
-    configurelogging.configureLogging('', prefix = args.out) #todo should seperate each module to a different folder to have different "namespaces"?
     logging.info("Starting glint...")
     parser.run()
 
