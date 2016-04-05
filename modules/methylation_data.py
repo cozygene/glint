@@ -67,7 +67,7 @@ class MethylationData( Module ):
         logging.info("checking for missing values in datafile file...")
         validate_no_missing_values(data) #TODO remove when missing values are supported
 
-        return data, sample_ids, cpgnames
+        return data, samples_ids, cpgnames
 
     """
     reads matrix from matrix_file_path
@@ -77,7 +77,7 @@ class MethylationData( Module ):
     """
     def _validate_samples_ids(self, data):
         if len(data) != len(self.samples_ids):
-            common.terminate("the file provided %s doesn't include all sample ids" % matrix_file_path)
+            common.terminate("the file doesn't include all sample ids")
 
         matrix_sample_ids = data[:,0]
 
@@ -105,13 +105,13 @@ class MethylationData( Module ):
         """
         returns phenotype data (type=float) without samples ids
         """
-        if not phenotype:
-            return Nnoe
+        if not phenofile:
+            return None
         logging.info("validating phenotype file...")
         pheno = self._load_and_validate_samples_info(phenofile)
         if len(pheno[0]) != 1:
-            logging.warning("more than one phenotype is not supported. will use only the first phenotype (first column)")
-            pheno = pheno[:,1]
+            logging.warning("more than one phenotype is not supported. will use only the first phenotype (first column)") # TODO remove when supported
+            pheno = pheno[:,1] 
         return pheno
 
     def _load_and_validate_covar(self, covariates):
@@ -127,12 +127,12 @@ class MethylationData( Module ):
     def _exclude_sites_from_data(self, sites_indicies_list):
         """
         this function removes from the data the cpg sites which indices found in sites_indicies_list
-        it updates the sites_size, the cpgnames list and the list holds the average value per site
+        it updates the sites_size, the cpgnames list
         """
         self.data = delete(self.data, sites_indicies_list, axis = 0)
         self.cpgnames = delete(self.cpgnames, sites_indicies_list)
         self.sites_size = len(self.cpgnames)
-        if (self.data.shape[0] != self.sites_size):
+        if (self.data.shape[0] != self.sites_size): # TODO remove this after tests
             common.terminate("After excluding sites, methylation data sites size is %s but we got %s" % (self.data.shape[0], self.sites_size))
 
     def get_mean_per_site(self):
