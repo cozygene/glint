@@ -92,15 +92,14 @@ class ModulesArgumentParsers(object):
 
 
     def run(self):
-        meth_data = self.methylation.init_data(self.args)
-        output_file_prefix = self.args.out
+        meth_data = self.methylation.init_data(self.args, output_perfix = self.args.out)
 
         if self.args.refactor:
             refactor_meth_data = meth_data.copy()
 
             estimates = self.refactor.run(args = self.args,
                                           meth_data = refactor_meth_data,
-                                          output_perfix = output_file_prefix)
+                                          output_perfix = self.args.out)
 
         if self.args.ewas:
             self.ewas.run(estimates)

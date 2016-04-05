@@ -35,6 +35,7 @@ class DataTester():
         self.test_remove()
         self.test_exclude_sites_with_low_mean()
         self.test_exclude_sites_with_high_mean()
+        self.test_upload_new_files()
 
 
     def test_remove_lowest_std_sites(self):
@@ -105,3 +106,18 @@ class DataTester():
         assert array_equal(res, data.data)
         logging.info("PASS")
 
+    def test_upload_new_files(self):
+        logging.info("Testing upload new covaritates and phenotype files...")
+        data = self.meth_data.copy()
+        data_upload = methylation_data.MethylationData(datafile = self.FAKE_DATA_REMOVE)
+        
+        data.remove(self.KEEP_REMOVE_INDICES)
+
+        data_upload.upload_new_covaritates_file(self.FAKE_COVAR_REMOVE)
+        data_upload.upload_new_phenotype_file(self.FAKE_PHENO_REMOVE)
+
+
+        assert array_equal(data.data, data_upload.data)
+        assert array_equal(data.phenotype, data_upload.phenotype)
+        assert array_equal(data.covar, data_upload.covar)
+        logging.info("PASS")

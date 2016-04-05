@@ -87,20 +87,18 @@ class MethylationDataParser(ModuleParser):
             if max_value <= min_value:
                 common.terminate("min value %s is greater than max value %s" % (min_value, max_value))
                 
-    def init_data(self, args):
+    def init_data(self, args, output_perfix = ''):
         try:
             meth_data = None
             if args.datafile.name.endswith(GLINT_FORMATTED_EXTENSION):
-                with open(args.datafile,'rb') as f:
-                    logging.info("Loading glint file: %s..." % args.datafile)
-                    meth_data = load(f)
-                    logging.debug("Got methylation data with %s sites and %s samples id" % (meth_data.sites_size, meth_data.samples_size))
+                logging.info("Loading glint file: %s..." % args.datafile.name)
+                meth_data = load(args.datafile) # datafile is fileType (status: open for read)
+                logging.debug("Got methylation data with %s sites and %s samples id" % (meth_data.sites_size, meth_data.samples_size))
                 # if phenotype or covariates supplied with metylation data, replace meth_data covar and pheno file with new ones
                 if args.pheno is not None:
                     meth_data.upload_new_phenotype_file(args.pheno)
                 if args.covar is not None:
                     meth_data.upload_new_covaritates_file(args.covar)
-
             else:
                 meth_data = methylation_data.MethylationData(datafile = args.datafile, covarfile = args.pheno, phenofile = args.covar)
 
