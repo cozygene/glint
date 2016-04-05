@@ -24,12 +24,8 @@ class GlintParser(ModuleParser):
     
 
 class ModulesArgumentParsers(object):
-    MODULES_PARSERS = [ 
-                        'MethylationDataParser',
-                        'GlintParser'
-                        'RefactorParser',
-                        'EWASParser'
-                      ]
+    FUNCTIONALITY_ARGS = [ '--gsave', '--refactor', '--ewas'] # TODO find better way to hold arguments that cause some functionality. glint is not supposed to be aware of those args
+
         
     def __init__(self, user_args_selection):
         self.selected_args = user_args_selection
@@ -83,10 +79,14 @@ class ModulesArgumentParsers(object):
         validates that the user selected "action" argument (and didn't supply just a datafile) 
         and that the user didnt select an argument that is not an option for him (argument from a module that wasn't selected)
         """
-        if len(self.selected_args) == 1:
-            common.terminate("Nothing to do with the data, select argument from the options (select --help for help)")
+        selected_args = set(self.selected_args)
+        func_args = set(self.FUNCTIONALITY_ARGS)
+        optional_args = set(optional_args)
 
-        differ = set(self.selected_args).difference(set(optional_args))
+        if len(selected_args.intersection(func_args)) == 0:
+            common.terminate("Nothing to do with the data, select at least one argument from %s" % self.FUNCTIONALITY_ARGS)
+
+        differ = selected_args.difference(optional_args)
         if differ:
             common.terminate("selected redundent argument" + str(differ)) # TODO: tell which module the arguments belong to, to user might forgot to specify --module and that msg can be confusing
 
