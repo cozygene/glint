@@ -4,14 +4,10 @@ import sys
 
 class GlintMutuallyExclusiveGroup(argparse._MutuallyExclusiveGroup):
         def __init__(self, container, required=False):
-            if required:
-                # TODO add support for required mutually exclusive group: only one arg from the group needs to be specified
-                raise Exception("NOT SUPPORTED: required mutually exclusive group")
-
             super(GlintMutuallyExclusiveGroup, self).__init__(container, required)
             self._all_args = set()
+            self._required_arguments = []
             self._arguments_dependencies = {}
-
 
         def add_mutually_exclusive_group(self, **kwargs):
             raise Exception("NOT SUPPORTED: func add_mutually_exclusive_group in GlintMutuallyExclusiveGroup")
@@ -19,10 +15,17 @@ class GlintMutuallyExclusiveGroup(argparse._MutuallyExclusiveGroup):
         def argname(self, arg_str):
             return arg_str.replace('-','')
 
+        def get_required_args(self):
+            return self._required_arguments
+
         # TODO check if duplicate flags are identical
         def add_argument( self,  *args, **kwargs ):
-
             arg = self.argname(args[0])
+
+            if 'required' in kwargs:
+                self._required_arguments.append(arg)
+                kwargs['required'] = False
+
             if 'dependencies' in kwargs:
                 self._arguments_dependencies[arg] = [self.argname(dependency) for dependency in kwargs.pop('dependencies')]
 
@@ -85,7 +88,9 @@ class GlintArgumentGroup(argparse._ArgumentGroup):
 
 
         def get_required_args(self):
-            return self._required_arguments
+            required_args = self._required_arguments[:] # copy by value, not by reference
+            [required_args.extend(mutual_group.get_required_args()) for mutual_group in self._glint_mutually_exclusive_groups]
+            return required_args
 
         def get_args_dependencies(self):
             for group in self._glint_mutually_exclusive_groups :
