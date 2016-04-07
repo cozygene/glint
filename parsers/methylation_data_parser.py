@@ -99,8 +99,10 @@ class MethylationDataParser(ModuleParser):
                     meth_data.upload_new_phenotype_file(args.pheno)
                 if args.covar is not None:
                     meth_data.upload_new_covaritates_file(args.covar)
+
+
             else:
-                meth_data = methylation_data.MethylationData(datafile = args.datafile, covarfile = args.pheno, phenofile = args.covar)
+                meth_data = methylation_data.MethylationData(datafile = args.datafile, phenofile = args.pheno, covarfile = args.covar)
 
             # load remove/keep sites/samples files and remove/keep values
             if args.include is not None:
