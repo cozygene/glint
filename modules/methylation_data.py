@@ -124,32 +124,40 @@ class MethylationData( Module ):
         logging.info("validating covariates file...")
         return self._load_and_validate_samples_info(covariates)
 
-    def _exclude_sites_from_data(self, sites_indicies_list):
+    def exclude_sites_indices(self, sites_indicies_list):
         """
+        sites_indicies_list - a list of sites indices to remove from data
         this function removes from the data the cpg sites which indices found in sites_indicies_list
         it updates the sites_size, the cpgnames list
         """
-        self.data = delete(self.data, sites_indicies_list, axis = 0)
-        self.cpgnames = delete(self.cpgnames, sites_indicies_list)
-        self.sites_size = len(self.cpgnames)
-        if (self.data.shape[0] != self.sites_size): # TODO remove this after tests
-            common.terminate("After excluding sites, methylation data sites size is %s but we got %s" % (self.data.shape[0], self.sites_size))
+        if len(sites_indicies_list) == 0:
+            logging.warning("found no sites to remove")
+        else:
+            self.data = delete(self.data, sites_indicies_list, axis = 0)
+            self.cpgnames = delete(self.cpgnames, sites_indicies_list)
+            self.sites_size = len(self.cpgnames)
+            if (self.data.shape[0] != self.sites_size): # TODO remove this after tests
+                common.terminate("After excluding sites, methylation data sites size is %s but we got %s" % (self.data.shape[0], self.sites_size))
 
-    def _exclude_samples_from_data(self, indices_list):
+    def remove_samples_indices(self, indices_list):
         """
+        indices_list - a list of sample indices to remove from data
         removes from the data the samples which indices found in indices_list
         it updates the samples_size, the sample_ids lists
         it also remove the sample from phenotype and covariates file if provided
         """
-        self.data = delete(self.data, indices_list, axis = 1)
-        if self.phenotype is not None:
-            self.phenotype = delete(self.phenotype, indices_list, axis = 0)
-        if self.covar is not None:
-            self.covar = delete(self.covar, indices_list, axis = 0)
-        self.samples_ids = delete(self.samples_ids, indices_list)
-        self.samples_size = len(self.samples_ids)
-        if (self.data.shape[1] != self.samples_size): # TODO remove this after tests
-            common.terminate("After removing samples, methylation data samples size is %s but we got %s" % (self.data.shape[1], self.samples_size))
+        if len(indices_list) == 0:
+            logging.warning("found no samples to remove")
+        else:
+            self.data = delete(self.data, indices_list, axis = 1)
+            if self.phenotype is not None:
+                self.phenotype = delete(self.phenotype, indices_list, axis = 0)
+            if self.covar is not None:
+                self.covar = delete(self.covar, indices_list, axis = 0)
+            self.samples_ids = delete(self.samples_ids, indices_list)
+            self.samples_size = len(self.samples_ids)
+            if (self.data.shape[1] != self.samples_size): # TODO remove this after tests
+                common.terminate("After removing samples, methylation data samples size is %s but we got %s" % (self.data.shape[1], self.samples_size))
     
     def get_mean_per_site(self):
         """
