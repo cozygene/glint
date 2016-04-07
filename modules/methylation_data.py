@@ -160,6 +160,7 @@ class MethylationData( Module ):
 
     def include(self, include_list):
         """
+        include_list - a list with sites name to keep in data (remove all other sites)
         this function removes the cpg sites not found in include_list list from the data
         it updates the sites_size, the cpgnames list and the list holds the average value per site
         """
@@ -178,33 +179,35 @@ class MethylationData( Module ):
 
     def exclude(self, exclude_list):
         """
+        exclude_list - a list with sites name to remove from data
         this function removes the cpg sites found in self.exclude list from the data
         it updates the sites_size, the cpgnames list and the list holds the average value per site
         """
         logging.info("excluding sites...")
         indices_list = [i for i, site in enumerate(self.cpgnames) if site in exclude_list]
-        self._exclude_sites_from_data(indices_list)
+        self.exclude_sites_indices(indices_list)
         logging.debug("%s sites were excluded" % len(indices_list))
 
     def keep(self, keep_list):
         """
+        keep_list- a list of samples ids to keep in data (remove all other sample ids)
         this function removes the samples ids not found in keep_list list from the data
         it updates the samples_size and the samples_ids list 
         """
         logging.info("keeping samples...")
         remove_indices_list = [i for i, site in enumerate(self.samples_ids) if site not in keep_list]
-        self._exclude_samples_from_data(remove_indices_list)
+        self.remove_samples_indices(remove_indices_list)
         logging.debug("%s samples were removed" % len(remove_indices_list))
 
     def remove(self, remove_list):
         """
+        remove_list - a list of samples ids to remove from data
         this function removes the samples ids found in remove_list from the data
         it updates the samples_size and the samples_ids list 
         """
         logging.info("removing samples...")
         indices_list = [i for i, site in enumerate(self.samples_ids) if site in remove_list]
-        self._exclude_samples_from_data(indices_list)
-        logging.debug("%s samples were removed" % len(remove_list))
+        self.remove_samples_indices(indices_list)
 
     def exclude_sites_with_low_mean(self, min_value):
         """
@@ -212,7 +215,7 @@ class MethylationData( Module ):
         """
         logging.info("excluding sites with mean lower than %s..." % min_value)
         min_values_indices = where(self.get_mean_per_site() < min_value)  
-        self._exclude_sites_from_data(min_values_indices)
+        self.exclude_sites_indices(min_values_indices)
         logging.debug("%s sites were excluded" % len(min_values_indices))
 
     def exclude_sites_with_high_mean(self, max_value):
@@ -221,7 +224,7 @@ class MethylationData( Module ):
         """
         logging.info("removing sites with mean greater than %s..." % max_value)
         max_values_indices = where(self.get_mean_per_site() > max_value)
-        self._exclude_sites_from_data(max_values_indices)
+        self.exclude_sites_indices(max_values_indices)
         logging.debug("%s sites were excluded" % len(max_values_indices))
 
     def save(self, methylation_data_filename):
@@ -254,7 +257,7 @@ class MethylationData( Module ):
         exclude_sites_indices = std_sorted_indices[:include_from_index]
 
         # exclude all sites with low std
-        self._exclude_sites_from_data(std_sorted_indices[:include_from_index])
+        self.exclude_sites_indices(std_sorted_indices[:include_from_index])
         logging.debug("%s sites were excluded" % len(std_sorted_indices[:include_from_index]))
 
 
@@ -272,7 +275,7 @@ class MethylationData( Module ):
         # nan_quantity_per_site = isnan(self.data).sum(axis=1) 
         # many_nan_indices = where(nan_quantity_per_site > max_missing_values)
         # logging.debug("Removing %s out of %s sites with more than %s missing values" % (len(many_nan_indices), self.sites_size, max_missing_values))
-        # self._exclude_sites_from_data(many_nan_indices)
+        # self.exclude_sites_indices(many_nan_indices)
         # logging.debug("%s sites were excluded" % len(many_nan_indices)
 
     def replace_missing_values_by_mean(self):
