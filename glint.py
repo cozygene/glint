@@ -98,24 +98,24 @@ class ModulesArgumentParsers(object):
                 logging.warning("selected data management arguments which are not relevant for refactor: %s" % str(not_relevant_atgs))
 
     def run(self):
-        self.meth_parser.run(self.args, output_perfix = self.args.out)
+        self.meth_parser.run(self.args)
         self.meth_parser.preprocess_samples_data() # preprocess samples before refactor and before ewas
 
         if self.args.refactor:
             refactor_meth_data = self.meth_parser.module.copy()
             self.refactor_parser.run(args = self.args,
-                              meth_data = refactor_meth_data,
-                              output_perfix = self.args.out)
+                                    meth_data = refactor_meth_data,
+                                    output_perfix = self.args.out)
             self.meth_parser.module.add_covariates(self.refactor_parser.module.components) # add refactor components as covariate file
 
         self.meth_parser.preprocess_sites_data() #preprocess sites after refactor and before ewas
-        self.meth_parser.gsave() #save after all preprocessing #TODO maybe take gsave out from MethData module
+        self.meth_parser.gsave(output_perfix = self.args.out) #save after all preprocessing #TODO maybe take gsave out from MethData module
 
         if self.args.ewas:
             ewas_meth_data = self.meth_parser.module.copy()
             self.ewas_parser.run(args = self.args,
-                          meth_data = ewas_meth_data,
-                          output_perfix = self.args.out)
+                                 meth_data = ewas_meth_data,
+                                 output_perfix = self.args.out)
 
 if __name__ == '__main__':
     selected_args = [arg for arg in sys.argv if arg.startswith("-")] #TODO startwith "--"? (there are no arguments that starts with -)

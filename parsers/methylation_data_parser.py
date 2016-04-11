@@ -104,11 +104,15 @@ class MethylationDataParser(ModuleParser):
 
     # must be called after all preprocessing (preprocess_samples_data, preprocess_sites_data)
     # save methylation data in Glint format
-    def gsave(self):
+    def gsave(self, output_perfix):
         if self.args.gsave:
-            self.module.save(output_perfix + methylation_data.COMPRESSED_FILENAME + GLINT_FORMATTED_EXTENSION)
+            if output_perfix:
+                output_file_name = output_perfix
+            else:
+                output_file_name = methylation_data.COMPRESSED_FILENAME
+            self.module.save(output_file_name + GLINT_FORMATTED_EXTENSION)
 
-    def run(self, args, output_perfix = ''):
+    def run(self, args):
         try:
             self.args = args
             self.module = None
