@@ -25,22 +25,19 @@ class MethylationDataParser(ModuleParser):
         group2.add_argument('--keep',   type = argparse.FileType('r'), help = "A list of samples to include in the data; removes the rest of the samples")
         group2.add_argument('--remove', type = argparse.FileType('r'), help = "A list of samples to exclude in the data; includes the rest of the samples")
 
-        # TODO add check for the value of minmean, maxmean?
-        optional.add_argument('--minmean', type = float, help = "A threshold for the minimal mean methylation level to consider")
-        optional.add_argument('--maxmean', type = float, help = "A threshold for the maximal mean methylation level to consider")
-
         optional.add_argument('--gsave', action='store_true', help = "Save the data in a glint format; makes following executions faster")
+
+        def methylation_value(num):
+            if not (num <= 1 and num >=0):
+                common.terminate("minmean/maxmean must be a standard methylation value (float number between 0 and 1)")
+
+        optional.add_argument('--minmean', type = methylation_value, help = "A threshold for the minimal mean methylation level to consider")
+        optional.add_argument('--maxmean', type = methylation_value, help = "A threshold for the maximal mean methylation level to consider")
 
         super(MethylationDataParser, self).__init__(required, optional)
         
     def validate_args(self, args):
         super(MethylationDataParser, self).validate_args(args)
-
-        # validate arguments
-        if args.minmean is not None:
-            self._validate_methylation_value(args.minmean)
-        if args.maxmean is not None:
-            self._validate_methylation_value(args.maxmean) 
         self._validate_min_and_max_mean_values(args.minmean, args.maxmean)
 
     def _load_and_validate_file_of_dimentions(self, fileobj, dim):
@@ -74,10 +71,6 @@ class MethylationDataParser(ModuleParser):
             logging.warning("The file %s contains ids that are not found in the datafile: %s" % (filepath, diff))
 
         return data
-
-    def _validate_methylation_value(self, num):
-        if not (num <= 1 and num >=0):
-            common.terminate("minmean/maxmean must be a standard methylation value (float number between 0 and 1)")
 
     def _validate_min_and_max_mean_values(self, min_value, max_value):
         """
