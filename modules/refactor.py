@@ -152,10 +152,11 @@ class Refactor( Module ):
         savetxt(self.ranked_output_filename, ranked_list_output, fmt='%s')
 
         logging.info('Saving the ReFACTor components...')
-        components_output = column_stack((self.meth_data.samples_ids ,  score[:,0:self.num_components]))
-        savetxt(self.components_output_filename, components_output, fmt = '%s')
+        components = score[:,0:self.num_components]
+        components_output = column_stack((self.meth_data.samples_ids, components))
+        savetxt(self.components_output_filename, components_output, fmt='%s')
         
-        return score[:,0:self.num_components], ranked_list
+        return components, ranked_list
 
     def _exclude_bad_probes(self):
         """
