@@ -48,7 +48,7 @@ class MethylationDataParser(ModuleParser):
         """
         if not isinstance(fileobj, file):
             fileobj = open(fileobj, 'r')
-        logging.info("Loading file %s..." % fileobj.name)
+        logging.info("loading file %s..." % fileobj.name)
         data = loadtxt(fileobj, dtype = str)#, converters = lambda x: x if x != 'NA' else 'nan')#,delimiter=';', missing_values='NA', filling_values=nan)# = lambda x: x if x != 'NA' else nan)#, missing_values = '???', filling_values = 0)
         # data = genfromtxt(args.datafile, dtype = str , delimiter=';', usemask = 'True', missing_values = 'NA', filling_values = "???")
 
@@ -86,44 +86,43 @@ class MethylationDataParser(ModuleParser):
     # must  be called after init_data
     def preprocess_sites_data(self):
         if self.args.include is not None:
-            self.meth_data.include(self.include_list)
+            self.module.include(self.include_list)
         if self.args.exclude is not None:
-            self.meth_data.exclude(self.exclude_list)
+            self.module.exclude(self.exclude_list)
         # exclude min/max values
         if self.args.minmean is not None:
-            self.meth_data.exclude_sites_with_low_mean(self.args.minmean)
+            self.module.exclude_sites_with_low_mean(self.args.minmean)
         if self.args.maxmean is not None:
-            self.meth_data.exclude_sites_with_high_mean(self.args.maxmean)
+            self.module.exclude_sites_with_high_mean(self.args.maxmean)
 
-    # must  be called after init_data
+    # must  be called after run
     def preprocess_samples_data(self):
         if self.args.keep is not None: # important check, otherwise will keep [] samples (will remove everything)
-            self.meth_data.keep(self.keep_list)
+            self.module.keep(self.keep_list)
         if self.args.remove is not None:
-            self.meth_data.remove(self.remove_list)
+            self.module.remove(self.remove_list)
 
     # must be called after all preprocessing (preprocess_samples_data, preprocess_sites_data)
     # save methylation data in Glint format
     def gsave(self):
         if self.args.gsave:
-            self.meth_data.save(output_perfix + methylation_data.COMPRESSED_FILENAME + GLINT_FORMATTED_EXTENSION)
+            self.module.save(output_perfix + methylation_data.COMPRESSED_FILENAME + GLINT_FORMATTED_EXTENSION)
 
-    def init_data(self, args, output_perfix = ''):
+    def run(self, args, output_perfix = ''):
         try:
             self.args = args
-            self.meth_data = None
+            self.module = None
             if args.datafile.name.endswith(GLINT_FORMATTED_EXTENSION):
                 logging.info("Loading glint file: %s..." % args.datafile.name)
-                self.meth_data = load(args.datafile) # datafile is fileType (status: open for read)
-                logging.debug("Got methylation data with %s sites and %s samples id" % (self.meth_data.sites_size, self.meth_data.samples_size))
-                # if phenotype or covariates supplied with metylation data, replace meth_data covar and pheno file with new ones
+                self.module = load(args.datafile) # datafile is fileType (status: open for read)
+                logging.debug("Got methylation data with %s sites and %s samples id" % (self.module.sites_size, self.module.samples_size))
+                # if phenotype or covariates supplied with metylation data, replace module covar and pheno file with new ones
                 if args.pheno is not None:
-                    self.meth_data.upload_new_phenotype_file(args.pheno)
+                    self.module.upload_new_phenotype_file(args.pheno)
                 if args.covar is not None:
-                    self.meth_data.upload_new_covaritates_file(args.covar)
+                    self.module.upload_new_covaritates_files(args.covar) # TODO check list
             else:
-                self.meth_data = methylation_data.MethylationData(datafile = args.datafile, phenofile = args.pheno, covarfile = args.covar)
-
+                self.module = methylation_data.MethylationData(datafile = args.datafile, phenofile = args.pheno, covarfiles = args.covar)
 
             # load remove/keep sites/samples files and remove/keep values
             self.include_list = []
@@ -132,13 +131,13 @@ class MethylationDataParser(ModuleParser):
             self.keep_list = []
 
             if args.include is not None:
-                self.include_list = self._load_and_validate_ids_in_file(args.include, self.meth_data.cpgnames)
+                self.include_list = self._load_and_validate_ids_in_file(args.include, self.module.cpgnames)
             if args.exclude is not None:
-                self.exclude_list = self._load_and_validate_ids_in_file(args.exclude, self.meth_data.cpgnames)
+                self.exclude_list = self._load_and_validate_ids_in_file(args.exclude, self.module.cpgnames)
             if args.keep is not None:
-                self.keep_list = self._load_and_validate_ids_in_file(args.keep, self.meth_data.samples_ids)
+                self.keep_list = self._load_and_validate_ids_in_file(args.keep, self.module.samples_ids)
             if args.remove is not None:
-                self.remove_list = self._load_and_validate_ids_in_file(args.remove, self.meth_data.samples_ids)
+                self.remove_list = self._load_and_validate_ids_in_file(args.remove, self.module.samples_ids)
             
 
         except Exception:

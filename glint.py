@@ -34,10 +34,10 @@ class ModulesArgumentParsers(object):
                              epilog = "<< todo add help after >>",
                              add_help=False) # don't add help because it is added in 'optional group'
 
-        self.glint = None
+        self.glint_parser = None
         self.meth_parser = None
-        self.refactor = None
-        self.ewas = None
+        self.refactor_parser = None
+        self.ewas_parser = None
         self.args = None
 
     def add_arguments(self):
@@ -45,11 +45,11 @@ class ModulesArgumentParsers(object):
 
         #main
         self.meth_parser = MethylationDataParser(self.parser)
-        self.glint = GlintParser(self.parser)
+        self.glint_parser = GlintParser(self.parser)
 
         #modules
-        self.refactor = RefactorParser(self.parser)
-        self.ewas = EWASParser(self.parser)
+        self.refactor_parser = RefactorParser(self.parser)
+        self.ewas_parser = EWASParser(self.parser)
 
     def parse_args(self):
         logging.info("Validating arguments...")
@@ -60,15 +60,15 @@ class ModulesArgumentParsers(object):
         self.meth_parser.validate_args(self.args)
         optional_args.extend(self.meth_parser.all_args)
 
-        self.glint.validate_args(self.args)
-        optional_args.extend(self.glint.all_args)
+        self.glint_parser.validate_args(self.args)
+        optional_args.extend(self.glint_parser.all_args)
         
         if self.args.refactor:
-            self.refactor.validate_args(self.args)
-            optional_args.extend(self.refactor.all_args)
+            self.refactor_parser.validate_args(self.args)
+            optional_args.extend(self.refactor_parser.all_args)
         if self.args.ewas:
-            self.ewas.validate_args(self.args)
-            optional_args.extend(self.ewas.all_args)
+            self.ewas_parser.validate_args(self.args)
+            optional_args.extend(self.ewas_parser.all_args)
 
         self.check_selected_args(optional_args)
         return self.args
@@ -98,23 +98,24 @@ class ModulesArgumentParsers(object):
                 logging.warning("selected data management arguments which are not relevant for refactor: %s" % str(not_relevant_atgs))
 
     def run(self):
-        self.meth_parser.init_data(self.args, output_perfix = self.args.out)
+        self.meth_parser.run(self.args, output_perfix = self.args.out)
         self.meth_parser.preprocess_samples_data() # preprocess samples before refactor and before ewas
 
         if self.args.refactor:
-            refactor_meth_data = self.meth_parser.meth_data.copy()
-            estimates = self.refactor.run(args = self.args,
-                                          meth_data = refactor_meth_data,
-                                          output_perfix = self.args.out)
+            refactor_meth_data = self.meth_parser.module.copy()
+            self.refactor_parser.run(args = self.args,
+                              meth_data = refactor_meth_data,
+                              output_perfix = self.args.out)
+            self.meth_parser.module.add_covariates(self.refactor_parser.module.components) # add refactor components as covariate file
 
         self.meth_parser.preprocess_sites_data() #preprocess sites after refactor and before ewas
         self.meth_parser.gsave() #save after all preprocessing #TODO maybe take gsave out from MethData module
 
         if self.args.ewas:
-            ewas_meth_data = self.meth_parser.meth_data.copy()
-            self.ewas.run(args = self.args,
+            ewas_meth_data = self.meth_parser.module.copy()
+            self.ewas_parser.run(args = self.args,
                           meth_data = ewas_meth_data,
-                          output_perfix = self.args.out)#estimates.components) #TODO on refactor estimates or not?
+                          output_perfix = self.args.out)
 
 if __name__ == '__main__':
     selected_args = [arg for arg in sys.argv if arg.startswith("-")] #TODO startwith "--"? (there are no arguments that starts with -)
