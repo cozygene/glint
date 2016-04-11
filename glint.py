@@ -35,7 +35,7 @@ class ModulesArgumentParsers(object):
                              add_help=False) # don't add help because it is added in 'optional group'
 
         self.glint = None
-        self.methylation = None
+        self.meth_parser = None
         self.refactor = None
         self.ewas = None
         self.args = None
@@ -44,7 +44,7 @@ class ModulesArgumentParsers(object):
         # Notice to add arguments by the order you want them to be printed in --help
 
         #main
-        self.methylation = MethylationDataParser(self.parser)
+        self.meth_parser = MethylationDataParser(self.parser)
         self.glint = GlintParser(self.parser)
 
         #modules
@@ -57,8 +57,8 @@ class ModulesArgumentParsers(object):
 
         optional_args = []
 
-        self.methylation.validate_args(self.args)
-        optional_args.extend(self.methylation.all_args)
+        self.meth_parser.validate_args(self.args)
+        optional_args.extend(self.meth_parser.all_args)
 
         self.glint.validate_args(self.args)
         optional_args.extend(self.glint.all_args)
@@ -90,23 +90,23 @@ class ModulesArgumentParsers(object):
         if differ:
             common.terminate("selected redundent argument" + str(differ)) # TODO: tell which module the arguments belong to, to user might forgot to specify --module and that msg can be confusing
 
-
+        if self.args.refactor and not self.args.ewas:
+                print "HHIIH"
     def run(self):
-        self.methylation.init_data(self.args, output_perfix = self.args.out)
-        meth_data = self.methylation.meth_data.copy()
-        meth_data.preprocess_samples_data() # preprocess samples before refactor and before ewas
+        self.meth_parser.init_data(self.args, output_perfix = self.args.out)
+        self.meth_parser.preprocess_samples_data() # preprocess samples before refactor and before ewas
 
         if self.args.refactor:
-            refactor_meth_data = meth_data.copy()
+            refactor_meth_data = self.meth_parser.meth_data.copy()
             estimates = self.refactor.run(args = self.args,
                                           meth_data = refactor_meth_data,
                                           output_perfix = self.args.out)
 
-        meth_data.preprocess_sites_data() #preprocess sites after refactor and before ewas
-        meth_data.gsave() #save after all preprocessing #TODO maybe take gsave out from MethData module
+        self.meth_parser.preprocess_sites_data() #preprocess sites after refactor and before ewas
+        self.meth_parser.gsave() #save after all preprocessing #TODO maybe take gsave out from MethData module
 
         if self.args.ewas:
-            ewas_meth_data = meth_data.copy()
+            ewas_meth_data = self.meth_parser.meth_data.copy()
             self.ewas.run(args = self.args,
                           meth_data = ewas_meth_data,
                           output_perfix = self.args.out)#estimates.components) #TODO on refactor estimates or not?

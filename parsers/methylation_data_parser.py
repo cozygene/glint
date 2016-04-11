@@ -93,10 +93,10 @@ class MethylationDataParser(ModuleParser):
         self.meth_data.include(self.include_list)
         self.meth_data.exclude(self.exclude_list)
         # exclude min/max values
-        if args.minmean is not None:
-            self.meth_data.exclude_sites_with_low_mean(args.minmean)
-        if args.maxmean is not None:
-            self.meth_data.exclude_sites_with_high_mean(args.maxmean)
+        if self.args.minmean is not None:
+            self.meth_data.exclude_sites_with_low_mean(self.args.minmean)
+        if self.args.maxmean is not None:
+            self.meth_data.exclude_sites_with_high_mean(self.args.maxmean)
 
     # must  be called after init_data
     def preprocess_samples_data(self):
@@ -106,11 +106,12 @@ class MethylationDataParser(ModuleParser):
     # must be called after all preprocessing (preprocess_samples_data, preprocess_sites_data)
     # save methylation data in Glint format
     def gsave(self):
-        if args.gsave:
+        if self.args.gsave:
             self.meth_data.save(output_perfix + methylation_data.COMPRESSED_FILENAME + GLINT_FORMATTED_EXTENSION)
 
     def init_data(self, args, output_perfix = ''):
         try:
+            self.args = args
             self.meth_data = None
             if args.datafile.name.endswith(GLINT_FORMATTED_EXTENSION):
                 logging.info("Loading glint file: %s..." % args.datafile.name)
