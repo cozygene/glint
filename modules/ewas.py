@@ -9,9 +9,9 @@ class EWAS(Module):
     TEST_FUNC_NAME_FORMAT = "_{test_name}_test"   # feature selections function name format
 
 
-    def __init__(self, methylation_data, test):
+    def __init__(self, methylation_data, tests_list):
         self.meth_data = methylation_data
-        self.test_handlers = self._get_test_handler(test)
+        self.test_handlers = self._get_test_handler(tests_list)
 
     def run(self):
         logging.info('starting EWAS...');

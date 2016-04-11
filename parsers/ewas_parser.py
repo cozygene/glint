@@ -35,7 +35,7 @@ class EWASParser(ModuleParser):
             if meth_data.phenotype is None and args.pheno is None:
                 common.terminate("phenotype file wasn't supplied")
 
-            self.module  = ewas.EWAS(methylation_data = meth_data, test = self.tests)
+            self.module  = ewas.EWAS(methylation_data = meth_data, tests_list = self.tests)
             self.module.run()
         except Exception :
             logging.exception("in ewas")
