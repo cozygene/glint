@@ -2,7 +2,7 @@ import os
 import sys
 import logging
 from sklearn import preprocessing
-from numpy import sqrt
+from numpy import sqrt, savetxt, column_stack
 from utils import tools, pca, LinearRegression, common
 from module import Module
 
@@ -148,12 +148,12 @@ class Refactor( Module ):
         score = pca_out.P
 
         logging.info('Saving a ranked list of the data features...')
-        data = '\n'.join(['%s\t%s'% (index + 1, self.meth_data.cpgnames[index]) for index in ranked_list])
-        self._write_file(self.ranked_output_filename, data)
+        ranked_list_output = [[index + 1, self.meth_data.cpgnames[index]] for index in ranked_list]
+        savetxt(self.ranked_output_filename, ranked_list_output, fmt='%s')
 
         logging.info('Saving the ReFACTor components...')
-        data = '\n'.join(['\t'.join([str(i) for i in line]) for line in score[:,0:self.num_components]])
-        self._write_file(self.components_output_filename, data)
+        components_output = column_stack((self.meth_data.samples_ids ,  score[:,0:self.num_components]))
+        savetxt(self.components_output_filename, components_output, fmt = '%s')
         
         return score[:,0:self.num_components], ranked_list
 
