@@ -25,6 +25,7 @@ class MethylationDataParser(ModuleParser):
         group2.add_argument('--keep',   type = argparse.FileType('r'), help = "A list of samples to include in the data; removes the rest of the samples")
         group2.add_argument('--remove', type = argparse.FileType('r'), help = "A list of samples to exclude in the data; includes the rest of the samples")
 
+        # TODO add check for the value of minmean, maxmean?
         optional.add_argument('--minmean', type = float, help = "A threshold for the minimal mean methylation level to consider")
         optional.add_argument('--maxmean', type = float, help = "A threshold for the maximal mean methylation level to consider")
 
@@ -86,49 +87,59 @@ class MethylationDataParser(ModuleParser):
         if min_value is not None and max_value is not None:
             if max_value <= min_value:
                 common.terminate("min value %s is greater than max value %s" % (min_value, max_value))
-                
+    
+    # must  be called after init_data
+    def preprocess_sites_data(self):
+        self.meth_data.include(self.include_list)
+        self.meth_data.exclude(self.exclude_list)
+        # exclude min/max values
+        if args.minmean is not None:
+            self.meth_data.exclude_sites_with_low_mean(args.minmean)
+        if args.maxmean is not None:
+            self.meth_data.exclude_sites_with_high_mean(args.maxmean)
+
+    # must  be called after init_data
+    def preprocess_samples_data(self):
+        self.meth_data.keep(self.keep_list)
+        self.meth_data.remove(self.remove_list)
+
+    # must be called after all preprocessing (preprocess_samples_data, preprocess_sites_data)
+    # save methylation data in Glint format
+    def gsave(self):
+        if args.gsave:
+            self.meth_data.save(output_perfix + methylation_data.COMPRESSED_FILENAME + GLINT_FORMATTED_EXTENSION)
+
     def init_data(self, args, output_perfix = ''):
         try:
-            meth_data = None
+            self.meth_data = None
             if args.datafile.name.endswith(GLINT_FORMATTED_EXTENSION):
                 logging.info("Loading glint file: %s..." % args.datafile.name)
-                meth_data = load(args.datafile) # datafile is fileType (status: open for read)
-                logging.debug("Got methylation data with %s sites and %s samples id" % (meth_data.sites_size, meth_data.samples_size))
+                self.meth_data = load(args.datafile) # datafile is fileType (status: open for read)
+                logging.debug("Got methylation data with %s sites and %s samples id" % (self.meth_data.sites_size, self.meth_data.samples_size))
                 # if phenotype or covariates supplied with metylation data, replace meth_data covar and pheno file with new ones
                 if args.pheno is not None:
-                    meth_data.upload_new_phenotype_file(args.pheno)
+                    self.meth_data.upload_new_phenotype_file(args.pheno)
                 if args.covar is not None:
-                    meth_data.upload_new_covaritates_file(args.covar)
-
-
+                    self.meth_data.upload_new_covaritates_file(args.covar)
             else:
-                meth_data = methylation_data.MethylationData(datafile = args.datafile, phenofile = args.pheno, covarfile = args.covar)
+                self.meth_data = methylation_data.MethylationData(datafile = args.datafile, phenofile = args.pheno, covarfile = args.covar)
+
 
             # load remove/keep sites/samples files and remove/keep values
+            self.include_list = []
+            self.exclude_list = []
+            self.remove_list = []
+            self.keep_list = []
+
             if args.include is not None:
-                include_list = self._load_and_validate_ids_in_file(args.include, meth_data.cpgnames)
-                meth_data.include(include_list)
+                self.include_list = self._load_and_validate_ids_in_file(args.include, self.meth_data.cpgnames)
             if args.exclude is not None:
-                exclude_list = self._load_and_validate_ids_in_file(args.exclude, meth_data.cpgnames)
-                meth_data.exclude(exclude_list)
+                self.exclude_list = self._load_and_validate_ids_in_file(args.exclude, self.meth_data.cpgnames)
             if args.keep is not None:
-                keep_list = self._load_and_validate_ids_in_file(args.keep, meth_data.samples_ids)
-                meth_data.keep(keep_list)
+                self.keep_list = self._load_and_validate_ids_in_file(args.keep, self.meth_data.samples_ids)
             if args.remove is not None:
-                remove_list = self._load_and_validate_ids_in_file(args.remove, meth_data.samples_ids)
-                meth_data.remove(remove_list)
-
-            # exclude min/max values
-            if args.minmean is not None:
-                meth_data.exclude_sites_with_low_mean(args.minmean)
-            if args.maxmean is not None:
-                meth_data.exclude_sites_with_high_mean(args.maxmean)
+                self.remove_list = self._load_and_validate_ids_in_file(args.remove, self.meth_data.samples_ids)
             
-            # save methylation data in Glint format
-            if args.gsave:
-                meth_data.save(output_perfix + methylation_data.COMPRESSED_FILENAME + GLINT_FORMATTED_EXTENSION)
-
-            return meth_data
 
         except Exception:
             logging.exception("in methylation data")

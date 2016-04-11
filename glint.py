@@ -92,17 +92,24 @@ class ModulesArgumentParsers(object):
 
 
     def run(self):
-        meth_data = self.methylation.init_data(self.args, output_perfix = self.args.out)
+        self.methylation.init_data(self.args, output_perfix = self.args.out)
+        meth_data = self.methylation.meth_data.copy()
+        meth_data.preprocess_samples_data() # preprocess samples before refactor and before ewas
 
         if self.args.refactor:
             refactor_meth_data = meth_data.copy()
-
             estimates = self.refactor.run(args = self.args,
                                           meth_data = refactor_meth_data,
                                           output_perfix = self.args.out)
 
+        meth_data.preprocess_sites_data() #preprocess sites after refactor and before ewas
+        meth_data.gsave() #save after all preprocessing #TODO maybe take gsave out from MethData module
+
         if self.args.ewas:
-            self.ewas.run(estimates)
+            ewas_meth_data = meth_data.copy()
+            self.ewas.run(args = self.args,
+                          meth_data = ewas_meth_data,
+                          output_perfix = self.args.out)#estimates.components) #TODO on refactor estimates or not?
 
 if __name__ == '__main__':
     selected_args = [arg for arg in sys.argv if arg.startswith("-")] #TODO startwith "--"? (there are no arguments that starts with -)
