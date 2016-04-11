@@ -25,7 +25,7 @@ class GlintParser(ModuleParser):
 
 class ModulesArgumentParsers(object):
     FUNCTIONALITY_ARGS = [ '--gsave', '--refactor', '--ewas'] # TODO find better way to hold arguments that cause some functionality. glint is not supposed to be aware of those args
-
+    DATA_PREPROCESSING_NOT_RELEVANT_FOR_REFACTOR = ['--include', '--exclude', '--minmean', '--maxmean']
         
     def __init__(self, user_args_selection):
         self.selected_args = user_args_selection
@@ -82,6 +82,7 @@ class ModulesArgumentParsers(object):
         selected_args = set(self.selected_args)
         func_args = set(self.FUNCTIONALITY_ARGS)
         optional_args = set(optional_args)
+        args_not_relevant_for_refactor = set(self.DATA_PREPROCESSING_NOT_RELEVANT_FOR_REFACTOR)
 
         if len(selected_args.intersection(func_args)) == 0:
             common.terminate("Nothing to do with the data, select at least one argument from %s" % self.FUNCTIONALITY_ARGS)
@@ -90,8 +91,12 @@ class ModulesArgumentParsers(object):
         if differ:
             common.terminate("selected redundent argument" + str(differ)) # TODO: tell which module the arguments belong to, to user might forgot to specify --module and that msg can be confusing
 
-        if self.args.refactor and not self.args.ewas:
-                print "HHIIH"
+        # warn if only refactor module is selected and  user selectes data management flags that are not relevant for refactor
+        if self.args.refactor and len(selected_args.intersection(func_args)) == 1:
+            not_relevant_atgs = list(selected_args.intersection(args_not_relevant_for_refactor))
+            if len(not_relevant_atgs) != 0:
+                logging.warning("selected data management arguments which are not relevant for refactor: %s" % str(not_relevant_atgs))
+
     def run(self):
         self.meth_parser.init_data(self.args, output_perfix = self.args.out)
         self.meth_parser.preprocess_samples_data() # preprocess samples before refactor and before ewas
