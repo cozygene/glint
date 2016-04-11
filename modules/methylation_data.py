@@ -132,6 +132,8 @@ class MethylationData( Module ):
         """
         if len(sites_indicies_list) == 0:
             logging.warning("found no sites to remove")
+        elif len(sites_indicies_list) == self.sites_size:
+            logging.error("all sites are about to be remove") # TODO terminate or warn or error witout terminateing?
         else:
             self.data = delete(self.data, sites_indicies_list, axis = 0)
             self.cpgnames = delete(self.cpgnames, sites_indicies_list)
@@ -148,6 +150,8 @@ class MethylationData( Module ):
         """
         if len(indices_list) == 0:
             logging.warning("found no samples to remove")
+        elif len(indices_list) == self.samples_size:
+            logging.error("all samples are about to be remove") # TODO terminate or warn or error witout terminateing?
         else:
             self.data = delete(self.data, indices_list, axis = 1)
             if self.phenotype is not None:

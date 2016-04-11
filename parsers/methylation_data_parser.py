@@ -28,8 +28,10 @@ class MethylationDataParser(ModuleParser):
         optional.add_argument('--gsave', action='store_true', help = "Save the data in a glint format; makes following executions faster")
 
         def methylation_value(num):
+            num = float(num)
             if not (num <= 1 and num >=0):
                 common.terminate("minmean/maxmean must be a standard methylation value (float number between 0 and 1)")
+            return num
 
         optional.add_argument('--minmean', type = methylation_value, help = "A threshold for the minimal mean methylation level to consider")
         optional.add_argument('--maxmean', type = methylation_value, help = "A threshold for the maximal mean methylation level to consider")
@@ -83,8 +85,10 @@ class MethylationDataParser(ModuleParser):
     
     # must  be called after init_data
     def preprocess_sites_data(self):
-        self.meth_data.include(self.include_list)
-        self.meth_data.exclude(self.exclude_list)
+        if self.args.include is not None:
+            self.meth_data.include(self.include_list)
+        if self.args.exclude is not None:
+            self.meth_data.exclude(self.exclude_list)
         # exclude min/max values
         if self.args.minmean is not None:
             self.meth_data.exclude_sites_with_low_mean(self.args.minmean)
@@ -93,8 +97,10 @@ class MethylationDataParser(ModuleParser):
 
     # must  be called after init_data
     def preprocess_samples_data(self):
-        self.meth_data.keep(self.keep_list)
-        self.meth_data.remove(self.remove_list)
+        if self.args.keep is not None: # important check, otherwise will keep [] samples (will remove everything)
+            self.meth_data.keep(self.keep_list)
+        if self.args.remove is not None:
+            self.meth_data.remove(self.remove_list)
 
     # must be called after all preprocessing (preprocess_samples_data, preprocess_sites_data)
     # save methylation data in Glint format
