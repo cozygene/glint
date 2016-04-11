@@ -11,10 +11,10 @@ class MethylationDataParser(ModuleParser):
 
     def __init__(self, parser):
         required = parser.add_argument_group('1.Required arguments') # numbering in the group name because help print it by abc order
-        required.add_argument('--datafile', type = argparse.FileType('r'), required=True,  help = "A data matrix file of beta-normalized methylation levels or a .glint file")
-        
+        required.add_argument('--datafile', type = argparse.FileType('r'), required = True,  help = "A data matrix file of beta-normalized methylation levels or a .glint file")
+
         optional = parser.add_argument_group('2.Data management options ')
-        optional.add_argument('--covar',   type = argparse.FileType('r'), help = "A covariates file")
+        optional.add_argument('--covar',   type = argparse.FileType('r'), nargs='*', help = "A covariates file")
         optional.add_argument('--pheno',   type = argparse.FileType('r'), help = "A phenotype file")
         
         group1 = optional.add_mutually_exclusive_group(required = False)

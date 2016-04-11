@@ -3,7 +3,7 @@ import sys
 import copy
 import logging
 from pickle import dump
-from numpy import loadtxt, delete, isnan, nanstd, where
+from numpy import loadtxt, delete, isnan, nanstd, where, column_stack
 from numpy.ma import average, masked_array
 from module import Module
 from utils import common
@@ -24,14 +24,13 @@ class MethylationData( Module ):
     """
     TODO add class doc here
     """
-    def __init__(self, datafile, phenofile = None, covarfile = None):
-
+    def __init__(self, datafile, phenofile = None, covarfiles = []):
         self.data, self.samples_ids, self.cpgnames = self._load_and_validate_datafile(datafile)        
         self.sites_size, self.samples_size = self.data.shape
         logging.debug("got methylation data with %s sites and %s samples id" % (self.sites_size, self.samples_size))
 
         self.phenotype = self._load_and_validate_phenotype(phenofile)
-        self.covar = self._load_and_validate_covar(covarfile)
+        self.covar = self._load_and_validate_covar(covarfiles)
 
     def _load_and_validate_file_of_dimentions(self, datafile, dim):
         """
@@ -114,15 +113,18 @@ class MethylationData( Module ):
             pheno = pheno[:,1] 
         return pheno
 
-    def _load_and_validate_covar(self, covariates):
+    def _load_and_validate_covar(self, covarfiles_list): # TODO add test
         """
-        returns covariates data (type=float) without samples ids
+        concatenate the covariates into one matrix (type=float).
+        Make sure all have n rows and the ids of the samples are sorted the same order as the data file
         """
-        if not covariates:
+        if not covarfiles_list:
             logging.warning("didn't supply covariates file")
             return None
-        logging.info("validating covariates file...")
-        return self._load_and_validate_samples_info(covariates)
+        logging.info("validating covariates files...")
+        
+        all_covar = column_stack(tuple([self._load_and_validate_samples_info(covariates) for covariates in covarfiles_list]))
+        return all_covar
 
     def exclude_sites_indices(self, sites_indicies_list):
         """
@@ -312,8 +314,18 @@ class MethylationData( Module ):
         """
         return copy.deepcopy(self)
 
-    def upload_new_covaritates_file(self, covarfile):
-        self.covar = self._load_and_validate_covar(covarfile)
+    def add_covariates(self, covardata): # TODO add test
+        """
+        covardata is the covariates data (without the colums of the sample_ids)
+        assumes covardata is in the right format and is sorted by sample_ids as datafile is sorted
+        """
+        self.covar = column_stack((self.covar ,covardata))
+
+    def upload_new_covaritates_files(self, covarfiles_list):
+        """
+        overloads self.covar with the covarfiles_list
+        """
+        self.covar = self._load_and_validate_covar(covarfiles_list)
 
     def upload_new_phenotype_file(self, phenofile):
         self.phenotype = self._load_and_validate_phenotype(phenofile)

@@ -113,7 +113,7 @@ class DataTester():
         
         data.remove(self.KEEP_REMOVE_INDICES)
 
-        data_upload.upload_new_covaritates_file(self.FAKE_COVAR_REMOVE)
+        data_upload.upload_new_covaritates_files([self.FAKE_COVAR_REMOVE])
         data_upload.upload_new_phenotype_file(self.FAKE_PHENO_REMOVE)
 
 
