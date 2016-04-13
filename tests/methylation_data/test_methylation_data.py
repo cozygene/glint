@@ -2,11 +2,16 @@ from modules import methylation_data
 from numpy import loadtxt, array_equal
 import logging
 from tests import tools
+import unittest
 
-class DataTester():
+class DataTester(unittest.TestCase):
     FAKE_DATA  = "tests/methylation_data/files/data.txt"
     FAKE_PHENO = "tests/methylation_data/files/pheno.txt"
+    FAKE_PHENO_BAD = "tests/methylation_data/files/pheno_bad.txt"
     FAKE_COVAR = "tests/methylation_data/files/covar.txt"
+    FAKE_COVAR_PART1 = "tests/methylation_data/files/covar2.txt"
+    FAKE_COVAR_PART2 = "tests/methylation_data/files/covar3.txt"
+    FAKE_COVAR_BAD = "tests/methylation_data/files/covar_bad.txt"
     FAKE_DATA_STDTH = "tests/methylation_data/files/data_after_std_0.25.txt"
     FAKE_DATA_INC = "tests/methylation_data/files/data_inc_1_2_3.txt"
     FAKE_DATA_EXC = "tests/methylation_data/files/data_ex_1_2_3.txt"
@@ -36,8 +41,30 @@ class DataTester():
         self.test_exclude_sites_with_low_mean()
         self.test_exclude_sites_with_high_mean()
         self.test_upload_new_files()
+        self.test_load_and_validate_covar()
+        self.test_load_and_validate_phenotype()
+        self.test_add_covariates()
 
-
+    def test_load_and_validate_phenotype(self):
+        logging.info("Testing validate pheno fails...")
+        data_copy = self.meth_data.copy()
+        with self.assertRaisesRegexp(SystemExit, '2'):
+            data_copy._load_and_validate_phenotype(self.FAKE_PHENO_BAD)
+        logging.info("PASS")
+        logging.info("Testing validate pheno pass...")
+        data_copy._load_and_validate_phenotype(self.FAKE_PHENO)
+        logging.info("PASS")
+        
+    def test_load_and_validate_covar(self):
+        logging.info("Testing validate covar fails...")
+        data_copy = self.meth_data.copy()
+        with self.assertRaisesRegexp(SystemExit, '2'):
+            data_copy._load_and_validate_covar([self.FAKE_COVAR_BAD,self.FAKE_COVAR])
+        logging.info("PASS")
+        logging.info("Testing validate covar pass...")
+        data_copy._load_and_validate_covar([self.FAKE_COVAR])
+        logging.info("PASS")
+        
     def test_remove_lowest_std_sites(self):
         logging.info("Testing stdth...")
         data_copy = self.meth_data.copy()
@@ -121,3 +148,19 @@ class DataTester():
         assert array_equal(data.phenotype, data_upload.phenotype)
         assert array_equal(data.covar, data_upload.covar)
         logging.info("PASS")
+
+
+    def test_add_covariates(self):
+        logging.info("Testing add covar...")
+        data = methylation_data.MethylationData(datafile = self.FAKE_DATA)
+        meth_data = self.meth_data.copy()
+
+        data.add_covar_files([self.FAKE_COVAR_PART1, self.FAKE_COVAR_PART2])
+        assert array_equal(data.covar, meth_data.covar)
+
+        data2 = methylation_data.MethylationData(datafile = self.FAKE_DATA, covarfiles  = [self.FAKE_COVAR_PART1])
+        data2.add_covar_files([self.FAKE_COVAR_PART2])
+        assert array_equal(data2.covar, meth_data.covar)
+
+        logging.info("PASS")
+
