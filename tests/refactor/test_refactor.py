@@ -90,7 +90,7 @@ class RefactorTester():
     RANK_K5_T400_stdth008covar = "tests/refactor/files/senarios_out/k5t400stdth0.08covar.out.rankedlist.txt"
 
     def __init__(self):
-        self.meth_data = methylation_data.MethylationData(datafile = self.DEMO_SMALL_DATA, covarfile = self.DEMO_COVAR, phenofile = self.DEMO_PHENO)
+        self.meth_data = methylation_data.MethylationData(datafile = self.DEMO_SMALL_DATA, covarfiles = [self.DEMO_COVAR]   , phenofile = self.DEMO_PHENO)
         self.test_remove_covariates()
         self.test_low_rank_approx_distances()
         self.test_exclude_bad_probes()
@@ -104,7 +104,7 @@ class RefactorTester():
                                     k = 2, 
                                     t = 500)
 
-        coavr = covar_meth_data._load_and_validate_covar(self.DEMO_COVAR)
+        coavr = covar_meth_data._load_and_validate_covar([self.DEMO_COVAR])
         # remove from refactor_meth_data
         module._remove_covariates()
 

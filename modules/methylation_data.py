@@ -113,7 +113,7 @@ class MethylationData( Module ):
             pheno = pheno[:,1] 
         return pheno
 
-    def _load_and_validate_covar(self, covarfiles_list): # TODO add test
+    def _load_and_validate_covar(self, covarfiles_list):
         """
         concatenate the covariates into one matrix (type=float).
         Make sure all have n rows and the ids of the samples are sorted the same order as the data file
@@ -314,12 +314,19 @@ class MethylationData( Module ):
         """
         return copy.deepcopy(self)
 
-    def add_covariates(self, covardata): # TODO add test
+
+    def add_covar_files(self, covarfiles_list):
+        covardata_list = [self._load_and_validate_samples_info(covariates) for covariates in covarfiles_list]
+        self.add_covar_datas(covardata_list)
+
+    def add_covar_datas(self, covardata_list):
         """
         covardata is the covariates data (without the colums of the sample_ids)
         assumes covardata is in the right format and is sorted by sample_ids as datafile is sorted
         """
-        self.covar = column_stack((self.covar ,covardata))
+        if self.covar is not None:
+            covardata_list.insert(0, self.covar)
+        self.covar = column_stack(tuple(covardata_list))
 
     def upload_new_covaritates_files(self, covarfiles_list):
         """

@@ -26,7 +26,7 @@ class DataTester():
     KEEP_REMOVE_INDICES = ['sample1', 'sample2', 'sample3']
 
     def __init__(self):
-        self.meth_data = methylation_data.MethylationData(datafile = self.FAKE_DATA, covarfile = self.FAKE_COVAR, phenofile = self.FAKE_PHENO)
+        self.meth_data = methylation_data.MethylationData(datafile = self.FAKE_DATA, covarfiles = [self.FAKE_COVAR], phenofile = self.FAKE_PHENO)
         self.test_remove_lowest_std_sites()
         self.test_get_mean_per_site()
         self.test_include()
@@ -65,7 +65,7 @@ class DataTester():
         
     def test_keep(self):
         logging.info("Testing keep...")
-        data_after = methylation_data.MethylationData(datafile = self.FAKE_DATA_KEEP, covarfile = self.FAKE_COVAR_KEEP, phenofile = self.FAKE_PHENO_KEEP)
+        data_after = methylation_data.MethylationData(datafile = self.FAKE_DATA_KEEP, covarfiles = [self.FAKE_COVAR_KEEP], phenofile = self.FAKE_PHENO_KEEP)
         data = self.meth_data.copy()
         data.keep(self.KEEP_REMOVE_INDICES)
         assert array_equal(data_after.data, data.data)
@@ -75,7 +75,7 @@ class DataTester():
 
     def test_remove(self):
         logging.info("Testing remove...")
-        data_after = methylation_data.MethylationData(datafile = self.FAKE_DATA_REMOVE, covarfile = self.FAKE_COVAR_REMOVE, phenofile = self.FAKE_PHENO_REMOVE)
+        data_after = methylation_data.MethylationData(datafile = self.FAKE_DATA_REMOVE, covarfiles = [self.FAKE_COVAR_REMOVE], phenofile = self.FAKE_PHENO_REMOVE)
         data = self.meth_data.copy()
         data.remove(self.KEEP_REMOVE_INDICES)
         assert array_equal(data_after.data, data.data)
