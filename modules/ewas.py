@@ -32,12 +32,10 @@ class EWAS(Module):
         """
         linear regression test
         """
-        print self.meth_data.phenotype.shape
         if self.meth_data.covar:
             test = column_stack((self.meth_data.phenotype, self.meth_data.covar))
         else:
             test = self.meth_data.phenotype.copy()
-        print test.shape
         lin_reg = LinearRegression(self.meth_data.data, test)
         
         # result is list of tuples (p_value, t_statistix, coef) for each site

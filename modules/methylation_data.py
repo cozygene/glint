@@ -209,7 +209,7 @@ class MethylationData( Module ):
         it updates the samples_size and the samples_ids list 
         """
         logging.info("keeping samples...")
-        remove_indices_list = [i for i, site in enumerate(self.samples_ids) if site not in keep_list]
+        remove_indices_list = [i for i, sample in enumerate(self.samples_ids) if sample not in keep_list]
         self.remove_samples_indices(remove_indices_list)
         logging.debug("%s samples were removed" % len(remove_indices_list))
 
@@ -220,7 +220,7 @@ class MethylationData( Module ):
         it updates the samples_size and the samples_ids list 
         """
         logging.info("removing samples...")
-        indices_list = [i for i, site in enumerate(self.samples_ids) if site in remove_list]
+        indices_list = [i for i, sample in enumerate(self.samples_ids) if sample in remove_list]
         self.remove_samples_indices(indices_list)
 
     def exclude_sites_with_low_mean(self, min_value):
