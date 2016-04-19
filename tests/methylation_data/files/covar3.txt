@@ -1,0 +1,6 @@
+sample0 3
+sample1 3
+sample2 3
+sample3 3
+sample4 3
+sample5 3
