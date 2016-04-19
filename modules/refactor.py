@@ -10,7 +10,7 @@ RANKED_FILENAME =       'refactor.out.rankedlist.txt'
 COMPONENTS_FILENAME =   'refactor.out.components.txt'
 #NOTE remember to copy the matrix before making changes!!!!
 
-class Refactor( Module ):
+class Refactor(Module):
     VERSION = 1.0 #TODO move to config file
 
 

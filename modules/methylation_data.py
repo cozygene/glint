@@ -20,7 +20,7 @@ def validate_no_missing_values(data):
         common.terminate("missing values are not supported at this version")
 
 
-class MethylationData( Module ):
+class MethylationData(Module):
     """
     TODO add class doc here
     """
