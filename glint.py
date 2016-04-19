@@ -8,7 +8,7 @@ import logging
 from utils import common
 from numpy import loadtxt
 from utils import GlintArgumentParser
-from parsers import ModuleParser, RefactorParser, EWASParser, MethylationDataParser  #dont remove this is imported in,,,
+from parsers import ModuleParser, RefactorParser, EWASParser, MethylationDataParser, KitParser  #dont remove this is imported in,,,
 
 class GlintParser(ModuleParser):
     def __init__(self, parser):
@@ -50,6 +50,7 @@ class ModulesArgumentParsers(object):
         #modules
         self.refactor_parser = RefactorParser(self.parser)
         self.ewas_parser = EWASParser(self.parser)
+        self.kit_parser = KitParser(self.parser)
 
     def parse_args(self):
         logging.info("Validating arguments...")
@@ -62,6 +63,9 @@ class ModulesArgumentParsers(object):
 
         self.glint_parser.validate_args(self.args)
         optional_args.extend(self.glint_parser.all_args)
+
+        self.kit_parser.validate_args(self.args)
+        optional_args.extend(self.kit_parser.all_args)
         
         if self.args.refactor:
             self.refactor_parser.validate_args(self.args)
@@ -80,12 +84,12 @@ class ModulesArgumentParsers(object):
         and that the user didnt select an argument that is not an option for him (argument from a module that wasn't selected)
         """
         selected_args = set(self.selected_args)
-        func_args = set(self.FUNCTIONALITY_ARGS)
+        func_args = set(self.FUNCTIONALITY_ARGS + self.kit_parser.all_args)
         optional_args = set(optional_args)
         args_not_relevant_for_refactor = set(self.DATA_PREPROCESSING_NOT_RELEVANT_FOR_REFACTOR)
 
         if len(selected_args.intersection(func_args)) == 0:
-            common.terminate("Nothing to do with the data, select at least one argument from %s" % self.FUNCTIONALITY_ARGS)
+            common.terminate("Nothing to do with the data, select at least one argument from %s" % func_args)
 
         differ = selected_args.difference(optional_args)
         if differ:
@@ -116,6 +120,10 @@ class ModulesArgumentParsers(object):
             self.ewas_parser.run(args = self.args,
                                  meth_data = ewas_meth_data,
                                  output_perfix = self.args.out)
+
+        self.kit_parser.run(args = self.args,
+                              meth_data = self.meth_parser.module.copy(), # TODO this meth_data?
+                              output_perfix = self.args.out)
 
 if __name__ == '__main__':
     selected_args = [arg for arg in sys.argv if arg.startswith("-")] #TODO startwith "--"? (there are no arguments that starts with -)
