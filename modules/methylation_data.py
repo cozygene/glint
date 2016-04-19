@@ -110,8 +110,9 @@ class MethylationData(Module):
         pheno = self._load_and_validate_samples_info(phenofile)
         if len(pheno[0]) != 1:
             logging.warning("more than one phenotype is not supported. will use only the first phenotype (first column)") # TODO remove when supported
-            pheno = pheno[:,1] 
-        return pheno
+            pheno = pheno[:,1]
+
+        return pheno.reshape(len(pheno)) # reshape to a 1d vector
 
     def _load_and_validate_covar(self, covarfiles_list):
         """
@@ -142,6 +143,7 @@ class MethylationData(Module):
             self.sites_size = len(self.cpgnames)
             if (self.data.shape[0] != self.sites_size): # TODO remove this after tests
                 common.terminate("After excluding sites, methylation data sites size is %s but we got %s" % (self.data.shape[0], self.sites_size))
+            logging.debug("%s sites were excluded" % len(sites_indicies_list))
 
     def remove_samples_indices(self, indices_list):
         """
@@ -164,7 +166,8 @@ class MethylationData(Module):
             self.samples_size = len(self.samples_ids)
             if (self.data.shape[1] != self.samples_size): # TODO remove this after tests
                 common.terminate("After removing samples, methylation data samples size is %s but we got %s" % (self.data.shape[1], self.samples_size))
-    
+            logging.debug("%s samples were removed" % len(indices_list))
+
     def get_mean_per_site(self):
         """
         returns array that contains the mean value (average) for each methylation site
@@ -200,7 +203,6 @@ class MethylationData(Module):
         logging.info("excluding sites...")
         indices_list = [i for i, site in enumerate(self.cpgnames) if site in exclude_list]
         self.exclude_sites_indices(indices_list)
-        logging.debug("%s sites were excluded" % len(indices_list))
 
     def keep(self, keep_list):
         """
@@ -211,7 +213,6 @@ class MethylationData(Module):
         logging.info("keeping samples...")
         remove_indices_list = [i for i, sample in enumerate(self.samples_ids) if sample not in keep_list]
         self.remove_samples_indices(remove_indices_list)
-        logging.debug("%s samples were removed" % len(remove_indices_list))
 
     def remove(self, remove_list):
         """
@@ -223,23 +224,22 @@ class MethylationData(Module):
         indices_list = [i for i, sample in enumerate(self.samples_ids) if sample in remove_list]
         self.remove_samples_indices(indices_list)
 
+    # TODO add fail test
     def exclude_sites_with_low_mean(self, min_value):
         """
         removes sites with mean < min_value
         """
         logging.info("excluding sites with mean lower than %s..." % min_value)
-        min_values_indices = where(self.get_mean_per_site() < min_value)  
+        min_values_indices = where(self.get_mean_per_site() < min_value)[0]  
         self.exclude_sites_indices(min_values_indices)
-        logging.debug("%s sites were excluded" % len(min_values_indices))
 
     def exclude_sites_with_high_mean(self, max_value):
         """
         removes sites with mean > max_value
         """
         logging.info("removing sites with mean greater than %s..." % max_value)
-        max_values_indices = where(self.get_mean_per_site() > max_value)
+        max_values_indices = where(self.get_mean_per_site() > max_value)[0]
         self.exclude_sites_indices(max_values_indices)
-        logging.debug("%s sites were excluded" % len(max_values_indices))
 
     def save(self, methylation_data_filename):
         """
@@ -272,7 +272,6 @@ class MethylationData(Module):
 
         # exclude all sites with low std
         self.exclude_sites_indices(std_sorted_indices[:include_from_index])
-        logging.debug("%s sites were excluded" % len(std_sorted_indices[:include_from_index]))
 
 
     
@@ -287,7 +286,7 @@ class MethylationData(Module):
         # """
         # max_missing_values = int(missing_values_th * self.samples_size)
         # nan_quantity_per_site = isnan(self.data).sum(axis=1) 
-        # many_nan_indices = where(nan_quantity_per_site > max_missing_values)
+        # many_nan_indices = where(nan_quantity_per_site > max_missing_values) # TODO add [0]?
         # logging.debug("Removing %s out of %s sites with more than %s missing values" % (len(many_nan_indices), self.sites_size, max_missing_values))
         # self.exclude_sites_indices(many_nan_indices)
         # logging.debug("%s sites were excluded" % len(many_nan_indices)
@@ -305,7 +304,7 @@ class MethylationData(Module):
         # masked_data = masked_array(self.data, isnan(self.data)) 
         # mean_per_site = average(masked_data, axis=1)  
         # # TODO is masked_data.mask equal to nan_indices? if so, we don't need to run this "where" line and just use masked_data.mask instead of nan_indices
-        # nan_indices = where(masked_data.mask)                    # find nan values indices
+        # nan_indices = where(masked_data.mask) #TODO add [0] ?                 # find nan values indices
         # self.data[nan_indices] = mean_per_site[nan_indices[0]]    # replace nan values by the mean of each site
 
     def copy(self):
