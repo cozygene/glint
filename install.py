@@ -110,7 +110,7 @@ def setup_glint():
         url='https://github.com/cozygene/glint',
         packages=['configuration','parsers', 'modules', 'utils'],
         package_data={'parsers':['assets/*']}, #data files which are not python files should be inside one of the packages specified in packages
-        scripts=['glint.py'], 
+        scripts=['glint.py', 'convertToGlintInput.R'], 
         #install_requires=[], # leave this commented out.declaring dependencies that are already install can cause problems
         include_package_data=True,
         zip_safe=False,

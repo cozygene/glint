@@ -39,11 +39,13 @@ class MethylationData(Module):
         """
         if not isinstance(datafile, file):
             datafile = open(datafile, 'r')
+
+                    
         logging.info("loading file %s..." % datafile.name)
 
         data = loadtxt(datafile, dtype = str)#, converters = lambda x: x if x != 'NA' else 'nan')#,delimiter=';', missing_values='NA', filling_values=nan)# = lambda x: x if x != 'NA' else nan)#, missing_values = '???', filling_values = 0)
         # data = genfromtxt(args.datafile, dtype = str , delimiter=';', usemask = 'True', missing_values = 'NA', filling_values = "???")
-
+        # or just  ma.masked_values(d, 'NA')
         if data.ndim != dim:
             common.terminate("the file '%s' is not a %sd matrix" % (datafile.name, dim))
 
