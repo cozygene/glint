@@ -1,10 +1,10 @@
 from modules import methylation_data
 from numpy import loadtxt, array_equal
 import logging
-from tests import tools
+from tests.test_tools import tools, test_logger
 import unittest
 
-class DataTester(unittest.TestCase):
+class DataTester(test_logger.LogTestCase, unittest.TestCase):
     FAKE_DATA  = "tests/methylation_data/files/data.txt"
     FAKE_PHENO = "tests/methylation_data/files/pheno.txt"
     FAKE_PHENO_BAD = "tests/methylation_data/files/pheno_bad.txt"
@@ -44,6 +44,8 @@ class DataTester(unittest.TestCase):
         self.test_load_and_validate_covar()
         self.test_load_and_validate_phenotype()
         self.test_add_covariates()
+        self.test_fail_exclude()
+        self.test_fail_remove()
 
     def test_load_and_validate_phenotype(self):
         logging.info("Testing validate pheno fails...")
@@ -73,6 +75,23 @@ class DataTester(unittest.TestCase):
         assert array_equal(data_copy.data, data_after_std.data)
         logging.info("PASS")
 
+    def test_fail_exclude(self):
+        logging.info("Testing exclude failure...")
+        data_copy = self.meth_data.copy()
+        with self.assertLogs(level=logging.ERROR):
+            data_copy.exclude_sites_indices(range(12))
+        with self.assertLogs(level=logging.WARNING):
+            data_copy.exclude_sites_indices([])
+        logging.info("PASS")
+
+    def test_fail_remove(self):
+        logging.info("Testing remove failure...")
+        data_copy = self.meth_data.copy()
+        with self.assertLogs(level=logging.ERROR):
+            data_copy.remove_samples_indices(range(12))
+        with self.assertLogs(level=logging.WARNING):
+            data_copy.remove_samples_indices([])
+        logging.info("PASS")  
 
     def test_include(self):
         logging.info("Testing include...")

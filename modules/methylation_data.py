@@ -135,14 +135,13 @@ class MethylationData(Module):
         """
         if len(sites_indicies_list) == 0:
             logging.warning("found no sites to remove")
-        elif len(sites_indicies_list) == self.sites_size:
-            logging.error("all sites are about to be remove") # TODO terminate or warn or error witout terminateing?
         else:
+            if len(set(range(self.sites_size)).difference(set(sites_indicies_list))) == 0:
+                logging.error("all sites are about to be remove") # TODO terminate or warn or error witout terminateing?
+
             self.data = delete(self.data, sites_indicies_list, axis = 0)
             self.cpgnames = delete(self.cpgnames, sites_indicies_list)
             self.sites_size = len(self.cpgnames)
-            if (self.data.shape[0] != self.sites_size): # TODO remove this after tests
-                common.terminate("After excluding sites, methylation data sites size is %s but we got %s" % (self.data.shape[0], self.sites_size))
             logging.debug("%s sites were excluded" % len(sites_indicies_list))
 
     def remove_samples_indices(self, indices_list):
@@ -154,9 +153,10 @@ class MethylationData(Module):
         """
         if len(indices_list) == 0:
             logging.warning("found no samples to remove")
-        elif len(indices_list) == self.samples_size:
-            logging.error("all samples are about to be remove") # TODO terminate or warn or error witout terminateing?
         else:
+            if len(set(range(self.samples_size)).difference(set(indices_list))) == 0:
+                logging.error("all samples are about to be remove") # TODO terminate or warn or error witout terminateing?
+
             self.data = delete(self.data, indices_list, axis = 1)
             if self.phenotype is not None:
                 self.phenotype = delete(self.phenotype, indices_list, axis = 0)
@@ -164,8 +164,6 @@ class MethylationData(Module):
                 self.covar = delete(self.covar, indices_list, axis = 0)
             self.samples_ids = delete(self.samples_ids, indices_list)
             self.samples_size = len(self.samples_ids)
-            if (self.data.shape[1] != self.samples_size): # TODO remove this after tests
-                common.terminate("After removing samples, methylation data samples size is %s but we got %s" % (self.data.shape[1], self.samples_size))
             logging.debug("%s samples were removed" % len(indices_list))
 
     def get_mean_per_site(self):

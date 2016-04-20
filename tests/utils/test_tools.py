@@ -2,7 +2,7 @@ from numpy import loadtxt
 from utils import tools
 from modules import methylation_data
 import logging
-from tests import tools as tests_tools
+from tests.test_tools import tools as tests_tools
 
 
 class ToolsTester():

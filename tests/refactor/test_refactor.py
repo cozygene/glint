@@ -2,7 +2,7 @@ from modules import refactor,methylation_data
 from numpy import loadtxt, array_equal
 from utils import LinearRegression
 import logging
-from tests import tools
+from tests.test_tools import tools
 from pickle import load
 
 class FeatureSelectionTester():

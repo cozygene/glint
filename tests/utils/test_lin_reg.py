@@ -1,4 +1,4 @@
-from tests import tools
+from tests.test_tools import tools
 from numpy import loadtxt
 from utils import LinearRegression
 import logging

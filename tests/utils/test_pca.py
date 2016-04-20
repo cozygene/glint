@@ -2,7 +2,7 @@ from numpy import loadtxt
 from utils import pca
 from modules import methylation_data
 import logging
-from tests import tools
+from tests.test_tools import tools
 
 class PCATester():
     DATA_FILE = "tests/utils/files/datafile2"
