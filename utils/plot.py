@@ -26,7 +26,7 @@ def draw_setup(function):
         if self.current_draw_index -1 == self.plots_number: # draw all plots
             if self.save_file:
                 plot.savefig(self.save_file)
-            plot.show()
+            # plot.show()
 
         return output
         

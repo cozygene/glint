@@ -34,7 +34,7 @@ class RefactorParser( ModuleParser ):
       try:
 
         bad_probes_list = set()
-        [bad_probes_list.update(loadtxt(probes_file, dtype=str)) for probes_file in BAD_PROBES_FILES]
+        [bad_probes_list.update(loadtxt(os.path.join( os.path.dirname(__file__), probes_file), dtype=str)) for probes_file in BAD_PROBES_FILES]
         self.module  = refactor.Refactor(methylation_data = meth_data, 
                               k = args.k, 
                               t = args.t, 
