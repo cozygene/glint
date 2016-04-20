@@ -137,7 +137,7 @@ class PCAScatterPlot(Plot):
              transform = ax2.transAxes)
 
         
-        # TODO - it's also possible to draw using "ax2.xaxis.grid()"
+        # it's also possible to draw using "ax2.xaxis.grid()"
             # but it doesn't work (lines are drawn bad) without the "[plot.axvline(x=x_std*i, color='r',linestyle='-') for i in  lines]".
             # moreover it only works if the axvline line is called before the .set_xticks line. otherwise it won't work.
             # I also noticed that if I set the xlim (out.set_xlim) it works with or without "[plot.axvline(x=x_std*i, color='r',linestyle='-') for i in  lines]"

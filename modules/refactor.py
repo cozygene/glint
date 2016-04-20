@@ -118,16 +118,6 @@ class Refactor(Module):
 
    
     """
-    writes data to file filepath.
-    removes the file if already exists
-    """
-    def _write_file( self, filepath, data):   
-        if  os.path.exists(filepath):
-            os.remove(filepath) #TODO move the last file to other place?
-        with open(filepath, 'w') as f:
-            f.write(data)
-
-    """
     TODO add doc
     """
     def _refactor( self ):

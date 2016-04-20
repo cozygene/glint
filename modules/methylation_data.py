@@ -62,30 +62,33 @@ class MethylationData(Module):
         # remove sample ID and sites names from matrix
         # that kind of assignment will create a copy of O[1:,1:]
         # Note that assignment like self.O = O will not create a copy
-        data = data[1:,1:].astype(float) 
-        
+        try:
+            data = data[1:,1:].astype(float) 
+        except ValueError:
+            common.terminate("file contains values which are not float")
         # must be called after convertion to float
         logging.info("checking for missing values in datafile file...")
         validate_no_missing_values(data) #TODO remove when missing values are supported
 
         return data, samples_ids, cpgnames
 
-    """
-    reads matrix from matrix_file_path
-    validates that the matrix has number of rows as the number of sample ids
-    checks that the sample ids in matrix (the first column) are the same ids as in sample_ids list
-    and in the same order
-    """
+
     def _validate_samples_ids(self, data):
+        """
+        reads matrix from matrix_file_path
+        validates that the matrix has number of rows as the number of sample ids
+        checks that the sample ids in matrix (the first column) are the same ids as in sample_ids list
+        and in the same order
+        """
         if len(data) != len(self.samples_ids):
             common.terminate("the file doesn't include all sample ids")
 
         matrix_sample_ids = data[:,0]
 
-        if not (self.samples_ids == matrix_sample_ids).all(): # TODO check this is not by order
+        if not (self.samples_ids == matrix_sample_ids).all():
             if len(set(self.samples_ids)^set(matrix_sample_ids)) != 0:
                 common.terminate("sample ids are not identical to the sample ids in data file")
-            common.terminate("sample ids are not in the same order as in the datafile") # TODO should we terminate because of order?
+            common.terminate("sample ids are not in the same order as in the datafile") # TODO Elior, should we terminate because sample_ids in files are not in the same order as in datafile?
 
     def _load_and_validate_samples_info(self, samples_info):
         """
@@ -98,7 +101,10 @@ class MethylationData(Module):
         # remove sample IDs from matrix
         # that kind of assignment will create a copy of data[:,1]
         # Note that assignment like self.O = O will not create a copy
-        data = data[:,1:].astype(float) # use only the first phenotype # TODO should check if can convert  to float
+        try:
+            data = data[:,1:].astype(float) # use only the first phenotype
+        except ValueError:
+            common.terminate("file contains values which are not float" )
         validate_no_missing_values(data)
         return data
 
@@ -139,7 +145,7 @@ class MethylationData(Module):
             logging.warning("found no sites to remove")
         else:
             if len(set(range(self.sites_size)).difference(set(sites_indicies_list))) == 0:
-                logging.error("all sites are about to be remove") # TODO terminate or warn or error witout terminateing?
+                logging.error("all sites are about to be remove") # TODO Elior, should we terminate or warn or error witout terminateing?
 
             self.data = delete(self.data, sites_indicies_list, axis = 0)
             self.cpgnames = delete(self.cpgnames, sites_indicies_list)
@@ -157,7 +163,7 @@ class MethylationData(Module):
             logging.warning("found no samples to remove")
         else:
             if len(set(range(self.samples_size)).difference(set(indices_list))) == 0:
-                logging.error("all samples are about to be remove") # TODO terminate or warn or error witout terminateing?
+                logging.error("all samples are about to be remove") # TODO Elior, should we terminate or warn or error witout terminateing?
 
             self.data = delete(self.data, indices_list, axis = 1)
             if self.phenotype is not None:
@@ -184,9 +190,6 @@ class MethylationData(Module):
         logging.info("including sites...")
         indices_list = [i for i, site in enumerate(self.cpgnames) if site in include_list]
         self.data = self.data[indices_list, :]
-        # TODO remove this test if it didnt fail
-        if sorted(indices_list) != indices_list:
-            common.terminate("indices_list must be sorted in order to do self.cpgnames[indices_list]")
         self.cpgnames = self.cpgnames[indices_list]
         self.sites_size = len(self.cpgnames)
         logging.debug("methylation data new size is %s" % str(self.data.shape))
@@ -223,8 +226,7 @@ class MethylationData(Module):
         logging.info("removing samples...")
         indices_list = [i for i, sample in enumerate(self.samples_ids) if sample in remove_list]
         self.remove_samples_indices(indices_list)
-
-    # TODO add fail test
+        
     def exclude_sites_with_low_mean(self, min_value):
         """
         removes sites with mean < min_value

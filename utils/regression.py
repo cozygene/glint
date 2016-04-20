@@ -9,7 +9,7 @@ class LinearRegression(object):
         elif y.ndim == 2: # y is a matrix
             self.residuals = self._regress_out_from_matrix(y, x)
 
-        # TODO - Elior, change this
+        # TODO Elior, change this
         self.p_value = 0.1
         self.t_statistic = 0.2
         self.coef = 0.3

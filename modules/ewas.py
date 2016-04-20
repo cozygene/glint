@@ -52,12 +52,12 @@ class EWAS(Module):
         output = array(output)
 
         if output_filename:
-            qqplot_out = output_filename + '_qqplot' # TODO change this?
+            qqplot_out = output_filename + '_qqplot' # TODO Elior, change this name (qqplot output file name)?
             logging.info("savings results to %s and qq-plot to %s" % (output_filename, qqplot_out))  
             savetxt(output_filename, output, fmt='%s')
             # plot the p-value
             qqplot = plot.QQPlot(save_file = qqplot_out)
-            qqplot.draw(output[:,1].astype(float), title = "TODO CHANGE THIS", xtitle="TODO change this x", ytitle = "TODO change this y")
+            qqplot.draw(output[:,1].astype(float), title = "TODO Elior, CHANGE THIS", xtitle="TODO Elior, change this x", ytitle = "TODO Elior, change this y")
 
         return output
 

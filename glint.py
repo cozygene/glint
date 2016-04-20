@@ -17,8 +17,8 @@ class GlintParser(ModuleParser):
         optional.add_argument('--out', type = str,  default = "",   help = "changes the prefix of the output file ")
 
         modules = parser.add_argument_group('4.Glint modules')
-        modules.add_argument('--refactor', action='store_true', help = "<todo add help here>")
-        modules.add_argument('--ewas',     action='store_true', help = "<todo add help here>" )
+        modules.add_argument('--refactor', action='store_true', help = "<TODO Elior, add help here>")
+        modules.add_argument('--ewas',     action='store_true', help = "<TODO Elior, add help here>" )
 
         super(GlintParser, self).__init__(optional, modules)
     
@@ -126,8 +126,8 @@ class ModulesArgumentParsers(object):
                               output_perfix = self.args.out)
 
 if __name__ == '__main__':
-    selected_args = [arg for arg in sys.argv if arg.startswith("-")] #TODO startwith "--"? (there are no arguments that starts with -)
-    
+    selected_args = [arg for arg in sys.argv if arg.startswith("--")] 
+
     parser = ModulesArgumentParsers(selected_args)
 
     parser.add_arguments()

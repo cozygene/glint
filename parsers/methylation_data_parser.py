@@ -124,7 +124,7 @@ class MethylationDataParser(ModuleParser):
                 if args.pheno is not None:
                     self.module.upload_new_phenotype_file(args.pheno)
                 if args.covar is not None:
-                    self.module.upload_new_covaritates_files(args.covar) # TODO check list
+                    self.module.upload_new_covaritates_files(args.covar)
             else:
                 self.module = methylation_data.MethylationData(datafile = args.datafile, phenofile = args.pheno, covarfiles = args.covar)
 
