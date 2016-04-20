@@ -99,6 +99,6 @@ if(transpose){
 
 
 # 6. save output
-output_filename <- paste("output", datafile, sep='_') # do not add .glint extenstion since glint will think it's commpressed glint data file (which is not)
+output_filename <- paste("output_", datafile, ".txt", sep='') # do not add .glint extenstion since glint will think it's commpressed glint data file (which is not)
 print(paste("data is saved to", output_filename, "as glint format"))
 write.table(data, output_filename, na = "NaN", sep = "\t", col.names = FALSE, row.names = FALSE) # TODO: when adding names dont forget the total name (data[0,0])
