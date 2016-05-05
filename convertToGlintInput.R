@@ -38,24 +38,23 @@ if (!file.exists(datafile)){
 
 # transpose - if user specifyed transpose - check it is a boolean
 if (typeof(transpose) == "character") { 
+
     if (toupper(transpose) %in% c('TRUE', 'FALSE')) {# all boolean options
         transpose <- type.convert(transpose)
     } else {
         print(paste("not a boolean value", transpose,"(booleans: true, false)"))
         quit()
     }
-} else if (is.numeric(type.convert(transpose))) {
-    print(paste("not a boolean value", transpose,"(booleans: true, false)"))
-     quit()
 }
-
 # argname - 
-# if user specified NULL argname or numeric argname
-if (is.numeric(type.convert(argname))) {
-    print(paste("argname is not a string value", argname))
-    quit()
-} else if (!is.null(argname) && toupper(argname) %in% c('NULL')){
-    argname <- NULL
+if(!is.null(argname)) {
+    # if user specified NULL argname or numeric argname
+    if (is.numeric(type.convert(argname))) {
+        print(paste("argname is not a string value", argname))
+        quit()
+    } else if (!is.null(argname) && toupper(argname) %in% c('NULL')){
+        argname <- NULL
+    }
 }
 
 
@@ -75,19 +74,33 @@ load(datafile)
 if (!is.null(argname)){
     if (argname %in% ls()){
         data <- get(argname)
+        print(paste("found data in argument", argname))
     } else {
-        print(paste("cant find argument ", argname, "in datafile", datafile))
+        print(paste("cant find argument", argname, "in datafile", datafile))
         quit()
     }
 } else {
-
     all_frame_args <- ls()[sapply(mget(ls()), is.data.frame)]
-    # dfs <- ls()[sapply(get(ls()), is.list)]
+    all_matrix_args <- ls()[sapply(mget(ls()), is.matrix)]
+
     if(length(all_frame_args) != 1){
-        print("cant find data in datafile, please execute script again and specify argument name")
-        quit()
+        if (length(all_matrix_args) != 1) { # there is no data frame and no matrix in datafile
+            print("cant find one data frame or matrix in datafile, please execute script again and specify argument name")
+            quit()
+        }
+        else { # there is only data frame in datafile
+            print(paste("found matrix at argument name", all_matrix_args[1]))
+            data <- get(all_matrix_args[1])
+        }
     } else {
-        data <- get(all_frame_args[1])
+        if (length(all_matrix_args) == 1) { # there is both data frame and no matrix in datafile
+            print(paste("found data frame at", all_frame_args[1], " and matrix at ", all_matrix_args[1], ".\nRdata must contain only one data argument. Otherwise, please run this script again and specify argname"))
+            quit()
+        }
+        else { # there is only matrix in datafile
+            print(paste("found data frame at argument name", all_frame_args[1]))
+            data <- get(all_frame_args[1])
+        }
     }
 }
 
@@ -101,4 +114,4 @@ if(transpose){
 # 6. save output
 output_filename <- paste("output_", datafile, ".txt", sep='') # do not add .glint extenstion since glint will think it's commpressed glint data file (which is not)
 print(paste("data is saved to", output_filename, "as glint format"))
-write.table(data, output_filename, na = "NaN", sep = "\t", col.names = FALSE, row.names = FALSE) # TODO: when adding names dont forget the total name (data[0,0])
+write.table(data, output_filename, na = "NaN", sep = ",", quote=FALSE, col.names = NA, row.names = TRUE) # sep must be something but space or tabs since there is no name for index [0][0] and glint won't be able to read it. col.name = NA is for allowing [0][0] to be "" (so there will be something there)

@@ -117,6 +117,8 @@ class PCAScatterPlot(Plot):
         x_std = std(x)
         lines = range(-1* self.STD_LINES_SYMMETRIC_LIMIT, self.STD_LINES_SYMMETRIC_LIMIT + 1)
         lines.remove(0) 
+        lines.remove(1) 
+        lines.remove(-1) 
         
         # draw the lines
         [plot.axvline(x=x_std*i, color='r',linestyle='-') for i in  lines]
@@ -129,7 +131,7 @@ class PCAScatterPlot(Plot):
         ax2.set_xlim(left, right)  # set xlim to the one before duplicatin x-axis: that line is what causes the std-lines title to adjust window size changing
         
         ax2.set_xticks([x_std*i for i in  lines])           # set ticks in the std places (dont show them with grid since this grid is wrong, that is why we use axvlines above)
-        ax2.set_xticklabels(["%d std"%i for i in lines])    # set title for each tick
+        ax2.set_xticklabels(["%dsd"%i for i in lines])    # set title for each tick
        
         plot.text(0.5, 1.11, title,
              horizontalalignment='center',

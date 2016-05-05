@@ -2,8 +2,7 @@ import logging
 from pickle import load
 from modules import methylation_data
 from utils import common
-import argparse 
-from numpy import loadtxt
+import argparse
 from module_parser import ModuleParser
 GLINT_FORMATTED_EXTENSION = ".glint" #TODO move to a config file
 
@@ -49,10 +48,10 @@ class MethylationDataParser(ModuleParser):
         if not isinstance(fileobj, file):
             fileobj = open(fileobj, 'r')
         logging.info("loading file %s..." % fileobj.name)
-        data = loadtxt(fileobj, dtype = str)#, converters = lambda x: x if x != 'NA' else 'nan')#,delimiter=';', missing_values='NA', filling_values=nan)# = lambda x: x if x != 'NA' else nan)#, missing_values = '???', filling_values = 0)
+        data = common.load_data_file(fileobj.name, dim)#, converters = lambda x: x if x != 'NA' else 'nan')#,delimiter=';', missing_values='NA', filling_values=nan)# = lambda x: x if x != 'NA' else nan)#, missing_values = '???', filling_values = 0)
         # data = genfromtxt(args.datafile, dtype = str , delimiter=';', usemask = 'True', missing_values = 'NA', filling_values = "???")
 
-        if data.ndim != dim:
+        if data is None:
             common.terminate("The file '%s' is not a %sd vector" % (fileobj.name, dim))
 
         return data

@@ -3,7 +3,7 @@ import sys
 import copy
 import logging
 from pickle import dump
-from numpy import loadtxt, delete, isnan, nanstd, where, column_stack
+from numpy import delete, isnan, nanstd, where, column_stack
 from numpy.ma import average, masked_array
 from module import Module
 from utils import common
@@ -25,7 +25,7 @@ class MethylationData(Module):
     TODO add class doc here
     """
     def __init__(self, datafile, phenofile = None, covarfiles = []):
-        self.data, self.samples_ids, self.cpgnames = self._load_and_validate_datafile(datafile)        
+        self.data, self.samples_ids, self.cpgnames = self._load_and_validate_datafile(datafile)
         self.sites_size, self.samples_size = self.data.shape
         logging.debug("got methylation data with %s sites and %s samples id" % (self.sites_size, self.samples_size))
 
@@ -43,10 +43,8 @@ class MethylationData(Module):
                     
         logging.info("loading file %s..." % datafile.name)
 
-        data = loadtxt(datafile, dtype = str)#, converters = lambda x: x if x != 'NA' else 'nan')#,delimiter=';', missing_values='NA', filling_values=nan)# = lambda x: x if x != 'NA' else nan)#, missing_values = '???', filling_values = 0)
-        # data = genfromtxt(args.datafile, dtype = str , delimiter=';', usemask = 'True', missing_values = 'NA', filling_values = "???")
-        # or just  ma.masked_values(d, 'NA')
-        if data.ndim != dim:
+        data = common.load_data_file(datafile.name, dim)
+        if data is None:
             common.terminate("the file '%s' is not a %sd matrix" % (datafile.name, dim))
 
         return data
@@ -55,8 +53,7 @@ class MethylationData(Module):
         """
         returns data (type=float without samples ids and cpgnames) and sample_ids list and cpgnames list
         """
-        data = self._load_and_validate_file_of_dimentions(datafile, 2) 
-
+        data = self._load_and_validate_file_of_dimentions(datafile, 2)
         samples_ids = data[0,:][1:]  # extract samples ID
         cpgnames = data[:,0][1:]     # extract methylation sites names
         # remove sample ID and sites names from matrix
