@@ -158,9 +158,9 @@ class Refactor(Module):
     def _remove_covariates(self):
         if self.remove_covariates and self.meth_data.covar is not None:
             logging.info("Removing covariates...")
-
-            lin_reg = LinearRegression(self.meth_data.data, self.meth_data.covar)
-            self.meth_data.data = lin_reg.residuals
+            residuals = LinearRegression.regress_out(self.meth_data.data.transpose(), self.meth_data.covar)
+            residuals = residuals.transpose()
+            self.meth_data.data = residuals
 
     """
     TODO add doc
@@ -175,10 +175,8 @@ class Refactor(Module):
     """
     def _phenotype_feature_handler( self ):
         logging.info("Running phenotype feature selection...")
-        
-        lin_reg = LinearRegression(self.meth_data.data, self.meth_data.phenotype)
-        return lin_reg.residuals
-
+        residuals =  LinearRegression.regress_out(self.meth_data.data.transpose(), self.meth_data.phenotype)
+        return residuals.transpose()
     
     """
     TODO add doc

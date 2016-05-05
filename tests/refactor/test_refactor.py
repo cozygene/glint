@@ -58,10 +58,10 @@ class FeatureSelectionTester():
         # validate phenotype feature selection output (res_data) is correlated to our linear regression for (site, phenotype)
         res_data = module.feature_selection_handler()
         for i,site in enumerate(self.fs_meth_data.data):
-            lin_reg = LinearRegression(site, phenotype)
-            assert len(lin_reg.residuals) == len(site)
+            residuals = LinearRegression.regress_out(site, phenotype)
+            assert len(residuals) == len(site)
             # validate our residuals are corelated to res_data
-            assert tools.correlation(lin_reg.residuals, res_data[i])
+            assert tools.correlation(residuals, res_data[i])
 
         logging.info("PASS")
 
@@ -110,11 +110,11 @@ class RefactorTester():
 
         # remove "manually"
         for i,site in enumerate(self.meth_data.data):
-            lin_reg = LinearRegression(site, coavr)
-            assert len(lin_reg.residuals) == len(site)
+            residuals = LinearRegression.regress_out(site, coavr)
+            assert len(residuals) == len(site)
 
             # validate our residuals are corelated to res_data
-            assert tools.correlation(lin_reg.residuals, covar_meth_data.data[i])
+            assert tools.correlation(residuals, covar_meth_data.data[i])
 
         logging.info("PASS")
 

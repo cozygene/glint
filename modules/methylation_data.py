@@ -117,7 +117,7 @@ class MethylationData(Module):
             logging.warning("more than one phenotype is not supported. will use only the first phenotype (first column)") # TODO remove when supported
             pheno = pheno[:,1]
 
-        return pheno.reshape(len(pheno)) # reshape to a 1d vector
+        return pheno
 
     def _load_and_validate_covar(self, covarfiles_list):
         """

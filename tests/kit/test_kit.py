@@ -1,5 +1,6 @@
 from modules import methylation_data, kit
-
+import logging
+ 
 class PCAKitTester(object):
     FAKE_DATA  = "tests/kit/files/data.txt"
     def __init__(self):
@@ -9,7 +10,9 @@ class PCAKitTester(object):
         self.test_remove_outliers()
 
     def test_remove_outliers(self):
+        logging.info("Test remove outliers")
         self.pca_kit.draw_pca_scatter(3)
         # raw_input()
         self.pca_kit.exclude_maxpcstds([[3,1]])
         self.pca_kit.draw_pca_scatter(5)
+        logging.info("PASS")
