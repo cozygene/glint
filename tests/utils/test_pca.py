@@ -5,7 +5,7 @@ import logging
 from tests.test_tools import tools
 
 class PCATester():
-    DATA_FILE = "tests/utils/files/datafile2"
+    DATA_FILE = "tests/files/datafile2"
     PCA_P_RES = "tests/utils/files/datafile2_pcs"
 
     def __init__(self):

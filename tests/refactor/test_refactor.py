@@ -68,7 +68,7 @@ class FeatureSelectionTester():
         logging.info("PASS")
 
 class RefactorTester():
-    DEMO_SMALL_DATA = "tests/refactor/files/demofiles/datafile2"
+    DEMO_SMALL_DATA = "tests/files/datafile2"
     DEMO_DATA_NO_BAD_PROBES = "tests/refactor/files/demofiles/datafile2_no_bad_probes"
     DEMO_COVAR = "tests/refactor/files/demofiles/covariates"
     DEMO_PHENO = "tests/refactor/files/demofiles/phenotype"

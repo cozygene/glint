@@ -6,7 +6,7 @@ from tests.test_tools import tools as tests_tools
 
 
 class ToolsTester():
-    DATA_FILE = "tests/utils/files/datafile2"
+    DATA_FILE = "tests/files/datafile2"
     LOW_RANK_APPROX = "tests/utils/files/datafile2_5_rank_approx"
     EUC_DIST = "tests/utils/files/datafile2_euc_dist_first_half_second_half"
     K = 5
