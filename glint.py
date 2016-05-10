@@ -26,7 +26,8 @@ class GlintParser(ModuleParser):
 class ModulesArgumentParsers(object):
     FUNCTIONALITY_ARGS = [ '--gsave', '--refactor', '--ewas'] # TODO find better way to hold arguments that cause some functionality. glint is not supposed to be aware of those args
     DATA_PREPROCESSING_NOT_RELEVANT_FOR_REFACTOR = ['--include', '--exclude', '--minmean', '--maxmean']
-        
+    SOLE_ARGS = ["--plotpcs"] # functilnality flags that cannot be soecified with other functionaity flags
+
     def __init__(self, user_args_selection):
         self.selected_args = user_args_selection
         self.parser = GlintArgumentParser(prog=os.path.basename(sys.argv[0]),
@@ -86,18 +87,26 @@ class ModulesArgumentParsers(object):
         selected_args = set(self.selected_args)
         func_args = set(self.FUNCTIONALITY_ARGS + self.kit_parser.all_args)
         optional_args = set(optional_args)
+        sole_args = set(self.SOLE_ARGS)
         args_not_relevant_for_refactor = set(self.DATA_PREPROCESSING_NOT_RELEVANT_FOR_REFACTOR)
 
-        if len(selected_args.intersection(func_args)) == 0:
+        func_args_chosen = selected_args.intersection(func_args)
+        args_not_relevant_for_refactor_chosen = selected_args.intersection(args_not_relevant_for_refactor)
+        sole_args_chosen = selected_args.intersection(sole_args)
+
+        if len(func_args_chosen) == 0:
             common.terminate("Nothing to do with the data, select at least one argument from %s" % func_args)
+
+        elif (len(func_args_chosen) > len(sole_args_chosen)) or (len(sole_args_chosen) > 1):
+            common.terminate("options from %s cannot be specified with any other flags in the same command. you chose %s" % (str(list(sole_args)), str(list(func_args_chosen))))
 
         differ = selected_args.difference(optional_args)
         if differ:
-            common.terminate("selected redundent argument" + str(differ)) # TODO: tell which module the arguments belong to, to user might forgot to specify --module and that msg can be confusing
+            common.terminate("selected redundent argument" + str(list(differ))) # TODO: tell which module the arguments belong to, to user might forgot to specify --module and that msg can be confusing
 
         # warn if only refactor module is selected and  user selectes data management flags that are not relevant for refactor
-        if self.args.refactor and len(selected_args.intersection(func_args)) == 1:
-            not_relevant_atgs = list(selected_args.intersection(args_not_relevant_for_refactor))
+        if self.args.refactor and len(func_args_chosen) == 1:
+            not_relevant_atgs = list(args_not_relevant_for_refactor_chosen)
             if len(not_relevant_atgs) != 0:
                 logging.warning("selected data management arguments which are not relevant for refactor: %s" % str(not_relevant_atgs))
 
