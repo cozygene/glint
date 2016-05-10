@@ -15,7 +15,8 @@ class MethylationDataParser(ModuleParser):
         optional = parser.add_argument_group('2.Data management options ')
         optional.add_argument('--covar',   type = argparse.FileType('r'), nargs='*', help = "A covariates file")
         optional.add_argument('--pheno',   type = argparse.FileType('r'), help = "A phenotype file")
-        
+        optional.add_argument('--maxpcstd', metavar=('PC_INDEX (TODO Elior, change those names?', 'STD_COUNT'), type = int, action = 'append', nargs = 2, help = "TODO Elior, edit: pc index and std number of times for removing outliers")
+            
         group1 = optional.add_mutually_exclusive_group(required = False)
         group1.add_argument('--include', type = argparse.FileType('r'), help = "A list of sites to include in the data; removes the rest of the sites")
         group1.add_argument('--exclude', type = argparse.FileType('r'), help = "A list of sites to exclude from the data; includes the rest of the sites")
@@ -100,6 +101,8 @@ class MethylationDataParser(ModuleParser):
             self.module.keep(self.keep_list)
         if self.args.remove is not None:
             self.module.remove(self.remove_list)
+        if self.args.maxpcstd is not None:
+            self.module.exclude_maxpcstds(self.args.maxpcstd)
 
     # must be called after all preprocessing (preprocess_samples_data, preprocess_sites_data)
     # save methylation data in Glint format

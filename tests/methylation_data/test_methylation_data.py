@@ -5,7 +5,7 @@ from tests.test_tools import tools, test_logger
 import unittest
 
 class DataTester(test_logger.LogTestCase, unittest.TestCase):
-    FAKE_DATA  = "tests/methylation_data/files/data.txt"
+    FAKE_DATA = "tests/methylation_data/files/data.txt"
     FAKE_PHENO = "tests/methylation_data/files/pheno.txt"
     FAKE_PHENO_BAD = "tests/methylation_data/files/pheno_bad.txt"
     FAKE_COVAR = "tests/methylation_data/files/covar.txt"
@@ -24,6 +24,8 @@ class DataTester(test_logger.LogTestCase, unittest.TestCase):
     FAKE_DATA_MAX_MEANS = "tests/methylation_data/files/data_excluded_mean_above_0.5.txt"
     FAKE_DATA_MIN_MEANS = "tests/methylation_data/files/data_excluded_mean_below_0.5.txt"
     FAKE_DATA_MEANS= "tests/methylation_data/files/data_means.txt"
+    DATA_FILE = "tests/files/datafile2"
+    SAMPLES_AFTER_MAXPCSTD = "tests/methylation_data/files/datafile2_sample_ids_after_maxpcstd_3_in_pcs_1-2"
     MIN_MEAN_TH = 0.5
     MAX_MEAN_TH = 0.5
     STDTH = 0.25
@@ -47,6 +49,7 @@ class DataTester(test_logger.LogTestCase, unittest.TestCase):
         self.test_add_covariates()
         self.test_fail_exclude()
         self.test_fail_remove()
+        self.test_remove_outliers()
         logging.info("Testing Finished on DataTester")
 
     def test_load_and_validate_phenotype(self):
@@ -185,3 +188,10 @@ class DataTester(test_logger.LogTestCase, unittest.TestCase):
 
         logging.info("PASS")
 
+    def test_remove_outliers(self):
+        logging.info("Test remove outliers")
+        data = methylation_data.MethylationData(datafile = self.DATA_FILE)
+        samples_after_maxpcstd =  loadtxt(self.SAMPLES_AFTER_MAXPCSTD, dtype = str)
+        orig_samples = set([ i for i in data.samples_ids])
+        data.exclude_maxpcstds([[1,3], [2,3]])
+        assert array_equal(data.samples_ids, samples_after_maxpcstd)

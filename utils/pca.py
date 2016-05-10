@@ -15,4 +15,4 @@ class PCA( object ):
         scaled = preprocessing.StandardScaler().fit(A).transform(A)
         pca_res = pca().fit(scaled)
         self.U = pca_res.components_.transpose() # loadings
-        self.P = pca_res.transform( scaled )     # scores
+        self.P = pca_res.transform(scaled)     # scores

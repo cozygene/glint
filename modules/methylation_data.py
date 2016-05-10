@@ -3,10 +3,10 @@ import sys
 import copy
 import logging
 from pickle import dump
-from numpy import delete, isnan, nanstd, where, column_stack
+from numpy import delete, isnan, nanstd, where, column_stack, std
 from numpy.ma import average, masked_array
 from module import Module
-from utils import common
+from utils import common, pca
 from bisect import bisect_right
 
 COMPRESSED_FILENAME = "methylation_data"
@@ -272,6 +272,25 @@ class MethylationData(Module):
         # exclude all sites with low std
         self.exclude_sites_indices(std_sorted_indices[:include_from_index])
 
+    def exclude_maxpcstds(self, pcstds):
+        """
+        pcstds is a list of lists (or tuples) where the first index is the pc_index and the second index is the std_num
+        exclude samples that have std above std_num times higer or lower than the pc std on every std_index
+        
+        for example, let pcstds be [(1,3),(5,4)] - that will exclude samples that have std above 3 or below -3 on pc 1 and above 4 or below -4 in pc 5 
+        """
+        pca_out = pca.PCA(self.data.transpose())
+
+        maxpcstds_samples_indices = set()
+        for pc_index, std_num in pcstds:
+            logging.info("finding samples with std higher than %d stds or lower than %d stds on pc number %d..." % (std_num, -1 * std_num, pc_index))
+            pc = pca_out.P[:,pc_index-1] # user start counting from 1 and python from 0
+            std_pc = std(pc)
+            maxpcstds_samples_indices.update(where((pc > std_num * std_pc) | (pc < -1 * std_num * std_pc))[0])
+
+        if maxpcstds_samples_indices:
+            logging.info("excluding samples with max std...")
+            self.remove_samples_indices(list(maxpcstds_samples_indices))
 
     
     def remove_missing_values_sites(self, missing_values_th = 0.03):
