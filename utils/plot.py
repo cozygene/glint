@@ -45,7 +45,7 @@ class Plot(object):
             self.nrows = ceil(sqrt(plots_number))
             self.ncols = ceil(self.plots_number / self.nrows)
             # create windows
-            fig, axes = plot.subplots()
+            fig, axes = plot.subplots(figsize = (self.ncols*8,self.nrows*4))
             fig.subplots_adjust(hspace=.5)
 
 
