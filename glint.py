@@ -97,7 +97,7 @@ class ModulesArgumentParsers(object):
         if len(func_args_chosen) == 0:
             common.terminate("Nothing to do with the data, select at least one argument from %s" % func_args)
 
-        elif (len(func_args_chosen) > len(sole_args_chosen)) or (len(sole_args_chosen) > 1):
+        elif ((len(func_args_chosen) > len(sole_args_chosen)) and (len(sole_args_chosen) > 0))or (len(sole_args_chosen) > 1):
             common.terminate("options from %s cannot be specified with any other flags in the same command. you chose %s" % (str(list(sole_args)), str(list(func_args_chosen))))
 
         differ = selected_args.difference(optional_args)
