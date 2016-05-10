@@ -9,9 +9,11 @@ class FeatureSelectionTester():
     FAKE_DATA  = "tests/refactor/files/feature_selection/data"
     FAKE_CONTROL = "tests/refactor/files/feature_selection/control"
     def __init__(self):
+        logging.info("Testing Started on FeatureSelectionTester")
         self.fs_meth_data = methylation_data.MethylationData(datafile = self.FAKE_DATA, phenofile = self.FAKE_CONTROL)
         self.test_controls_fs()
         self.test_phenotype_fs()
+        logging.info("Testing Finished on FeatureSelectionTester")
 
     def test_controls_fs(self):
         """
@@ -90,11 +92,14 @@ class RefactorTester():
     RANK_K5_T400_stdth008covar = "tests/refactor/files/senarios_out/k5t400stdth0.08covar.out.rankedlist.txt"
 
     def __init__(self):
+        logging.info("Testing Started on RefactorTester")
         self.meth_data = methylation_data.MethylationData(datafile = self.DEMO_SMALL_DATA, covarfiles = [self.DEMO_COVAR]   , phenofile = self.DEMO_PHENO)
         self.test_remove_covariates()
         self.test_low_rank_approx_distances()
         self.test_exclude_bad_probes()
         self.test_senarios()
+
+        logging.info("Testing Finished on RefactorTester")
 
     def test_remove_covariates(self):
         logging.info("Testing removing covariates...")

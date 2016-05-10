@@ -67,7 +67,7 @@ class QQPlot(Plot):
     @draw_setup
     def draw(self, y, title = None, xtitle = None, ytitle = None, style = 'b.'):
         #x
-        x = -log10(linspace(0,1,len(y)+1))
+        x = -log10(linspace(0.001,1.001,len(y)+1)) # 0.001 and 1.001 instead of 0 and 1 in order to avoid dividing by zero warning
         x = x[1:]
         x.sort()
 

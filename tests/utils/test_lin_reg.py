@@ -10,10 +10,12 @@ class LinearRegressionTester():
     LIN_REG_FIT_MODEL = "tests/utils/files/fit_model_results.txt" #In the first row you have the coefficient, f-statistic and p-value of the test on the first column in lin_reg_test_x.txt, and in the second row you have the same details for the second column in lin_reg_test_x.txt
     
     def __init__(self):
+        logging.info("Testing Started on LinearRegressionTester")
         self.y = loadtxt(self.LIN_REG_Y)
         self.x = loadtxt(self.LIN_REG_X)
         self._test_fit_model()
         self._test_regress_out()
+        logging.info("Testing Finished on LinearRegressionTester")
 
     def _test_regress_out(self):
         """

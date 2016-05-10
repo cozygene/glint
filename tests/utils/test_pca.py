@@ -9,6 +9,7 @@ class PCATester():
     PCA_P_RES = "tests/utils/files/datafile2_pcs"
 
     def __init__(self):
+        logging.info("Testing Started on PCATester")
         pca_res_p = loadtxt(self.PCA_P_RES)
 
         meth_data = methylation_data.MethylationData(datafile = self.DATA_FILE)
@@ -18,3 +19,4 @@ class PCATester():
             assert tools.correlation(pca_out.P[:,i], pca_res_p[:,i])
 
         logging.info("PASS")
+        logging.info("Testing Finished on PCATester")

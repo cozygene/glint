@@ -12,9 +12,11 @@ class ToolsTester():
     K = 5
 
     def __init__(self):
+        logging.info("Testing Started ToolsTester")
         self.meth_data = methylation_data.MethylationData(datafile = self.DATA_FILE)
         self.test_low_rank_approx()
         self.test_euclidean_distance()
+        logging.info("Testing Finished ToolsTester")
 
     def test_low_rank_approx(self):
         logging.info("Testing low rank approximation")

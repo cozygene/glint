@@ -27,8 +27,7 @@ class LinearRegression(object):
         # if x is a n X 1 vector in the format (n,), change it's size to (n,1)
         if x.ndim == 1:
             x = x.reshape(-1,1)
-        
-        if get_dim(y) ==2 :
+        if get_dim(y) == 2 :
             d = y.shape[1]
             y_res = zeros([n,d])
             for i in range(d):
@@ -50,34 +49,60 @@ class LinearRegression(object):
         """
         y is n X 1, x is n X m and covars (optional) is n X p
         Returns three values, each is an m length vector, one for the coefficients, one for the f-statistics and one for the p-values.
-        """       
-        y_res = y# TODO .ravel()
-        regr = linear_model.LinearRegression(True)
-        if covars is not None:
-            y_res = LinearRegression.regress_out(y_res,covars)
+        """
+        # Note:  regr.fit(x,y) expects x of 2dim and y of 2 dim
+        #        f_regression(x,y) expects x of 2dim and y of 1 dim
+        # therefor we create a 2dim and ydim vectors of x and y and we call them:
+        # x_res2 - for 2 dim x
+        # x_res1 - for 1dim x (if possible)
+        # and same for y
         
-        if x.ndim == 1 or (x.ndim == 2 and x.shape[1] == 1): # 1 dim
-            m = 1
-            if x.ndim == 1:
-                x_res = x.reshape(-1, 1) # make a (n,) vector to (n,1) vector
-            if covars is not None:
-                x_res = LinearRegression.regress_out(x_res,covars)
-            regr.fit(x_res, y_res)
-            coefs = regr.coef_[0]
-            fstats, pvals = feature_selection.f_regression(x_res, y_res, center=True)
 
+        # regress out covariates
+        if covars is not None:
+            y = LinearRegression.regress_out(y, covars)
+
+        # create a 2dim (n,1) and 1dim (n,) vectors of y since there are function expects 2dim and functions expects 1dim
+        if y.ndim == 1:
+            y_res1 = y
+            y_res2 = y.reshape(-1, 1)
         else:
+            y_res1 = y.reshape(-1)
+            y_res2 = y
+        
+        regr = linear_model.LinearRegression(True)
+
+        
+        if get_dim(x) == 1: # if x is n X 1
+            m = 1
+            if covars is not None:
+                x_res = LinearRegression.regress_out(x, covars)
+            else:
+                x_res = x
+
+            # create a 2dim (n,1) and 1dim (n,) vectors of x
+            if x_res.ndim == 1:
+                x_res2 = x_res.reshape(-1,1)
+            else:
+                x_res2 = x_res
+
+            regr.fit(x_res2, y_res2)
+            coefs = regr.coef_[0]
+            fstats, pvals = feature_selection.f_regression(x_res2, y_res1, center=True)
+
+        else: 
             m = x.shape[1]
             pvals = zeros(m)
             fstats = zeros(m)
             coefs = zeros(m)
             for i in range(m):
-                x_res = x[:,i].reshape(-1, 1)
+                x_res2 = x[:,i].reshape(-1, 1)
                 if covars is not None:
-                    x_res = LinearRegression.regress_out(x_res,covars)
-                regr.fit(x_res, y_res)
+                    x_res1 = LinearRegression.regress_out(x_res2, covars) # regress_out of (n,1) or (n,) vector returns (n,) vector
+                    x_res2 = x_res1.reshape(-1,1)
+                regr.fit(x_res2, y_res2)
                 coefs[i] = regr.coef_[0]
-                fstats[i], pvals[i] = feature_selection.f_regression(x_res, y_res, center=True)
+                fstats[i], pvals[i] = feature_selection.f_regression(x_res2, y_res1, center=True)
 
         return coefs, fstats, pvals
 

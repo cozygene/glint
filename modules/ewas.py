@@ -36,17 +36,11 @@ class EWAS(Module):
         """
         logging.info("running linear regression test...")
         output = []
-        if self.meth_data.covar is not None:
-            for i, site in enumerate(self.meth_data.data):
-                test = column_stack((ones(len(site)), site, self.meth_data.covar))
-                coefs, fstats, p_value = LinearRegression.fit_model(self.meth_data.phenotype, test) #TODO add test
-                output.append([self.meth_data.cpgnames[i], p_value, fstats, coef])
-        else:
-            for i, site in enumerate(self.meth_data.data):
-                test = column_stack((ones(len(site)), site))
-                coefs, fstats, p_value  = LinearRegression.fit_model(self.meth_data.phenotype, test)
-                output.append([self.meth_data.cpgnames[i], p_value, fstats, coef])
-        
+            
+        for i, site in enumerate(self.meth_data.data):
+            coefs, fstats, p_value = LinearRegression.fit_model(self.meth_data.phenotype, site, covars = self.meth_data.covar) #TODO add test
+            output.append([self.meth_data.cpgnames[i], p_value[0], fstats[0], coefs[0]  ])
+
         
         output.sort(key = lambda x: x[1]) # sort output by p-value
         output = array(output)

@@ -31,6 +31,7 @@ class DataTester(test_logger.LogTestCase, unittest.TestCase):
     KEEP_REMOVE_INDICES = ['sample1', 'sample2', 'sample3']
 
     def __init__(self):
+        logging.info("Testing Started on DataTester")
         self.meth_data = methylation_data.MethylationData(datafile = self.FAKE_DATA, covarfiles = [self.FAKE_COVAR], phenofile = self.FAKE_PHENO)
         self.test_remove_lowest_std_sites()
         self.test_get_mean_per_site()
@@ -46,6 +47,7 @@ class DataTester(test_logger.LogTestCase, unittest.TestCase):
         self.test_add_covariates()
         self.test_fail_exclude()
         self.test_fail_remove()
+        logging.info("Testing Finished on DataTester")
 
     def test_load_and_validate_phenotype(self):
         logging.info("Testing validate pheno fails...")
