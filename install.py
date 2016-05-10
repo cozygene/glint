@@ -2,7 +2,7 @@
 
 import os
 import sys
-from setuptools import setup
+# from setuptools import setup
 
 if (sys.version_info > (3, 0)):
     VERSION = 3
@@ -84,37 +84,37 @@ elif os.name == 'posix': # Unix
 GLINT_OBLIGATORY_DEPENDENCIES = ['numpy', 'scipy', 'sklearn', 'matplotlib']
 GLINT_OPTIONAL_DEPENDENCIES = []
 
-def setup_glint():
-    """
-    Adds glint.py to the PATH so it can be executed from anywhere.
-    NOTE: on windows glint.py is added to C:\PythonXX\Scripts, but this folder is not in the PATH by default.
-    """
-    # add "install" command for the setup script. "mimic" user choice: setup install 
-    sys.argv.append("install")
+# def setup_glint():
+#     """
+#     Adds glint.py to the PATH so it can be executed from anywhere.
+#     NOTE: on windows glint.py is added to C:\PythonXX\Scripts, but this folder is not in the PATH by default.
+#     """
+#     # add "install" command for the setup script. "mimic" user choice: setup install 
+#     sys.argv.append("install")
     
 
-    # TODO: add  C:\PythonXX\Scripts to registry or environment in a way it will stay there after script terminates
-    # could be something like that:
-    #
-    # aKey = _winreg.OpenKey(aReg, r"SYSTEM\CurrentControlSet\Control\Session Manager\Environment", 0, _winreg.KEY_SET_VALUE)
-    # try:   
-    #     _winreg.SetValueEx(key = aKey,value_name="Path",type=_winreg.REG_EXPAND_SZ, value= os.path.join(os.path.dirname(sys.executable), "Scripts") ) 
-    # except EnvironmentError:                                          
-    #     print("Encountered problems writing into the Registry...")
-    # _winreg.CloseKey(aKey)
-    # _winreg.CloseKey(aReg)        
+#     # TODO: add  C:\PythonXX\Scripts to registry or environment in a way it will stay there after script terminates
+#     # could be something like that:
+#     #
+#     # aKey = _winreg.OpenKey(aReg, r"SYSTEM\CurrentControlSet\Control\Session Manager\Environment", 0, _winreg.KEY_SET_VALUE)
+#     # try:   
+#     #     _winreg.SetValueEx(key = aKey,value_name="Path",type=_winreg.REG_EXPAND_SZ, value= os.path.join(os.path.dirname(sys.executable), "Scripts") ) 
+#     # except EnvironmentError:                                          
+#     #     print("Encountered problems writing into the Registry...")
+#     # _winreg.CloseKey(aKey)
+#     # _winreg.CloseKey(aReg)        
     
-    setup(name='glint',
-        version='1.0',
-        description='',
-        url='https://github.com/cozygene/glint',
-        packages=['configuration','parsers', 'modules', 'utils'],
-        package_data={'parsers':['assets/*']}, #data files which are not python files should be inside one of the packages specified in packages
-        scripts=['glint.py', 'convertToGlintInput.R'], 
-        #install_requires=[], # leave this commented out.declaring dependencies that are already install can cause problems
-        include_package_data=True,
-        zip_safe=False,
-    )
+#     setup(name='glint',
+#         version='1.0',
+#         description='',
+#         url='https://github.com/cozygene/glint',
+#         packages=['configuration','parsers', 'modules', 'utils'],
+#         package_data={'parsers':['assets/*']}, #data files which are not python files should be inside one of the packages specified in packages
+#         scripts=['glint.py', 'convertToGlintInput.R'], 
+#         #install_requires=[], # leave this commented out.declaring dependencies that are already install can cause problems
+#         include_package_data=True,
+#         zip_safe=False,
+#     )
 
 def run_function_without_prints(func):
     """
@@ -239,7 +239,7 @@ def install_glint():
     """
 
     print("Installing Glint...")
-    setup_glint()
+    # setup_glint()
     
     # install dependencies
     dependencies_to_install = check_dependencies(GLINT_OBLIGATORY_DEPENDENCIES + GLINT_OPTIONAL_DEPENDENCIES)
