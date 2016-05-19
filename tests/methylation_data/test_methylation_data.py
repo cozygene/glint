@@ -34,7 +34,7 @@ class DataTester(test_logger.LogTestCase, unittest.TestCase):
 
     def __init__(self):
         logging.info("Testing Started on DataTester")
-        self.meth_data = methylation_data.MethylationData(datafile = self.FAKE_DATA, covarfiles = [self.FAKE_COVAR], phenofile = self.FAKE_PHENO)
+        self.meth_data = methylation_data.MethylationDataLoader(datafile = self.FAKE_DATA, covarfiles = [self.FAKE_COVAR], phenofile = self.FAKE_PHENO)
         self.test_remove_lowest_std_sites()
         self.test_get_mean_per_site()
         self.test_include()
@@ -56,27 +56,27 @@ class DataTester(test_logger.LogTestCase, unittest.TestCase):
         logging.info("Testing validate pheno fails...")
         data_copy = self.meth_data.copy()
         with self.assertRaisesRegexp(SystemExit, '2'):
-            data_copy._load_and_validate_phenotype(self.FAKE_PHENO_BAD)
+            data_copy._load_and_validate_phenotype(self.FAKE_PHENO_BAD, data_copy.samples_size , data_copy.samples_ids)
         logging.info("PASS")
         logging.info("Testing validate pheno pass...")
-        data_copy._load_and_validate_phenotype(self.FAKE_PHENO)
+        data_copy._load_and_validate_phenotype(self.FAKE_PHENO, data_copy.samples_size , data_copy.samples_ids)
         logging.info("PASS")
         
     def test_load_and_validate_covar(self):
         logging.info("Testing validate covar fails...")
         data_copy = self.meth_data.copy()
         with self.assertRaisesRegexp(SystemExit, '2'):
-            data_copy._load_and_validate_covar([self.FAKE_COVAR_BAD,self.FAKE_COVAR])
+            data_copy._load_and_validate_covar([self.FAKE_COVAR_BAD,self.FAKE_COVAR], data_copy.samples_size , data_copy.samples_ids)
         logging.info("PASS")
         logging.info("Testing validate covar pass...")
-        data_copy._load_and_validate_covar([self.FAKE_COVAR])
+        data_copy._load_and_validate_covar([self.FAKE_COVAR], data_copy.samples_size , data_copy.samples_ids)
         logging.info("PASS")
         
     def test_remove_lowest_std_sites(self):
         logging.info("Testing stdth...")
         data_copy = self.meth_data.copy()
         data_copy.remove_lowest_std_sites(self.STDTH)
-        data_after_std = methylation_data.MethylationData(datafile = self.FAKE_DATA_STDTH)
+        data_after_std = methylation_data.MethylationDataLoader(datafile = self.FAKE_DATA_STDTH)
         assert array_equal(data_copy.data, data_after_std.data)
         logging.info("PASS")
 
@@ -100,7 +100,7 @@ class DataTester(test_logger.LogTestCase, unittest.TestCase):
 
     def test_include(self):
         logging.info("Testing include...")
-        data_after = methylation_data.MethylationData(datafile = self.FAKE_DATA_INC)
+        data_after = methylation_data.MethylationDataLoader(datafile = self.FAKE_DATA_INC)
         data = self.meth_data.copy()
         data.include(self.INC_EXC)
         assert array_equal(data_after.data, data.data)
@@ -108,7 +108,7 @@ class DataTester(test_logger.LogTestCase, unittest.TestCase):
 
     def test_exclude(self):
         logging.info("Testing test_exclude...")
-        data_after = methylation_data.MethylationData(datafile = self.FAKE_DATA_EXC)
+        data_after = methylation_data.MethylationDataLoader(datafile = self.FAKE_DATA_EXC)
         data = self.meth_data.copy()
         data.exclude(self.INC_EXC)
         assert array_equal(data_after.data, data.data)
@@ -116,7 +116,7 @@ class DataTester(test_logger.LogTestCase, unittest.TestCase):
         
     def test_keep(self):
         logging.info("Testing keep...")
-        data_after = methylation_data.MethylationData(datafile = self.FAKE_DATA_KEEP, covarfiles = [self.FAKE_COVAR_KEEP], phenofile = self.FAKE_PHENO_KEEP)
+        data_after = methylation_data.MethylationDataLoader(datafile = self.FAKE_DATA_KEEP, covarfiles = [self.FAKE_COVAR_KEEP], phenofile = self.FAKE_PHENO_KEEP)
         data = self.meth_data.copy()
         data.keep(self.KEEP_REMOVE_INDICES)
         assert array_equal(data_after.data, data.data)
@@ -126,7 +126,7 @@ class DataTester(test_logger.LogTestCase, unittest.TestCase):
 
     def test_remove(self):
         logging.info("Testing remove...")
-        data_after = methylation_data.MethylationData(datafile = self.FAKE_DATA_REMOVE, covarfiles = [self.FAKE_COVAR_REMOVE], phenofile = self.FAKE_PHENO_REMOVE)
+        data_after = methylation_data.MethylationDataLoader(datafile = self.FAKE_DATA_REMOVE, covarfiles = [self.FAKE_COVAR_REMOVE], phenofile = self.FAKE_PHENO_REMOVE)
         data = self.meth_data.copy()
         data.remove(self.KEEP_REMOVE_INDICES)
         assert array_equal(data_after.data, data.data)
@@ -160,7 +160,7 @@ class DataTester(test_logger.LogTestCase, unittest.TestCase):
     def test_upload_new_files(self):
         logging.info("Testing upload new covaritates and phenotype files...")
         data = self.meth_data.copy()
-        data_upload = methylation_data.MethylationData(datafile = self.FAKE_DATA_REMOVE)
+        data_upload = methylation_data.MethylationDataLoader(datafile = self.FAKE_DATA_REMOVE)
         
         data.remove(self.KEEP_REMOVE_INDICES)
 
@@ -176,13 +176,13 @@ class DataTester(test_logger.LogTestCase, unittest.TestCase):
 
     def test_add_covariates(self):
         logging.info("Testing add covar...")
-        data = methylation_data.MethylationData(datafile = self.FAKE_DATA)
+        data = methylation_data.MethylationDataLoader(datafile = self.FAKE_DATA)
         meth_data = self.meth_data.copy()
 
         data.add_covar_files([self.FAKE_COVAR_PART1, self.FAKE_COVAR_PART2])
         assert array_equal(data.covar, meth_data.covar)
 
-        data2 = methylation_data.MethylationData(datafile = self.FAKE_DATA, covarfiles  = [self.FAKE_COVAR_PART1])
+        data2 = methylation_data.MethylationDataLoader(datafile = self.FAKE_DATA, covarfiles  = [self.FAKE_COVAR_PART1])
         data2.add_covar_files([self.FAKE_COVAR_PART2])
         assert array_equal(data2.covar, meth_data.covar)
 
@@ -190,7 +190,7 @@ class DataTester(test_logger.LogTestCase, unittest.TestCase):
 
     def test_remove_outliers(self):
         logging.info("Test remove outliers")
-        data = methylation_data.MethylationData(datafile = self.DATA_FILE)
+        data = methylation_data.MethylationDataLoader(datafile = self.DATA_FILE)
         samples_after_maxpcstd =  loadtxt(self.SAMPLES_AFTER_MAXPCSTD, dtype = str)
         orig_samples = set([ i for i in data.samples_ids])
         data.exclude_maxpcstds([[1,3], [2,3]])

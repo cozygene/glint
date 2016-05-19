@@ -12,7 +12,7 @@ class PCATester():
         logging.info("Testing Started on PCATester")
         pca_res_p = loadtxt(self.PCA_P_RES)
 
-        meth_data = methylation_data.MethylationData(datafile = self.DATA_FILE)
+        meth_data = methylation_data.MethylationDataLoader(datafile = self.DATA_FILE)
         pca_out = pca.PCA(meth_data.data.transpose())
 
         for i in range(10):

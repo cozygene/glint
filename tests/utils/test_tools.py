@@ -13,7 +13,7 @@ class ToolsTester():
 
     def __init__(self):
         logging.info("Testing Started ToolsTester")
-        self.meth_data = methylation_data.MethylationData(datafile = self.DATA_FILE)
+        self.meth_data = methylation_data.MethylationDataLoader(datafile = self.DATA_FILE)
         self.test_low_rank_approx()
         self.test_euclidean_distance()
         logging.info("Testing Finished ToolsTester")

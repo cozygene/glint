@@ -10,7 +10,7 @@ EWAS
 class EWASParser(ModuleParser):
     def __init__(self, parser):
 
-        ewas = parser.add_argument_group('ewas', 'add ewas description here')
+        ewas = parser.add_argument_group('ewas', 'TODO Elior,add ewas description here')
         ewas.add_argument('--linreg', action='store_const', const='linear_regression',   help = "Run a linear regression analysis; --pheno must be provided (executed by default if --ewas is selected)")
         ewas.add_argument('--logreg', action='store_const', const='logistic_regression', help = "Run a logistic regression analysis; --pheno must be provided and be a binary phenotype")
         

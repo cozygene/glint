@@ -3,7 +3,7 @@ import sys
 import copy
 import logging
 from pickle import dump
-from numpy import delete, isnan, nanstd, where, column_stack, std
+from numpy import delete, isnan, nanstd, where, column_stack, std, array
 from numpy.ma import average, masked_array
 from module import Module
 from utils import common, pca
@@ -22,115 +22,19 @@ def validate_no_missing_values(data):
 
 class MethylationData(Module):
     """
-    TODO add class doc here
+    meth_data is an numpy matrix
+    samples_list, sites_list are numpy arrays
     """
-    def __init__(self, datafile, phenofile = None, covarfiles = []):
-        self.data, self.samples_ids, self.cpgnames = self._load_and_validate_datafile(datafile)
+    def __init__(self, meth_data, samples_list, sites_list, phenotype = None ,covar = None):
+        self.data = meth_data
+        self.samples_ids = samples_list
+        self.cpgnames = sites_list
         self.sites_size, self.samples_size = self.data.shape
         logging.debug("got methylation data with %s sites and %s samples id" % (self.sites_size, self.samples_size))
 
-        self.phenotype = self._load_and_validate_phenotype(phenofile)
-        self.covar = self._load_and_validate_covar(covarfiles)
+        self.phenotype = phenotype
+        self.covar = covar
 
-    def _load_and_validate_file_of_dimentions(self, datafile, dim):
-        """
-        validates that the file contains a matrix from dimentions dim
-        datafile is not None
-        """
-        if not isinstance(datafile, file):
-            datafile = open(datafile, 'r')
-
-                    
-        logging.info("loading file %s..." % datafile.name)
-
-        data = common.load_data_file(datafile.name, dim)
-        if data is None:
-            common.terminate("the file '%s' is not a %sd matrix" % (datafile.name, dim))
-
-        return data
-
-    def _load_and_validate_datafile(self, datafile):
-        """
-        returns data (type=float without samples ids and cpgnames) and sample_ids list and cpgnames list
-        """
-        data = self._load_and_validate_file_of_dimentions(datafile, 2)
-        samples_ids = data[0,:][1:]  # extract samples ID
-        cpgnames = data[:,0][1:]     # extract methylation sites names
-        # remove sample ID and sites names from matrix
-        # that kind of assignment will create a copy of O[1:,1:]
-        # Note that assignment like self.O = O will not create a copy
-        try:
-            data = data[1:,1:].astype(float) 
-        except ValueError:
-            common.terminate("file contains values which are not float")
-        # must be called after convertion to float
-        logging.info("checking for missing values in datafile file...")
-        validate_no_missing_values(data) #TODO remove when missing values are supported
-
-        return data, samples_ids, cpgnames
-
-
-    def _validate_samples_ids(self, data):
-        """
-        reads matrix from matrix_file_path
-        validates that the matrix has number of rows as the number of sample ids
-        checks that the sample ids in matrix (the first column) are the same ids as in sample_ids list
-        and in the same order
-        """
-        if len(data) != len(self.samples_ids):
-            common.terminate("the file doesn't include all sample ids")
-
-        matrix_sample_ids = data[:,0]
-
-        if not (self.samples_ids == matrix_sample_ids).all():
-            if len(set(self.samples_ids)^set(matrix_sample_ids)) != 0:
-                common.terminate("sample ids are not identical to the sample ids in data file")
-            common.terminate("sample ids are not in the same order as in the datafile") # TODO Elior, should we terminate because sample_ids in files are not in the same order as in datafile?
-
-    def _load_and_validate_samples_info(self, samples_info):
-        """
-        samples_info - path to file containing information about samples (matrix where first column is sample_id)
-        samples_info assumed to hold path (not None)
-        """
-        data = self._load_and_validate_file_of_dimentions(samples_info, 2)
-        self._validate_samples_ids(data)
-
-        # remove sample IDs from matrix
-        # that kind of assignment will create a copy of data[:,1]
-        # Note that assignment like self.O = O will not create a copy
-        try:
-            data = data[:,1:].astype(float) # use only the first phenotype
-        except ValueError:
-            common.terminate("file contains values which are not float" )
-        validate_no_missing_values(data)
-        return data
-
-    def _load_and_validate_phenotype(self, phenofile):
-        """
-        returns phenotype data (type=float) without samples ids
-        """
-        if not phenofile:
-            return None
-        logging.info("validating phenotype file...")
-        pheno = self._load_and_validate_samples_info(phenofile)
-        if len(pheno[0]) != 1:
-            logging.warning("more than one phenotype is not supported. will use only the first phenotype (first column)") # TODO remove when supported
-            pheno = pheno[:,1]
-
-        return pheno
-
-    def _load_and_validate_covar(self, covarfiles_list):
-        """
-        concatenate the covariates into one matrix (type=float).
-        Make sure all have n rows and the ids of the samples are sorted the same order as the data file
-        """
-        if not covarfiles_list:
-            logging.warning("didn't supply covariates file")
-            return None
-        logging.info("validating covariates files...")
-        
-        all_covar = column_stack(tuple([self._load_and_validate_samples_info(covariates) for covariates in covarfiles_list]))
-        return all_covar
 
     def exclude_sites_indices(self, sites_indicies_list):
         """
@@ -331,10 +235,8 @@ class MethylationData(Module):
         """
         return copy.deepcopy(self)
 
-
-    def add_covar_files(self, covarfiles_list):
-        covardata_list = [self._load_and_validate_samples_info(covariates) for covariates in covarfiles_list]
-        self.add_covar_datas(covardata_list)
+    def run():
+        pass
 
     def add_covar_datas(self, covardata_list):
         """
@@ -345,14 +247,127 @@ class MethylationData(Module):
             covardata_list.insert(0, self.covar)
         self.covar = column_stack(tuple(covardata_list))
 
+
+class MethylationDataLoader(MethylationData):
+    """
+    TODO add class doc here
+    """
+    def __init__(self, datafile, phenofile = None, covarfiles = []):
+        data, samples_ids, cpgnames = self._load_and_validate_datafile(datafile)
+        sites_size, samples_size = data.shape
+        phenotype = self._load_and_validate_phenotype(phenofile, samples_size, samples_ids)
+        covar = self._load_and_validate_covar(covarfiles, samples_size, samples_ids)
+        super(MethylationDataLoader, self).__init__(data, array(samples_ids), array(cpgnames), phenotype, covar)
+
+    def _load_and_validate_file_of_dimentions(self, datafile, dim):
+        """
+        validates that the file contains a matrix from dimentions dim
+        datafile is not None
+        """
+        if not isinstance(datafile, file):
+            datafile = open(datafile, 'r')
+
+                    
+        logging.info("loading file %s..." % datafile.name)
+
+        data = common.load_data_file(datafile.name, dim)
+        if data is None:
+            common.terminate("the file '%s' is not a %sd matrix" % (datafile.name, dim))
+
+        return data
+
+    def _load_and_validate_datafile(self, datafile):
+        """
+        returns data (type=float without samples ids and cpgnames) and sample_ids list and cpgnames list
+        """
+        data = self._load_and_validate_file_of_dimentions(datafile, 2)
+        samples_ids = data[0,:][1:]  # extract samples ID
+        cpgnames = data[:,0][1:]     # extract methylation sites names
+        # remove sample ID and sites names from matrix
+        # that kind of assignment will create a copy of O[1:,1:]
+        # Note that assignment like self.O = O will not create a copy
+        try:
+            data = data[1:,1:].astype(float) 
+        except ValueError:
+            common.terminate("file contains values which are not float")
+        # must be called after convertion to float
+        logging.info("checking for missing values in datafile file...")
+        validate_no_missing_values(data) #TODO remove when missing values are supported
+
+        return data, samples_ids, cpgnames
+
+
+    def _validate_samples_ids(self, data, samples_size, samples_ids):
+        """
+        reads matrix from matrix_file_path
+        validates that the matrix has number of rows as the number of sample ids
+        checks that the sample ids in matrix (the first column) are the same ids as in sample_ids list
+        and in the same order
+        """
+        if samples_size != len(samples_ids):
+            common.terminate("the file doesn't include all sample ids %s %s"% (len(data) ,len(samples_ids)))
+
+        matrix_sample_ids = data[:,0]
+        if not (samples_ids == matrix_sample_ids).all():
+            if len(set(samples_ids)^set(matrix_sample_ids)) != 0:
+                common.terminate("sample ids are not identical to the sample ids in data file")
+            common.terminate("sample ids are not in the same order as in the datafile") # TODO Elior, should we terminate because sample_ids in files are not in the same order as in datafile?
+
+
+    def _load_and_validate_samples_info(self, samples_info, samples_size, samples_ids):
+        """
+        samples_info - path to file containing information about samples (matrix where first column is sample_id)
+        samples_info assumed to hold path (not None)
+        """
+        data = self._load_and_validate_file_of_dimentions(samples_info, 2)
+        self._validate_samples_ids(data, samples_size, samples_ids)
+        # remove sample IDs from matrix
+        # that kind of assignment will create a copy of data[:,1]
+        # Note that assignment like self.O = O will not create a copy
+        try:
+            data = data[:,1:].astype(float) # use only the first phenotype
+        except ValueError:
+            common.terminate("file contains values which are not float" )
+        validate_no_missing_values(data)
+        return data
+
+    def _load_and_validate_phenotype(self, phenofile, samples_size, samples_ids):
+        """
+        returns phenotype data (type=float) without samples ids
+        """
+        if not phenofile:
+            return None
+        logging.info("validating phenotype file...")
+        pheno = self._load_and_validate_samples_info(phenofile, samples_size, samples_ids)
+        if len(pheno[0]) != 1:
+            logging.warning("more than one phenotype is not supported. will use only the first phenotype (first column)") # TODO remove when supported
+            pheno = pheno[:,1]
+
+        return pheno
+
+    def _load_and_validate_covar(self, covarfiles_list, samples_size, samples_ids):
+        """
+        concatenate the covariates into one matrix (type=float).
+        Make sure all have n rows and the ids of the samples are sorted the same order as the data file
+        """
+        if not covarfiles_list:
+            logging.warning("didn't supply covariates file")
+            return None
+        logging.info("validating covariates files...")
+        
+        all_covar = column_stack(tuple([self._load_and_validate_samples_info(covariates, samples_size, samples_ids) for covariates in covarfiles_list]))
+        return all_covar
+
+    def add_covar_files(self, covarfiles_list):
+        covardata_list = [self._load_and_validate_samples_info(covariates, self.samples_size, self.samples_ids) for covariates in covarfiles_list]
+        self.add_covar_datas(covardata_list)
+
     def upload_new_covaritates_files(self, covarfiles_list):
         """
         overloads self.covar with the covarfiles_list
         """
-        self.covar = self._load_and_validate_covar(covarfiles_list)
+        self.covar = self._load_and_validate_covar(covarfiles_list, self.samples_size, self.samples_ids)
 
     def upload_new_phenotype_file(self, phenofile):
-        self.phenotype = self._load_and_validate_phenotype(phenofile)
+        self.phenotype = self._load_and_validate_phenotype(phenofile, self.samples_size, self.samples_ids)
 
-    def run():
-        pass

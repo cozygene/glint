@@ -10,7 +10,7 @@ class FeatureSelectionTester():
     FAKE_CONTROL = "tests/refactor/files/feature_selection/control"
     def __init__(self):
         logging.info("Testing Started on FeatureSelectionTester")
-        self.fs_meth_data = methylation_data.MethylationData(datafile = self.FAKE_DATA, phenofile = self.FAKE_CONTROL)
+        self.fs_meth_data = methylation_data.MethylationDataLoader(datafile = self.FAKE_DATA, phenofile = self.FAKE_CONTROL)
         self.test_controls_fs()
         self.test_phenotype_fs()
         logging.info("Testing Finished on FeatureSelectionTester")
@@ -56,7 +56,7 @@ class FeatureSelectionTester():
                       feature_selection = "phenotype",
                       t=5)
 
-        phenotype = refactor_meth_data._load_and_validate_phenotype(self.FAKE_CONTROL)
+        phenotype = refactor_meth_data._load_and_validate_phenotype(self.FAKE_CONTROL, refactor_meth_data.samples_size, refactor_meth_data.samples_ids)
         # validate phenotype feature selection output (res_data) is correlated to our linear regression for (site, phenotype)
         res_data = module.feature_selection_handler()
         for i,site in enumerate(self.fs_meth_data.data):
@@ -93,7 +93,7 @@ class RefactorTester():
 
     def __init__(self):
         logging.info("Testing Started on RefactorTester")
-        self.meth_data = methylation_data.MethylationData(datafile = self.DEMO_SMALL_DATA, covarfiles = [self.DEMO_COVAR]   , phenofile = self.DEMO_PHENO)
+        self.meth_data = methylation_data.MethylationDataLoader(datafile = self.DEMO_SMALL_DATA, covarfiles = [self.DEMO_COVAR]   , phenofile = self.DEMO_PHENO)
         self.test_remove_covariates()
         self.test_low_rank_approx_distances()
         self.test_exclude_bad_probes()
@@ -109,7 +109,7 @@ class RefactorTester():
                                     k = 2, 
                                     t = 500)
 
-        coavr = covar_meth_data._load_and_validate_covar([self.DEMO_COVAR])
+        coavr = covar_meth_data._load_and_validate_covar([self.DEMO_COVAR], covar_meth_data.samples_size, covar_meth_data.samples_ids)
         # remove from refactor_meth_data
         module._remove_covariates()
 
@@ -143,7 +143,7 @@ class RefactorTester():
         logging.info("Testing removing bad probes...")
         probes_meth_data = self.meth_data.copy()
 
-        data_no_bad_probes = methylation_data.MethylationData(datafile = self.DEMO_DATA_NO_BAD_PROBES)
+        data_no_bad_probes = methylation_data.MethylationDataLoader(datafile = self.DEMO_DATA_NO_BAD_PROBES)
 
         bad_probes = load(open(self.BAD_PROBES,'r'))
         module  = refactor.Refactor(methylation_data = probes_meth_data, 

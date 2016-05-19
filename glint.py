@@ -119,6 +119,7 @@ class ModulesArgumentParsers(object):
             self.refactor_parser.run(args = self.args,
                                     meth_data = refactor_meth_data,
                                     output_perfix = self.args.out)
+            logging.info("adding refactor components to covariates, set --gsave to save new methData")
             self.meth_parser.module.add_covar_datas([self.refactor_parser.module.components]) # add refactor components as covariate file
 
         self.meth_parser.preprocess_sites_data() #preprocess sites after refactor and before ewas

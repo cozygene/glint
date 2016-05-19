@@ -128,7 +128,7 @@ class MethylationDataParser(ModuleParser):
                 if args.covar is not None:
                     self.module.upload_new_covaritates_files(args.covar)
             else:
-                self.module = methylation_data.MethylationData(datafile = args.datafile, phenofile = args.pheno, covarfiles = args.covar)
+                self.module = methylation_data.MethylationDataLoader(datafile = args.datafile, phenofile = args.pheno, covarfiles = args.covar)
 
             # load remove/keep sites/samples files and remove/keep values
             self.include_list = []
