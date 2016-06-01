@@ -8,8 +8,9 @@ import logging
 from utils import common
 from numpy import loadtxt
 from utils import GlintArgumentParser
-from parsers import ModuleParser, RefactorParser, EWASParser, MethylationDataParser, KitParser  #dont remove this is imported in,,,
+from parsers import ModuleParser, RefactorParser, EWASParser, MethylationDataParser, KitParser, PredictorParser  #dont remove this is imported in,,,
 
+        
 class GlintParser(ModuleParser):
     def __init__(self, parser):
         optional = parser.add_argument_group('3.Optional arguments')
@@ -19,14 +20,15 @@ class GlintParser(ModuleParser):
         modules = parser.add_argument_group('4.Glint modules')
         modules.add_argument('--refactor', action='store_true', help = "<TODO Elior, add help here>")
         modules.add_argument('--ewas',     action='store_true', help = "<TODO Elior, add help here>" )
+        modules.add_argument('--methpred',  action='store_true', help = "<TODO Elior, add help here methylation predictor>" )
 
         super(GlintParser, self).__init__(optional, modules)
     
 
 class ModulesArgumentParsers(object):
-    FUNCTIONALITY_ARGS = [ '--gsave', '--refactor', '--ewas'] # TODO find better way to hold arguments that cause some functionality. glint is not supposed to be aware of those args
+    FUNCTIONALITY_ARGS = [ '--gsave', '--refactor', '--ewas', '--methpred'] # TODO find better way to hold arguments that cause some functionality. glint is not supposed to be aware of those args
     DATA_PREPROCESSING_NOT_RELEVANT_FOR_REFACTOR = ['--include', '--exclude', '--minmean', '--maxmean']
-    SOLE_ARGS = ["--plotpcs"] # functilnality flags that cannot be soecified with other functionaity flags
+    SOLE_ARGS = ['--plotpcs'] # functilnality flags that cannot be soecified with other functionaity flags
 
     def __init__(self, user_args_selection):
         self.selected_args = user_args_selection
@@ -52,6 +54,7 @@ class ModulesArgumentParsers(object):
         self.refactor_parser = RefactorParser(self.parser)
         self.ewas_parser = EWASParser(self.parser)
         self.kit_parser = KitParser(self.parser)
+        self.predictor_parser = PredictorParser(self.parser)
 
     def parse_args(self):
         logging.info("Validating arguments...")
@@ -59,21 +62,29 @@ class ModulesArgumentParsers(object):
 
         optional_args = []
 
-        self.meth_parser.validate_args(self.args)
-        optional_args.extend(self.meth_parser.all_args)
+
 
         self.glint_parser.validate_args(self.args)
         optional_args.extend(self.glint_parser.all_args)
 
-        self.kit_parser.validate_args(self.args)
-        optional_args.extend(self.kit_parser.all_args)
+        if self.args.methpred:
+            self.predictor_parser.validate_args(self.args)
+            optional_args.extend(self.predictor_parser.all_args)
+        else:
+
+            self.meth_parser.validate_args(self.args)
+            optional_args.extend(self.meth_parser.all_args)
+            
         
-        if self.args.refactor:
-            self.refactor_parser.validate_args(self.args)
-            optional_args.extend(self.refactor_parser.all_args)
-        if self.args.ewas:
-            self.ewas_parser.validate_args(self.args)
-            optional_args.extend(self.ewas_parser.all_args)
+            self.kit_parser.validate_args(self.args)
+            optional_args.extend(self.kit_parser.all_args)
+            
+            if self.args.refactor:
+                self.refactor_parser.validate_args(self.args)
+                optional_args.extend(self.refactor_parser.all_args)
+            if self.args.ewas:
+                self.ewas_parser.validate_args(self.args)
+                optional_args.extend(self.ewas_parser.all_args)
 
         self.check_selected_args(optional_args)
         return self.args
@@ -111,6 +122,11 @@ class ModulesArgumentParsers(object):
                 logging.warning("selected data management arguments which are not relevant for refactor: %s" % str(not_relevant_atgs))
 
     def run(self):
+
+        if self.args.methpred:
+            self.predictor_parser.run(args, output_perfix = self.args.out)
+            return
+
         self.meth_parser.run(self.args)
         self.meth_parser.preprocess_samples_data() # preprocess samples before refactor and before ewas
 
@@ -134,6 +150,7 @@ class ModulesArgumentParsers(object):
         self.kit_parser.run(args = self.args,
                               meth_data = self.meth_parser.module.copy(), # TODO this meth_data?
                               output_perfix = self.args.out)
+
 
 if __name__ == '__main__':
     selected_args = [arg for arg in sys.argv if arg.startswith("--")] 

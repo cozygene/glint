@@ -62,3 +62,5 @@ class LinearRegressionTester():
             assert abs(fstats[i] - results[i][1]) < 1e-3
             assert abs(pvals[i] - results[i][2]) < 1e-3
         logging.info("PASS")
+
+        # TODO add test fit_model with covar

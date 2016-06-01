@@ -4,7 +4,6 @@ from modules import methylation_data
 from utils import common
 import argparse
 from module_parser import ModuleParser
-GLINT_FORMATTED_EXTENSION = ".glint" #TODO move to a config file
 
 class MethylationDataParser(ModuleParser): 
 
@@ -108,17 +107,13 @@ class MethylationDataParser(ModuleParser):
     # save methylation data in Glint format
     def gsave(self, output_perfix):
         if self.args.gsave:
-            if output_perfix:
-                output_file_name = output_perfix
-            else:
-                output_file_name = methylation_data.COMPRESSED_FILENAME
-            self.module.save(output_file_name + GLINT_FORMATTED_EXTENSION)
+            self.module.save(output_perfix)
 
     def run(self, args):
         try:
             self.args = args
             self.module = None
-            if args.datafile.name.endswith(GLINT_FORMATTED_EXTENSION):
+            if args.datafile.name.endswith(methylation_data.GLINT_FORMATTED_EXTENSION):
                 logging.info("Loading glint file: %s..." % args.datafile.name)
                 self.module = load(args.datafile) # datafile is fileType (status: open for read)
                 logging.debug("Got methylation data with %s sites and %s samples id" % (self.module.sites_size, self.module.samples_size))

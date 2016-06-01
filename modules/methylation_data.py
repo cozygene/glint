@@ -3,13 +3,14 @@ import sys
 import copy
 import logging
 from pickle import dump
-from numpy import delete, isnan, nanstd, where, column_stack, std, array
+from numpy import delete, isnan, nanstd, where, column_stack, std, array, savetxt
 from numpy.ma import average, masked_array
 from module import Module
 from utils import common, pca
 from bisect import bisect_right
 
 COMPRESSED_FILENAME = "methylation_data"
+GLINT_FORMATTED_EXTENSION = ".glint" #TODO move to a config file
 
 def validate_no_missing_values(data):
     """
@@ -144,14 +145,27 @@ class MethylationData(Module):
         max_values_indices = where(self.get_mean_per_site() > max_value)[0]
         self.exclude_sites_indices(max_values_indices)
 
-    def save(self, methylation_data_filename):
+    def save(self, prefix = ''):
         """
         serializes this object and saves it to methylation_data_filename
         assumes that methylation_data_filename is a valid file 
         """
+        if prefix != '' and not prefix.endswith('_'):
+            prefix = prefix + "_"
+        filename = prefix + COMPRESSED_FILENAME
+        methylation_data_filename = filename + GLINT_FORMATTED_EXTENSION
+
         with open(methylation_data_filename, 'wb') as f:
             logging.info("Saving methylation data as glint format at %s" % methylation_data_filename)
             dump(self, f)
+        f.close()
+        
+        logging.info("Saving cpg names to %s" % filename + "_sites_list.txt")
+        savetxt(filename + "_sites_list.txt", self.cpgnames, fmt = '%s25')
+
+
+        logging.info("Saving samples ids to %s" % filename + "_sampless_list.txt")
+        savetxt(filename + "_sampless_list.txt", self.samples_ids, fmt = '%s25')
 
     def remove_lowest_std_sites(self, lowest_std_th = 0.02):
         """
