@@ -36,6 +36,13 @@ class Predictor(Module):
         self.sites_scores = loadtxt(sites_scores_list_file)
 
     def predict(self, min_score, plink_snp_file, plink_geno_file, plink_ind_file, min_missing_values):
+        """
+        predict with following rules:
+        replace missing values with mean (unless there are more htan min_missing_values missing values)
+        remove samples which have more than min_missing_values missing values (TODO: add parameter for this? a different one from the snp missing values? (this parameter is now for both samples and snps))
+        remore site with score lower than min_score
+        dont predict sites that we dont have any snp (if we have at least one - predict it)
+        """
         samples = loadtxt(plink_ind_file, dtype=str, usecols=(0,))
         number_of_samples = samples.shape[0]
         plink_ind_file.close()
@@ -66,7 +73,6 @@ class Predictor(Module):
         
         # remove missing samples from prediction
         self.site_prediction = site_prediction[:, non_missing_sampels_indices]
-        
 
     def get_plink_snp_list(self, plink_snps_data):
         """
@@ -171,21 +177,33 @@ class Predictor(Module):
         return relevant_snp_occurrences, relevant_snps_indices, missing_sampels_indices
 
     def predict_site(self, number_of_samples, site_snps_ids, snps_coeffs, relevant_snps_indices_per_id, relevant_snp_occurrences):
+        """
+        predict each site with the following model:
+
+        Assume we have a methylation site m with two predictors s1, s2 and assume that their reference alleles are G, C and coefficients c1, c2, respectively.
+        Given the genotypes of an individual i in SNPs s1,s2  (denote s1_i,s2_i), we predict m_i, the methylation level of individual i in meth site m, as follows:
+        m_i_predicted = c1*(number of 'G' alleles in s1_i) + c2*c1*(number of 'C' alleles in s2_i)
+        """
         site_prediction = zeros(number_of_samples)
 
         for j, snp_id in enumerate(site_snps_ids):
             try:
                 snp_index = relevant_snps_indices_per_id[snp_id]
             except:
-                continue
+                continue # in case snp_id not found (we include sites whoch have at least one snp predictor)
             site_prediction += snps_coeffs[j] * relevant_snp_occurrences[snp_index]
         return site_prediction
 
 
     def predict_sites(self, number_of_samples, relevant_snps_names, relevant_snp_occurrences, relevant_sites_indices, relevant_snps_indices):
-        # look at sites that we have all snps to predict
-        relevant_snps_indices_per_id = dict()
 
+        """
+        predict each site that we have  at least informations about one of the sites predicting snps
+        if we have no snp to predict with - dont predict the site
+
+        """
+        # get the indices of the snps relevant ids
+        relevant_snps_indices_per_id = dict()
         relevant_snps_number = len(relevant_snps_indices)
         for i in range(relevant_snps_number):
             try:
@@ -196,15 +214,17 @@ class Predictor(Module):
 
         relevant_snps_ids_set = set(relevant_snps_indices_per_id.keys())
 
+        # iterate over each site and predict its value
         next_index = 0
         sites_predictions = []
         predicted_sites_ids = []
         with open(self.site_snps_list_file, 'r') as f:
+            # iterate over only relevant sites
             for i, site_snps in enumerate(f):
-                                
                 if (next_index < len(relevant_sites_indices)) and (i == relevant_sites_indices[next_index]):
                     site_snps_ids = [int(sid) for sid in site_snps.split('\t')[:-1]]
                     
+                    # if we have information about at least one of the sites predicting snps
                     if len(set(site_snps_ids).difference(relevant_snps_ids_set)) < len(site_snps_ids):
 
                         site_prediction = self.predict_site(number_of_samples, site_snps_ids, self.sites_snps_coeff[i], relevant_snps_indices_per_id, relevant_snp_occurrences)
