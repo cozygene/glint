@@ -31,6 +31,14 @@ class MethylationData(Module):
         self.samples_ids = samples_list
         self.cpgnames = sites_list
         self.sites_size, self.samples_size = self.data.shape
+
+        if (len(self.samples_ids) != self.samples_size):
+            common.terminate("got data with %s samples but %s samples ids" % (self.samples_size, len(self.samples_ids)))
+
+
+        if (len(self.cpgnames) != self.sites_size):
+            common.terminate("got data with %s sites but %s cpgnames" % (self.sites_size, len(self.cpgnames)))
+
         logging.debug("got methylation data with %s sites and %s samples id" % (self.sites_size, self.samples_size))
 
         self.phenotype = phenotype

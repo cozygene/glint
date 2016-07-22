@@ -1,11 +1,11 @@
-from numpy import vstack, loadtxt, bincount, mean, where, delete, zeros, concatenate, dtype, fromstring
+from numpy import vstack, loadtxt, bincount, mean, where, delete, zeros, concatenate, dtype, fromstring, seterr
 import time
 import logging
 import pickle
 import re
 from module import Module
 from methylation_data import MethylationData
-
+from utils import common
 
 class Predictor(Module):
     NA_VALUE = 9
@@ -26,7 +26,7 @@ class Predictor(Module):
                 self.snps_id_per_name[snp_name] = snp_id
         f.close()
 
-        self.sites_id_per_name = loadtxt(sites_ids_list_file, dtype = str)
+        self.sites_name_per_id = loadtxt(sites_ids_list_file, dtype = str)
 
         # load snps coeffs for each site
         with open(sites_snps_coeff_list_file, 'r') as f:
@@ -49,32 +49,43 @@ class Predictor(Module):
 
         plink_snps_data = loadtxt(plink_snp_file, dtype = str)
         plink_snp_file.close()
-        # snps that dont containg CG or AT
-        relevant_snps_indices = self.get_plink_snp_list(plink_snps_data)
+        # use only snps that their allele are not the pairs CG or AT - since in those cases we cannot know which strand was tested 
+        relevant_snps_indices = self.get_relevant_plink_snp_list(plink_snps_data)
 
         logging.info("get number of snp occurences...")
         # extract find occurences per sample for each snp from .geno file
-        relevant_snp_occurrences, relevant_snps_indices, missing_sampels_indices = self.get_relevant_snps_occurences(plink_geno_file, relevant_snps_indices, number_of_samples, min_missing_values) 
-        relevant_snps_names = plink_snps_data[relevant_snps_indices, 0]
-        non_missing_sampels_indices = delete(range(number_of_samples), missing_sampels_indices)
+        snp_occurrences, relevant_snps_indices, missing_sampels_indices, non_missing_sampels_indices = self.get_snps_occurences(plink_geno_file, relevant_snps_indices, number_of_samples, min_missing_values) 
+        
+        # indices = [i  for i,name in enumerate(plink_snps_data[relevant_snps_indices,0]) if name in self.snps_id_per_name]
+        relevant_snps_names = []
+        relevant_snp_occurrences = []
+        for i,name in enumerate(plink_snps_data[relevant_snps_indices,0]):
+            if name in self.snps_id_per_name:
+                relevant_snps_names.append(name)
+                relevant_snp_occurrences.append(snp_occurrences[i])
 
-        # number_of_samples = len(non_missing_sampels_indices)
+        # remove snps that we dont have information on
         self.predicted_samples = samples[non_missing_sampels_indices]
-        # find sites with score bigger than min_score
-        logging.info("remove sites with score lower than %s..." % min_score)
+        number_of_samples = self.predicted_samples.size
 
+        if (number_of_samples == 0):
+            common.terminate("All samples removed. There is nothing to predick. quiting...")
+
+        # find sites with score bigger than min_score
+        seterr(invalid='ignore') # to ignore the following line warning (These warnings are an intentional aspect of numpy)
         relevant_sites_indices = where(self.sites_scores > min_score)[0]
+        logging.info("remove %s sites with score lower than %s..." % (len(relevant_sites_indices), min_score))
 
         # calc prediction
         logging.info("predict methylation level...")
-        site_prediction, predicted_sites_ids =  self.predict_sites(number_of_samples, relevant_snps_names, relevant_snp_occurrences, relevant_sites_indices, relevant_snps_indices)
-        self.predicted_sites_names = self.sites_id_per_name[predicted_sites_ids]
-        logging.info("remove samples with more than %s missing values..." % min_missing_values)
+        site_prediction, predicted_sites_ids =  self.predict_sites(number_of_samples, relevant_snps_names, relevant_snp_occurrences, relevant_sites_indices)
+        if site_prediction == []: # no sites predicted
+            common.terminate("All sites removed. There is nothing to predict.")
         
-        # remove missing samples from prediction
-        self.site_prediction = site_prediction[:, non_missing_sampels_indices]
-
-    def get_plink_snp_list(self, plink_snps_data):
+        self.predicted_sites_names = self.sites_name_per_id[predicted_sites_ids]
+        self.site_prediction = site_prediction
+        
+    def get_relevant_plink_snp_list(self, plink_snps_data):
         """
         gets a .snp file and deletes all snps which references (two last columns in the file) are ('C' and 'G') or ('A' and 'T')
         the snps that will be left are those which references are ('C' and 'A') or ('C' and 'T') or ('G' and 'A') or ('G' and 'T')
@@ -103,7 +114,7 @@ class Predictor(Module):
     def convert_012_string_to_ndarray(self, string):
         return (fromstring(string, dtype=dtype('S1'))).astype(int)
 
-    def get_relevant_snps_occurences(self, plink_geno_file, snp_indices, number_of_samples, min_missing_values):
+    def get_snps_occurences(self, plink_geno_file, snp_indices, number_of_samples, min_missing_values):
         """
         extracts number of occerences for each snp and each sample from .geno plink file, handles missing values
         the format of this file:
@@ -138,7 +149,6 @@ class Predictor(Module):
             samples_snps_f = plink_geno_file
 
         snps_missing_values_counter = 0
-        samples_missing_values_counter = 0
 
         # iterate over each snp
         next_index = 0
@@ -171,68 +181,97 @@ class Predictor(Module):
         relevant_snps_indices = snp_indices[where(snp_indices != -1)[0]]
         
         # find samples with too many missing values
-        missing_sampels_indices = where(na_count_per_sample > number_of_samples * min_missing_values)
+        missing_sampels_indices = where(na_count_per_sample > number_of_samples * min_missing_values)[0]
+        non_missing_sampels_indices = delete(range(number_of_samples), missing_sampels_indices)
+
+        # remove missing samples from snp occurences
+        relevant_snp_occurrences = vstack(tuple(relevant_snp_occurrences))
+        relevant_snp_occurrences = relevant_snp_occurrences[:, non_missing_sampels_indices]
+
+        #missing_sampels_indices = where(na_count_per_sample >= number_of_samples * 0)[0]
         logging.info("removing %d samples with more than %f missing values..." %(len(missing_sampels_indices), min_missing_values))
         
-        return relevant_snp_occurrences, relevant_snps_indices, missing_sampels_indices
+        return relevant_snp_occurrences, relevant_snps_indices, missing_sampels_indices, non_missing_sampels_indices
 
-    def predict_site(self, number_of_samples, site_snps_ids, snps_coeffs, relevant_snps_indices_per_id, relevant_snp_occurrences):
+
+    def predict_site(self, number_of_samples, site_snps_ids, snps_coeffs, relevant_snps_ids, relevant_snp_occurrences):
         """
+        site_snps_ids - the ids of all snps that are the site predictors
+        snps_coeffs - an array such that snps_coeffs[i] is the coefficient of the snp which id is site_snps_ids[i]
+        relevant_snps_ids - list of the relevant snps for prediction (we don't predict using 
+                            every snp, for wxample we ignore snps which alleles are A and T)
+        relevant_snp_occurrences - an array of arrays , size aXb where a is number of relevant snps and b is number of samples.
+                                    relevant_snp_occurrences[i][j] is number of alleles of 
+                                    snp id ID such that relevant_snps_indices_per_id[ID] = i  in sample j.
+
         predict each site with the following model:
 
-        Assume we have a methylation site m with two predictors s1, s2 and assume that their reference alleles are G, C and coefficients c1, c2, respectively.
-        Given the genotypes of an individual i in SNPs s1,s2  (denote s1_i,s2_i), we predict m_i, the methylation level of individual i in meth site m, as follows:
-        m_i_predicted = c1*(number of 'G' alleles in s1_i) + c2*c1*(number of 'C' alleles in s2_i)
+        Assume we have a methylation site m with two predictors s1, s2 and assume that their reference alleles are G, C and coefficients c1, c2,
+        respectively. Given the genotypes of an individual i in SNPs s1,s2  (denote s1_i,s2_i), we predict m_i, the methylation level of 
+        individual i in meth site m, as follows:
+        m_i_predicted = c1*(number of 'G' alleles in s1_i) + c2*(number of 'C' alleles in s2_i)
         """
+        snp_index_per_id = dict()
+        for index, snp_id in enumerate(relevant_snps_ids):
+            snp_index_per_id[snp_id] = index
+
         site_prediction = zeros(number_of_samples)
 
-        for j, snp_id in enumerate(site_snps_ids):
-            try:
-                snp_index = relevant_snps_indices_per_id[snp_id]
-            except:
-                continue # in case snp_id not found (we include sites whoch have at least one snp predictor)
-            site_prediction += snps_coeffs[j] * relevant_snp_occurrences[snp_index]
+        for i,snp_id in enumerate(site_snps_ids):
+            if snp_id in relevant_snps_ids:
+                site_prediction += snps_coeffs[i] * relevant_snp_occurrences[snp_index_per_id[snp_id]]
+
         return site_prediction
 
 
-    def predict_sites(self, number_of_samples, relevant_snps_names, relevant_snp_occurrences, relevant_sites_indices, relevant_snps_indices):
+    def predict_sites(self, number_of_samples, relevant_snps_names, relevant_snp_occurrences, relevant_sites_indices):
 
         """
         predict each site that we have  at least informations about one of the sites predicting snps
         if we have no snp to predict with - dont predict the site
 
-        """
-        # get the indices of the snps relevant ids
-        relevant_snps_indices_per_id = dict()
-        relevant_snps_number = len(relevant_snps_indices)
-        for i in range(relevant_snps_number):
-            try:
-                snp_id = self.snps_id_per_name[relevant_snps_names[i]] 
-            except:
-                continue # plink snp not in our model
-            relevant_snps_indices_per_id[snp_id] = i
+        number_of_samples - (int) number of samples (n)
+        relevant_snps_names - an array of names of the relevant snps for sites prediction (we don't predict using 
+                              every snp, for example we ignore snps which alleles are A and T).
+                              array of size s - number of relevant snps
+                              relevant_snps_names[i] is the name of the ith snp ("rsXXX..")
+        relevant_snp_occurrences - array of size sXn where s is the number of snps that are relevant for this site prediction
+                                    and  n is number of samples.
+                                    relevant_snp_occurrences[i][j] is the number of occurences of the i-th snp in sample j.
+        relevant_sites_indices - a list (array) of the indices of the sites that we will predict now. array of size m - number of sites
 
-        relevant_snps_ids_set = set(relevant_snps_indices_per_id.keys())
+        return:
+            matrix of size mXn (m- number of predicted sites, n- number of samples) of the prediction
+            predicted_sites_ids - list of the predicted sited ids
+
+        """
+        
+        relevant_snps_ids = [self.snps_id_per_name[name] for name in relevant_snps_names]
+        relevant_snps_ids_set = set(relevant_snps_ids)
 
         # iterate over each site and predict its value
         next_index = 0
         sites_predictions = []
         predicted_sites_ids = []
+
         with open(self.site_snps_list_file, 'r') as f:
             # iterate over only relevant sites
             for i, site_snps in enumerate(f):
+
                 if (next_index < len(relevant_sites_indices)) and (i == relevant_sites_indices[next_index]):
                     site_snps_ids = [int(sid) for sid in site_snps.split('\t')[:-1]]
                     
                     # if we have information about at least one of the sites predicting snps
                     if len(set(site_snps_ids).difference(relevant_snps_ids_set)) < len(site_snps_ids):
-
-                        site_prediction = self.predict_site(number_of_samples, site_snps_ids, self.sites_snps_coeff[i], relevant_snps_indices_per_id, relevant_snp_occurrences)
+                        site_prediction = self.predict_site(number_of_samples, site_snps_ids, self.sites_snps_coeff[i], relevant_snps_ids, relevant_snp_occurrences)
                         sites_predictions.append(site_prediction)
                         predicted_sites_ids.append(i)
 
                     next_index += 1
+
         f.close()
+        if len(sites_predictions) == 0:
+            return [], []
         return vstack(tuple(sites_predictions)), predicted_sites_ids
 
 
