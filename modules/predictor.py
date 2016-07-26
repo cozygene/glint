@@ -45,10 +45,12 @@ class Predictor(Module):
         """
         samples = loadtxt(plink_ind_file, dtype=str, usecols=(0,))
         number_of_samples = samples.shape[0]
-        plink_ind_file.close()
+        if type(plink_ind_file) == file:
+            plink_ind_file.close()
 
         plink_snps_data = loadtxt(plink_snp_file, dtype = str)
-        plink_snp_file.close()
+        if type(plink_snp_file) == file:
+            plink_snp_file.close()
         # use only snps that their allele are not the pairs CG or AT - since in those cases we cannot know which strand was tested 
         relevant_snps_indices = self.get_relevant_plink_snp_list(plink_snps_data)
 
