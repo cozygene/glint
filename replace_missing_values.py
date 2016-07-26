@@ -1,7 +1,9 @@
 from numpy import loadtxt, savetxt, where, zeros, delete, mean
 import argparse
 
-def _replace_missing_values_in_matrix(all_data, missing_value_indicator, data_max_missing_values, samples_max_missing_values, replace = False, data_type = float):
+DATA_TYPE = float
+STR_DATA_TYPE = '|S16'
+def _replace_missing_values_in_matrix(all_data, missing_value_indicator, data_max_missing_values, samples_max_missing_values, replace = False):
     number_of_data, number_of_samples = all_data.shape
     na_count_per_sample  = zeros(number_of_samples)
 
@@ -19,7 +21,7 @@ def _replace_missing_values_in_matrix(all_data, missing_value_indicator, data_ma
                 # "predict" using mean of non-missing samples in this snp
                 non_na_indices = delete(range(number_of_samples), na_indices)
                 if replace:
-                    all_data[i][na_indices] = mean(data_for_all_samples[non_na_indices].astype(data_type))
+                    all_data[i][na_indices] = mean(data_for_all_samples[non_na_indices].astype(DATA_TYPE))
                 else:
                     all_data[i][na_indices] = mean(data_for_all_samples[non_na_indices])
 
@@ -28,23 +30,25 @@ def _replace_missing_values_in_matrix(all_data, missing_value_indicator, data_ma
     data_indices_to_keep = delete(range(number_of_data), data_indices_to_remove)
     print "Removed %s data with more than %s missing values" % (len(data_indices_to_remove), data_max_missing_values)
 
+    if replace:
+        return all_data[data_indices_to_keep,:][:,samples_indices_to_keep].astype(DATA_TYPE)
     return all_data[data_indices_to_keep,:][:,samples_indices_to_keep]
 
 def get_data_type(data_type_str):
-    if data_type_str == 'float' or data_type_str == 'double':
+    if data_type_str in ['float', 'double', float]:
         return float
-    if data_type_str == 'int' or data_type_str == 'integer':
+    if data_type_str in ['int', 'integer', int]:
         return int
     return None
 
-def replace_missing(data_filename, missing_value_indicator, data_max_missing_values, samples_max_missing_values, data_type = float, sep = " ", suffix = ".non_missing_values", dim=2):
+def replace_missing(data_filename, missing_value_indicator, data_max_missing_values, samples_max_missing_values, sep = " ", suffix = ".non_missing_values", dim=2):
     """
-    replaces missing values by mean of non-missing data/samples and saves the output to the file named data_filename + suffix
+    replaces missing values by mean (mean of non-missing data/samples) and saves the output to the file named data_filename + suffix
     if there are too many missing samples (more than samples_max_missing_values) - they are removed
     if there are too mant missing datas (more than data_max_missing_values) - they are removed
 
     parames:
-    data_filename - a matrix of type int or float. dimensions nXm where n is number of samples and m number of data(e.g sites)
+    data_filename - a matrix of type int or float (not including the missing value indicator which can be string as well). dimensions nXm where n is number of samples and m number of data(e.g sites)
     assumes data_filename format is
 
             sample_0, .., sample_n
@@ -58,20 +62,15 @@ def replace_missing(data_filename, missing_value_indicator, data_max_missing_val
     missing_value_indicator - the missing value char (int, float or string) in your data 
     data_max_missing_values - the maximum data missing values allowed  (percantage - values between 0 and 1)
     samples_max_missing_values - the maximum sample missing values allowed  (percantage - values between 0 and 1)
-    data_type - the daya type in the matrix found in data_filename - must be  float or int
     sep - the separator sign of the matrix in data_filename
     suffix - the suffix for the output filename
-
 
     returns array of non-missing data/samples
     """
     #convert data_type from string to type ('float' --> float)
-    original_data_type = data_type
-    data_type = get_data_type(data_type)
+    data_type = DATA_TYPE
+    original_data_type = DATA_TYPE
 
-    if data_type == None:
-        raw_input("Error: data type must be float or int, not %s" % original_data_type)
-        return None
     
     #find the right missing value indicator type 
     replace = False
@@ -89,13 +88,13 @@ def replace_missing(data_filename, missing_value_indicator, data_max_missing_val
     # (if it represent an float -  it cant be converted to int) so its enough to check the int alone
 
     # if indicator type is not str - we'll use the original datatyp
-    # if it is str - ew'll read the data as strings, find the indicator and convert it back to datatype
+    # if it is str - we'll read the data as strings, find the indicator and convert it back to datatype
     if int_ind is not None: 
         missing_value_indicator = int_ind
     elif float_ind is not None:
         missing_value_indicator = float_ind
     else:
-        data_type = str
+        data_type = STR_DATA_TYPE
         replace = True
 
     try:
@@ -105,10 +104,10 @@ def replace_missing(data_filename, missing_value_indicator, data_max_missing_val
             return None
         output_filename = data_filename + suffix
 
-        if replace:
-            data_type = original_data_type
+        # if replace:
+        #     data_type = original_data_type
 
-        output_data = _replace_missing_values_in_matrix(all_data, missing_value_indicator, data_max_missing_values, samples_max_missing_values, replace, data_type)
+        output_data = _replace_missing_values_in_matrix(all_data, missing_value_indicator, data_max_missing_values, samples_max_missing_values, replace)
         print "Output is saved to " + output_filename
         savetxt(output_filename, output_data, fmt='%s')
         return output_data
@@ -125,7 +124,6 @@ def parse_args(argv=None):
     parser.add_argument("--ind", type=str, required=True, help="the missing value char (or any sign) in your data" )
     parser.add_argument("--max_d",required=True, type = float, help="the maximum data missing values allowed  (percantage - values between 0 and 1)")
     parser.add_argument("--max_s", required=True,type = float, help="the maximum sample missing values allowed  (percantage - values between 0 and 1)")
-    parser.add_argument("--dtype", type=str, default='float', help="the daya type in the matrix found in data_filename. must be float or int Default is float")
     parser.add_argument("--sep", type=str, default=" ", help="the separator sign of the matrix in data_filename. Default is single whitespace. please write \"\t\" for tab")
     parser.add_argument("--suffix", type=str, default=".non_missing_values", help="the suffix for the output filename")
     parser.add_argument("--dim", type=int, default=2, help="the dimensions of the matrix in the datafile. Default is 2")
@@ -133,5 +131,6 @@ def parse_args(argv=None):
 
     return parser.parse_args(args=argv)
 
-args = parse_args()
-replace_missing(args.datafile, args.ind, args.max_d, args.max_s, args.dtype, args.sep , args.suffix, args.dim)
+if __name__=="__main__":
+    args = parse_args()
+    replace_missing(args.datafile, args.ind, args.max_d, args.max_s, args.sep , args.suffix, args.dim)
