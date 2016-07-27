@@ -16,6 +16,8 @@ class PCAKit(Module):
         """
         logging.info("running PCA...")
         pca_out = pca.PCA(self.meth_data.data.transpose()) # meth_data should be transposed before passing to pca
+        if output_file_prefix is None:
+            output_file_prefix = ''
         output_filename = output_file_prefix + self.SCATTER_OUTPUT_FILE
         pca_scatter_plot = plot.PCAScatterPlot(pca_out, plots_number = amount, save_file = output_filename)
         pca_scatter_plot.draw()
