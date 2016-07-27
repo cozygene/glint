@@ -101,14 +101,16 @@ class MethylationData(Module):
         """
         logging.info("including sites...")
         indices_list = where(in1d(self.cpgnames , include_list))[0]
+        logging.info("include sites: %s CpGs from the reference list of %s CpGs were used" % (len(indices_list), len(include_list)))
         self.data = self.data[indices_list, :]
         self.cpgnames = self.cpgnames[indices_list]
         size_before = self.sites_size
         self.sites_size = len(self.cpgnames)
-        logging.debug("methylation data new size is %s" % str(self.data.shape))
         if (self.data.shape[0] != self.sites_size):
             common.terminate("After including sites, methylation data sites size is %s but we got %s" % (self.data.shape[0], self.sites_size))
         logging.debug("%s sites out of %s were included" % (self.sites_size, size_before))
+        logging.info("methylation data new size is %s sites by %s samples" % self.data.shape)
+
 
     def exclude(self, exclude_list):
         """
@@ -118,7 +120,9 @@ class MethylationData(Module):
         """
         logging.info("excluding sites...")
         indices_list = where(in1d(self.cpgnames , exclude_list))[0]
+        logging.info("exclude sites: %s CpGs from the reference list of %s CpGs were used" % (len(indices_list), len(exclude_list)))
         self.exclude_sites_indices(indices_list)
+        logging.debug("methylation data new size is %s sites by %s samples" % self.data.shape)
 
     def keep(self, keep_list):
         """
@@ -128,7 +132,9 @@ class MethylationData(Module):
         """
         logging.info("keeping samples...")
         remove_indices_list = where(False == in1d(self.samples_ids , keep_list))[0]
+        logging.info("keep samples: %s samples from the reference list of %s samples were used" % (len(remove_indices_list), len(keep_list)))
         self.remove_samples_indices(remove_indices_list)
+        logging.debug("methylation data new size is %s sites by %s samples" % self.data.shape)
 
     def remove(self, remove_list):
         """
@@ -138,7 +144,9 @@ class MethylationData(Module):
         """
         logging.info("removing samples...")
         indices_list = where(in1d(self.samples_ids , remove_list))[0]
+        logging.info("remove samples: %s samples from the reference list of %s samples were used" % (len(indices_list), len(remove_list)))
         self.remove_samples_indices(indices_list)
+        logging.debug("methylation data new size is %s sites by %s samples" % self.data.shape)
         
     def exclude_sites_with_low_mean(self, min_value):
         """
