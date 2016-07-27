@@ -3,7 +3,7 @@ import sys
 import copy
 import logging
 from pickle import dump
-from numpy import delete, isnan, nanstd, where, column_stack, std, array, savetxt
+from numpy import delete, isnan, nanstd, where, column_stack, std, array, savetxt, in1d
 from numpy.ma import average, masked_array
 from module import Module
 from utils import common, pca
@@ -98,7 +98,7 @@ class MethylationData(Module):
         it updates the sites_size, the cpgnames list and the list holds the average value per site
         """
         logging.info("including sites...")
-        indices_list = [i for i, site in enumerate(self.cpgnames) if site in include_list]
+        indices_list = where(in1d(self.cpgnames , include_list))[0]
         self.data = self.data[indices_list, :]
         self.cpgnames = self.cpgnames[indices_list]
         self.sites_size = len(self.cpgnames)
@@ -114,7 +114,7 @@ class MethylationData(Module):
         it updates the sites_size, the cpgnames list and the list holds the average value per site
         """
         logging.info("excluding sites...")
-        indices_list = [i for i, site in enumerate(self.cpgnames) if site in exclude_list]
+        indices_list = where(in1d(self.cpgnames , exclude_list))[0]
         self.exclude_sites_indices(indices_list)
 
     def keep(self, keep_list):
@@ -124,7 +124,7 @@ class MethylationData(Module):
         it updates the samples_size and the samples_ids list 
         """
         logging.info("keeping samples...")
-        remove_indices_list = [i for i, sample in enumerate(self.samples_ids) if sample not in keep_list]
+        remove_indices_list = where(False == in1d(self.samples_ids , keep_list))[0]
         self.remove_samples_indices(remove_indices_list)
 
     def remove(self, remove_list):
@@ -134,7 +134,7 @@ class MethylationData(Module):
         it updates the samples_size and the samples_ids list 
         """
         logging.info("removing samples...")
-        indices_list = [i for i, sample in enumerate(self.samples_ids) if sample in remove_list]
+        indices_list = where(in1d(self.samples_ids , remove_list))[0]
         self.remove_samples_indices(indices_list)
         
     def exclude_sites_with_low_mean(self, min_value):
