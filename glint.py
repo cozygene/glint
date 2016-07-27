@@ -15,7 +15,7 @@ class GlintParser(ModuleParser):
     def __init__(self, parser):
         optional = parser.add_argument_group('3.Optional arguments')
         optional.add_argument('-h', '--help', action='help', help = "print this help") # add help here so it will be under same group with all other optional argument
-        optional.add_argument('--out', type = str,  default = "",   help = "changes the prefix of the output file ")
+        optional.add_argument('--out', type = str,   help = "changes the prefix of the output file ")
 
         modules = parser.add_argument_group('4.Glint modules')
         modules.add_argument('--refactor', action='store_true', help = "<TODO Elior, add help here>")
@@ -128,14 +128,12 @@ class ModulesArgumentParsers(object):
                 logging.warning("selected data management arguments which are not relevant for refactor: %s" % str(not_relevant_atgs))
 
     def run(self):
-
         if self.args.methpred:
-            self.predictor_parser.run(args, output_perfix = self.args.out)
+            self.predictor_parser.run(args)
             return
 
         self.meth_parser.run(self.args)
         self.meth_parser.preprocess_samples_data() # preprocess samples before refactor and before ewas
-
         if self.args.refactor:
             refactor_meth_data = self.meth_parser.module.copy()
             self.refactor_parser.run(args = self.args,
@@ -150,8 +148,7 @@ class ModulesArgumentParsers(object):
         if self.args.ewas:
             ewas_meth_data = self.meth_parser.module.copy()
             self.ewas_parser.run(args = self.args,
-                                 meth_data = ewas_meth_data,
-                                 output_perfix = self.args.out)
+                                 meth_data = ewas_meth_data)
 
         if self.args.epi:
             epi_met_data = self.meth_parser.module.copy()

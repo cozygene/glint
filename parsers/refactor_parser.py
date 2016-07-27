@@ -30,9 +30,10 @@ class RefactorParser( ModuleParser ):
       super(RefactorParser, self).__init__(refactor)
 
 
-    def run(self, args, meth_data, output_perfix = ""):
+    def run(self, args, meth_data, output_perfix = None):
       try:
-
+        if output_perfix is None:
+          output_perfix = ""
         bad_probes_list = set()
         [bad_probes_list.update(loadtxt(os.path.join( os.path.dirname(__file__), probes_file), dtype=str)) for probes_file in BAD_PROBES_FILES]
         self.module  = refactor.Refactor(methylation_data = meth_data, 

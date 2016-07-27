@@ -30,7 +30,7 @@ class EWASParser(ModuleParser):
                 self.tests.append(args.linreg)
 
 
-    def run(self, args, meth_data, output_perfix = ""):
+    def run(self, args, meth_data):
         try:
             if meth_data.phenotype is None and args.pheno is None:
                 common.terminate("phenotype file wasn't supplied")

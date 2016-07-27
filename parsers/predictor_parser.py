@@ -24,9 +24,9 @@ class PredictorParser(ModuleParser):
         super(PredictorParser, self).__init__(predictor)
         
 
-    def run(self, args, output_perfix = ""):
+    def run(self, args):
         try:
-            self.module  = predictor.Predictor(SITES_SCORES_FILE, SITES_SNPS_FILE, SITES_IDS_FILE, SNPS_IDS_FILE, SITES_SNPS_COEFF_FILE)
+            self.module  = predictor.Predictor(SITES_SCORES_FILE, SITES_SNPS_FILE, SITES_IDS_FILE, SNPS_IDS_FILE, SITES_SNPS_COEFF_FILE) # todo Predictor should get lists and not files?
             self.module.predict(args.score, args.psnp, args.pgeno, args.pind, 0.02)
             meth_data = self.module.meth_data()
             meth_data.save('predicted')

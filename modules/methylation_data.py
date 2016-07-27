@@ -161,6 +161,8 @@ class MethylationData(Module):
         serializes this object and saves it to methylation_data_filename
         assumes that methylation_data_filename is a valid file 
         """
+        if prefix is None:
+            prefix = ''
         if prefix != '' and not prefix.endswith('_'):
             prefix = prefix + "_"
         filename = prefix + COMPRESSED_FILENAME
