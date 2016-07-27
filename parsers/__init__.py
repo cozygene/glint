@@ -4,3 +4,4 @@ from methylation_data_parser import MethylationDataParser
 from module_parser import ModuleParser
 from kit_parser import KitParser
 from predictor_parser import PredictorParser
+from epistructure_parser import EpistructureParser
