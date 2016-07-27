@@ -59,8 +59,9 @@ class MethylationData(Module):
 
             self.data = delete(self.data, sites_indicies_list, axis = 0)
             self.cpgnames = delete(self.cpgnames, sites_indicies_list)
+            size_before = self.sites_size
             self.sites_size = len(self.cpgnames)
-            logging.debug("%s sites were excluded" % len(sites_indicies_list))
+            logging.debug("%s sites out of %s were excluded (left %s sites)" % (len(sites_indicies_list), size_before, self.sites_size))
 
     def remove_samples_indices(self, indices_list):
         """
@@ -81,8 +82,9 @@ class MethylationData(Module):
             if self.covar is not None:
                 self.covar = delete(self.covar, indices_list, axis = 0)
             self.samples_ids = delete(self.samples_ids, indices_list)
+            size_before = self.samples_size
             self.samples_size = len(self.samples_ids)
-            logging.debug("%s samples were removed" % len(indices_list))
+            logging.debug("%s samples out of %s were removed (left %s samples)" % (len(indices_list), size_before, self.samples_size))
 
     def get_mean_per_site(self):
         """
@@ -101,11 +103,12 @@ class MethylationData(Module):
         indices_list = where(in1d(self.cpgnames , include_list))[0]
         self.data = self.data[indices_list, :]
         self.cpgnames = self.cpgnames[indices_list]
+        size_before = self.sites_size
         self.sites_size = len(self.cpgnames)
         logging.debug("methylation data new size is %s" % str(self.data.shape))
         if (self.data.shape[0] != self.sites_size):
             common.terminate("After including sites, methylation data sites size is %s but we got %s" % (self.data.shape[0], self.sites_size))
-        logging.debug("%s sites were included" % len(indices_list))
+        logging.debug("%s sites out of %s were included" % (self.sites_size, size_before))
 
     def exclude(self, exclude_list):
         """
