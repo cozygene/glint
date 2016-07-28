@@ -3,8 +3,7 @@ import sys
 import copy
 import logging
 from pickle import dump
-from numpy import delete, isnan, nanstd, where, column_stack, std, array, savetxt, in1d
-from numpy.ma import average, masked_array
+from numpy import delete, isnan, where, column_stack, std, array, savetxt, in1d, mean
 from module import Module
 from utils import common, pca
 from bisect import bisect_right
@@ -90,12 +89,15 @@ class MethylationData(Module):
         """
         returns array that contains the mean value (average) for each methylation site
         """
-        masked_data = masked_array(self.data, isnan(self.data)) # create masked array
-        return average(masked_data, axis=1)
+        # # the commentes suppose to handle missing values but we dont support NAs now . they calcs the right mean (tested) but it wasnt tested with missing values
+        # masked_data = masked_array(self.data, isnan(self.data)) # create masked array
+        # return average(masked_data, axis=1)
+        return mean(self.data, axis=1)
+
 
     def include(self, include_list):
         """
-        include_list - a list with sites name to keep in data (remove all other sites)
+        include_list - a list with sites names to keep in data (remove all other sites)
         this function removes the cpg sites not found in include_list list from the data
         it updates the sites_size, the cpgnames list and the list holds the average value per site
         """
@@ -195,7 +197,9 @@ class MethylationData(Module):
         """
         logging.info("excluding site with variance lower than %s..." % lowest_std_th)
         # get std for each site
-        sites_std = nanstd(self.data, axis=1) # calc variance consider NaN
+        # sites_std = nanstd(self.data, axis=1) # calc variance consider NaN - missing values are not supported right noe
+        sites_std = std(self.data, axis=1) # calc variance - missing values are not allowed
+
         # sort std and get sites index for each std (sorted, so indices of the lowest std sites will be to the left) 
         std_sorted_indices = sites_std.argsort() # sort the sites_variance and return an array that holds the indices of the sorted values
         # get std list sorted
