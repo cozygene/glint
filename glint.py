@@ -28,7 +28,7 @@ class GlintParser(ModuleParser):
     
 
 class ModulesArgumentParsers(object):
-    FUNCTIONALITY_ARGS = [ '--gsave', '--refactor', '--ewas', '--predict'] # TODO find better way to hold arguments that cause some functionality. glint is not supposed to be aware of those args
+    FUNCTIONALITY_ARGS = [ '--gsave', '--refactor', '--ewas', '--predict', '--lmm'] # TODO find better way to hold arguments that cause some functionality. glint is not supposed to be aware of those args
     DATA_PREPROCESSING_NOT_RELEVANT_FOR_REFACTOR = ['--include', '--exclude', '--minmean', '--maxmean']
     SOLE_ARGS = ['--plotpcs', '--epi'] # functilnality flags that cannot be soecified with other functionaity flags
 
@@ -54,14 +54,14 @@ class ModulesArgumentParsers(object):
         self.meth_parser = MethylationDataParser(self.parser)
         self.glint_parser = GlintParser(self.parser)
 
-        #modules
+        #modules in the order they'll appear on --help
         self.refactor_parser = RefactorParser(self.parser)
         self.ewas_parser = EWASParser(self.parser)
+        self.lmm_parser = LMMParser(self.parser)
         self.kit_parser = KitParser(self.parser)
         self.predictor_parser = PredictorParser(self.parser)
         self.epi_parser = EpistructureParser(self.parser)
 
-    
 
     def parse_args(self):
         logging.info("Validating arguments...")
@@ -89,9 +89,13 @@ class ModulesArgumentParsers(object):
             if self.args.refactor:
                 self.refactor_parser.validate_args(self.args)
                 optional_args.extend(self.refactor_parser.all_args)
+            # ewas tests need to be after refactor
             if self.args.ewas:
                 self.ewas_parser.validate_args(self.args)
                 optional_args.extend(self.ewas_parser.all_args)
+            if self.args.lmm:
+                self.lmm_parser.validate_args(self.args)
+                optional_args.extend(self.lmm_parser.all_args)
 
         self.check_selected_args(optional_args)
         return self.args
@@ -146,11 +150,18 @@ class ModulesArgumentParsers(object):
 
         self.meth_parser.preprocess_sites_data() #preprocess sites after refactor and before ewas
         self.meth_parser.gsave(output_perfix = self.args.out) #save after all preprocessing #TODO maybe take gsave out from MethData module
-
+        # ewas tests must be called after refactor
         if self.args.ewas:
             ewas_meth_data = self.meth_parser.module.copy()
             self.ewas_parser.run(args = self.args,
                                  meth_data = ewas_meth_data)
+
+        # ewas test must be called after refactor
+        if self.args.lmm:
+            lmm_meth_data = self.meth_parser.module.copy()
+            self.lmm_parser.run(args = self.args,
+                                 meth_data = lmm_meth_data,
+                                 output_perfix = self.args.out)
 
         if self.args.epi:
             epi_met_data = self.meth_parser.module.copy()

@@ -5,7 +5,7 @@ class PCA( object ):
     """
     A is centered and each column is devided by its standard deviation before calculating PCA
 
-    input:  A - dimensions are n X m
+    input:  A - dimensions are n X m (where m > n)
     output: U - dimensions m X n (loadings)
             P - dimensions n X n (scores)
 

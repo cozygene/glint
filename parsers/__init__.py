@@ -5,3 +5,4 @@ from module_parser import ModuleParser
 from kit_parser import KitParser
 from predictor_parser import PredictorParser
 from epistructure_parser import EpistructureParser
+from lmm_parser import LMMParser

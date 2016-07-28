@@ -15,8 +15,11 @@ class EWASParser(ModuleParser):
 
         # Note that argument '--pheno' is required for all EWAS tests. but dont add it to dependencies list (dependencies = ['--pheno'])
         # since it can be supplied through the meth_data object (if .glint file was provided and not meth data matrix)
-        ewas.add_argument('--linreg', action='store_const', const='linear_regression',   help = "Run a linear regression analysis; --pheno must be provided (executed by default if --ewas is selected)")
-        ewas.add_argument('--logreg', action='store_const', const='logistic_regression', help = "Run a logistic regression analysis; --pheno must be provided and be a binary phenotype")
+        ewas.add_argument('--linreg', action='store_const', const='linear_regression',   help = "Run a linear regression analysis (executed by default if --ewas is selected)")
+        ewas.add_argument('--logreg', action='store_const', const='logistic_regression', help = "Run a logistic regression analysis")
+        # Note: lmm module is handled not the very best way since there was no time. it appears here under "EWAS" but the glin.py handles it as 
+        # an independed module
+        # ewas.add_argument('--lmm', dependencies = ["--ewas"], action='store_const', const='logistic_regression', help = "Run a linear mixed model test. More explanation and options described under \"lmm\"")
         
         super(EWASParser, self).__init__(ewas)
 
@@ -27,7 +30,8 @@ class EWASParser(ModuleParser):
             self.required_args.append('pheno')
 
         # default test is linear regression
-        if not args.logreg:
+        if not args.logreg and not args.lmm:
+            logging.info("No EWAS test was chosen, running linerar regression by default.")
             self.tests = ['linear_regression']
         else:
             self.tests = []
