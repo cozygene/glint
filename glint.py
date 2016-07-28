@@ -8,7 +8,7 @@ import logging
 from utils import common
 from numpy import loadtxt
 from utils import GlintArgumentParser
-from parsers import ModuleParser, RefactorParser, EWASParser, MethylationDataParser, KitParser, PredictorParser, EpistructureParser  #dont remove this is imported in,,,
+from parsers import ModuleParser, RefactorParser, EWASParser, MethylationDataParser, KitParser, PredictorParser, EpistructureParser, LMMParser  #dont remove this is imported in,,,
 
         
 class GlintParser(ModuleParser):
@@ -20,14 +20,15 @@ class GlintParser(ModuleParser):
         modules = parser.add_argument_group('4.Glint modules')
         modules.add_argument('--refactor', action='store_true', help = "<TODO Elior, add help here>")
         modules.add_argument('--ewas',     action='store_true', help = "<TODO Elior, add help here>" )
-        modules.add_argument('--methpred', action='store_true', help = "<TODO Elior, add help here methylation predictor>" )
+        modules.add_argument('--predict', action='store_true', help = "<TODO Elior, add help here methylation predictor>" )
+        modules.add_argument('--lmm',      action='store_true', help = "<TODO Elior, add help here lmm>" )
         modules.add_argument('--epi',      action='store_true', help = "<TODO Elior, edit>" )
 
         super(GlintParser, self).__init__(optional, modules)
     
 
 class ModulesArgumentParsers(object):
-    FUNCTIONALITY_ARGS = [ '--gsave', '--refactor', '--ewas', '--methpred'] # TODO find better way to hold arguments that cause some functionality. glint is not supposed to be aware of those args
+    FUNCTIONALITY_ARGS = [ '--gsave', '--refactor', '--ewas', '--predict'] # TODO find better way to hold arguments that cause some functionality. glint is not supposed to be aware of those args
     DATA_PREPROCESSING_NOT_RELEVANT_FOR_REFACTOR = ['--include', '--exclude', '--minmean', '--maxmean']
     SOLE_ARGS = ['--plotpcs', '--epi'] # functilnality flags that cannot be soecified with other functionaity flags
 
@@ -43,6 +44,7 @@ class ModulesArgumentParsers(object):
         self.refactor_parser = None
         self.ewas_parser = None
         self.epi_parser = None
+        self.lmm_parser = None
         self.args = None
 
     def add_arguments(self):
@@ -69,7 +71,7 @@ class ModulesArgumentParsers(object):
         self.glint_parser.validate_args(self.args)
         optional_args.extend(self.glint_parser.all_args)
 
-        if self.args.methpred:
+        if self.args.predict:
             self.predictor_parser.validate_args(self.args)
             optional_args.extend(self.predictor_parser.all_args)
         else:
@@ -128,7 +130,7 @@ class ModulesArgumentParsers(object):
                 logging.warning("selected data management arguments which are not relevant for refactor: %s" % str(not_relevant_atgs))
 
     def run(self):
-        if self.args.methpred:
+        if self.args.predict:
             self.predictor_parser.run(args)
             return
 
