@@ -28,20 +28,17 @@ class ModuleParser(object):
     def __init__(self,  *groups):
         self.groups = groups # groups of type GlintArgumentGroup
         self.all_args = []
+        self.required_args = []
         for group in self.groups:
             self.all_args.extend(group.get_all_args())
+            self.required_args.extend(group.get_required_args())
 
 
     def validate_required_args(self, args):
-        for group in self.groups:
-            self._validate_required_args_in_group(group, args)
-
-
-    def _validate_required_args_in_group(self, group, args):
         """
         errors if required argument is not set in arguments list (args)
         """
-        for arg in group.get_required_args():
+        for arg in self.required_args:
             if not contains_arg(args, arg):
                 common.terminate("argument --%s is required" % arg)
 
