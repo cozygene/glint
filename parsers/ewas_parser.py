@@ -3,24 +3,31 @@ import logging
 from utils import common
 import argparse
 from module_parser import ModuleParser
-from modules import ewas
+from modules import ewas, methylation_data
+
+
 """""
 EWAS
 """""
 class EWASParser(ModuleParser):
     def __init__(self, parser):
-
         ewas = parser.add_argument_group('ewas', 'TODO Elior,add ewas description here')
+
+        # Note that argument '--pheno' is required for all EWAS tests. but dont add it to dependencies list (dependencies = ['--pheno'])
+        # since it can be supplied through the meth_data object (if .glint file was provided and not meth data matrix)
         ewas.add_argument('--linreg', action='store_const', const='linear_regression',   help = "Run a linear regression analysis; --pheno must be provided (executed by default if --ewas is selected)")
         ewas.add_argument('--logreg', action='store_const', const='logistic_regression', help = "Run a logistic regression analysis; --pheno must be provided and be a binary phenotype")
         
         super(EWASParser, self).__init__(ewas)
-        
 
     def validate_args(self, args):
-        super(EWASParser, self).validate_args(args)
+        # argument pheno is required for all ewas tests - it can be supplied through --pheno flag of .glint meth data file
+        # So, if the datafile supplied is not .glint file - pheno must be supplied as a flag 
+        if not args.datafile.name.endswith(methylation_data.GLINT_FORMATTED_EXTENSION):
+            self.required_args.append('pheno')
+
         # default test is linear regression
-        if not args.logreg and not args.linreg:
+        if not args.logreg:
             self.tests = ['linear_regression']
         else:
             self.tests = []
@@ -28,7 +35,11 @@ class EWASParser(ModuleParser):
                 self.tests.append(args.logreg)
             if args.linreg is not None:
                 self.tests.append(args.linreg)
+            if args.lmm is not None:
+                self.tests.append(args.lmm)
 
+
+        super(EWASParser, self).validate_args(args)
 
     def run(self, args, meth_data):
         try:
@@ -40,3 +51,4 @@ class EWASParser(ModuleParser):
         except Exception :
             logging.exception("in ewas")
             raise
+

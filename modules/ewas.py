@@ -17,8 +17,10 @@ class EWAS(Module):
 
     def run(self):
         logging.info('starting EWAS...');
+        #running association tests
         results = [test_handler(output_filename = 'ewas_' + test_name) for (test_name,test_handler) in self.test_handlers]
         logging.info('EWAS is Done!')
+        return results
 
     def _get_test_handler(self, tests_list):
         # check that the tests in test_list are all optional tests (found in AVALIABLE_TESTS)
@@ -28,6 +30,7 @@ class EWAS(Module):
         return [(test,getattr(self, self.TEST_FUNC_NAME_FORMAT.format(test_name=test))) for test in tests_list]
 
     def _logistic_regression_test(self, output_filename = None):
+        logging.warning("logistic regression is not supported for the moment...") #todo when implementing remove this
         pass
         
     def _linear_regression_test(self, output_filename = None):
