@@ -129,19 +129,18 @@ class Refactor(Module):
 
         # feature selection
         distances = self.feature_selection_handler()
-        ranked_list = self._calc_low_rank_approx_distances()
+        ranked_list = self._calc_low_rank_approx_distances() # returns array of the indexes in a sorted order
 
         logging.info('Computing the ReFACTor components...')
-        sites = ranked_list[0:self.t]
-
+        sites = ranked_list[0:self.t] # take best t sites indices
         pca_out = pca.PCA(self.meth_data.data[sites,:].transpose())
         score = pca_out.P
 
-        logging.info('Saving a ranked list of the data features...')
+        logging.info('Saving a ranked list of the data features to %s...' % self.ranked_output_filename)
         ranked_list_output = [[index + 1, self.meth_data.cpgnames[index]] for index in ranked_list]
         savetxt(self.ranked_output_filename, ranked_list_output, fmt='%s')
 
-        logging.info('Saving the ReFACTor components...')
+        logging.info('Saving the ReFACTor components to %s...' % self.components_output_filename)
         components = score[:,0:self.num_components]
         components_output = column_stack((self.meth_data.samples_ids, components))
         savetxt(self.components_output_filename, components_output, fmt='%s')
