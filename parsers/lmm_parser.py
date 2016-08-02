@@ -22,7 +22,7 @@ class LMMParser(ModuleParser):
         
         def reml_value(val):
             val = int(val)
-            if val != 0 and val != -1:
+            if val != 0 and val != 1:
                 common.terminate("reml must be 0 or 1")
             return val
         lmm_parser.add_argument('--reml', type=reml_value, default=1, help='type 1 to use REML (restricted maximum likelihood) or 0 to use ML. Default is 1 (REML)')
@@ -60,13 +60,14 @@ class LMMParser(ModuleParser):
             kinship_data = None
 
             if args.kinship == 'refactor': # kinship and data to test are the same
-
-                self.refactor.run(args, meth_data, output_perfix)
+                logging.info("Running lmm with refactor kinship...")
+                refactor_meth_data = meth_data.copy() #todo need to copy?
+                self.refactor.run(args, refactor_meth_data, output_perfix)
 
                 logging.info("using best %s sites suggested by refactor as data for kinship..." % args.t)
                 t_best_sites = self.refactor.module.ranked_sites[:args.t]
 
-                data_for_kinship = meth_data.copy()
+                data_for_kinship = meth_data.copy() #todo need to copy?
                 data_for_kinship.include(t_best_sites)
                 
                 # todo handle if sample not in phenotype
@@ -74,10 +75,9 @@ class LMMParser(ModuleParser):
                 # all data is of dimensions n samplesX m sites
                 kinship_data = data_for_kinship.data.transpose()
                 kinship = lmm.KinshipCreator(kinship_data, is_normalized = False).create_standard_kinship()
-                
-            # all data is of dimensions n samplesX m sites
 
-            covars = meth_data.covar.transpose() if meth_data.covar else None
+            # all data is of dimensions n samplesX m sites
+            covars = meth_data.covar # no need to transpose since covars are nXm (n samples)
             data = meth_data.data.transpose() # data to test
             pheno = meth_data.phenotype #should transpose? todo
 
