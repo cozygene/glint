@@ -347,7 +347,7 @@ class MethylationDataLoader(MethylationData):
             common.terminate("the file doesn't include all sample ids %s %s"% (len(data) ,len(samples_ids)))
 
         matrix_sample_ids = data[:,0]
-        if not (samples_ids == matrix_sample_ids).all():
+        if not ((samples_ids.size == matrix_sample_ids.size) and ((samples_ids == matrix_sample_ids).all())):
             if len(set(samples_ids)^set(matrix_sample_ids)) != 0:
                 common.terminate("sample ids are not identical to the sample ids in data file")
             common.terminate("sample ids are not in the same order as in the datafile") # TODO Elior, should we terminate because sample_ids in files are not in the same order as in datafile?
