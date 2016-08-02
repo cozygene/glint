@@ -71,12 +71,10 @@ class LMMParser(ModuleParser):
                 
                 # todo handle if sample not in phenotype
 
-                #include /exclude sites of 22 chromosomes todo
-
                 # all data is of dimensions n samplesX m sites
                 kinship_data = data_for_kinship.data.transpose()
-
-            # if args.numPCCovars > 0 #todo finish this
+                kinship = lmm.KinshipCreator(kinship_data, is_normalized = False).create_standard_kinship()
+                
             # all data is of dimensions n samplesX m sites
 
             covars = meth_data.covar.transpose() if meth_data.covar else None
@@ -84,8 +82,8 @@ class LMMParser(ModuleParser):
             pheno = meth_data.phenotype #should transpose? todo
 
             # initialize lmm with kinship
-            module = lmm.LMM(kinship_data)
-            sorted_cpgnames, sorted_cpd_indices, pvalues = module.run(data, pheno, covars, meth_data.cpgnames, args.logdelta, args.reml)
+            module = lmm.LMM(kinship)
+            sorted_cpgnames, sorted_cpg_indices, pvalues = module.run(data, pheno, covars, meth_data.cpgnames, False, args.logdelta, args.reml)
 
             output_file = LMM_OUT_SUFFIX if output_perfix is None else output_perfix + LMM_OUT_SUFFIX
             logging.info("saving LMM output to file %s" % output_file)

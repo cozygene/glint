@@ -14,15 +14,6 @@ import logging
 
 AVAILABLE_KINSHIPS = ["refactor"]
 
-def compute_kinship(X):
-    """
-    param X: data of dimensions nXm where n is number of sampels and m is number of sites
-             data must be normalized
-    returns matrix of dimensions nXn
-    """
-    # compute kinship matrix ( X * X.transpose() ) / (number of sites)
-    return tools.symmetrize(blas.dsyrk(1.0, X, lower=1)) / X.shape[1]
-
 def negLLevalLong(logdelta, s, Uy, UX, logdetXX, reml=True):
     Sd = s + np.exp(logdelta)
     UyS = Uy / Sd
@@ -105,34 +96,66 @@ def lleval(Uy, UX, Sd, yKy, logdetK, logdetXX, reml=True):
     return (ll, beta, F)
 
 
+class KinshipCreator(Module):
+    def __init__(self, kinship_data, is_normalized = False):
+        """
+        creates a kinship matrix from data
+        
+        params:
+        kinship_data - the data to generate the kinship from
+        is_normalized: True if the data supplied is normalized. False is the default must be normalized
+                       Note that data is normalized according to axis = 0, so transopse the data before calling LMM if needed
+        
+        """
+        self.data = kinship_data
+        self.standardize = is_normalized
+
+    
+    def create_standard_kinship(self): #TODO change name
+        """
+        compute kinship matrix ( X * X.transpose() ) / (number of sites)
+        returns matrix of dimensions nXn
+        """
+        logging.info("Creating a standard kinship...")
+        X = self.data
+        if not self.standardize:
+            X = tools.standardize(X, axis = 0)
+
+        # compute kinship matrix ( X * X.transpose() ) / (number of sites)
+        return tools.symmetrize(blas.dsyrk(1.0, X, lower=1)) / X.shape[1]
+
+
 class LMM(Module):
-    def __init__(self, kinship_data):
+    def __init__(self, kinship_matrix):
         """
-        initialize LMM with the data for kinship matrix
-        Note - assumes kinship_data is n sampels by m sites
+        initialize LMM with a kinship matrix
+        Note - assumes kinship_data is of dimensions nXn where is number of samples
         """
-        X = tools.standardize(kinship_data, axis = 0)
-        kinship = compute_kinship(X)
         # preprocessing kinship
-        self.s, self.U = tools.eigenDecompose(kinship)
+        self.s, self.U = tools.eigenDecompose(kinship_matrix)
     
     
     
-    def run(self, data, pheno, covars, cpgnames, logdelta = None, reml=True):
+    def run(self, data, pheno, covars, cpgnames, is_covars_normalized = False, logdelta = None, reml=True):
         """
         preprocess data and run lmm. 
         
         params:
         data - the methylation data to test (matrix of n sampels by m sites)
         pheno - the phenotype    (a 1D vector of size n (sampels) )
-        covars - the covariates  (matrix of n sampels by x covariates or empty)
+        covars - the covariates.(matrix of n sampels by x covariates or empty)
+        is_covars_normalized - is the covariates matrix (supplied with param 'covar') is normalized (default is False).
+                                if False - covars will be normalized.
+                               Note that covariates will be normalized according to asix=0. transpose before calling this function if needed.
+                
         """
         # preprocess covariates and add a column of ones - before calc logdelta
         number_of_samples = pheno.shape[0]
         if covars is None:
             covars = np.empty((number_of_samples, 0))
 
-        covars = tools.standardize(covars, axis = 0)
+        if not is_covars_normalized:
+            covars = tools.standardize(covars, axis = 0)
         covars = np.concatenate((covars, np.ones((number_of_samples, 1))), axis=1)
         
         # if log delta is not supplied - calculate ir
