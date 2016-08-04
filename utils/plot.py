@@ -1,7 +1,10 @@
 from numpy import std, log10, linspace, sqrt, ceil
 import matplotlib.pyplot as plot
-from utils import pca
 import logging
+from pandas import DataFrame
+from scipy.stats import uniform
+from scipy.stats import randint
+from itertools import cycle
 
 def draw_setup(function):
     """
@@ -25,8 +28,10 @@ def draw_setup(function):
         # if finished drawing all plots, save plots
         if self.current_draw_index -1 == self.plots_number: # draw all plots
             if self.save_file:
-                plot.savefig(self.save_file)
-            # plot.show()
+                logging.info("Saving plot to %s" % self.save_file)
+                # plot.savefig(self.save_file)
+                plot.savefig(self.save_file, dpi = 200) #todo change dpi?
+        plot.close()
 
         return output
         
@@ -45,8 +50,11 @@ class Plot(object):
             self.nrows = ceil(sqrt(plots_number))
             self.ncols = ceil(self.plots_number / self.nrows)
             # create windows
-            fig, axes = plot.subplots(figsize = (self.ncols*8,self.nrows*4))
+            self.fig, axes = plot.subplots(figsize = (self.ncols*8,self.nrows*4))
             fig.subplots_adjust(hspace=.5)
+
+        else:
+            self.fig, axes = plot.subplots()
 
 
     def add_title(self, title = None, xtitle = None, ytitle = None):
@@ -55,7 +63,7 @@ class Plot(object):
         if ytitle:
             plot.ylabel(ytitle)
         if title:
-            plot.title(title)
+            plot.title(title, y = 1.08)
 
 
 
@@ -145,4 +153,63 @@ class PCAScatterPlot(Plot):
             # I also noticed that if I set the xlim (out.set_xlim) it works with or without "[plot.axvline(x=x_std*i, color='r',linestyle='-') for i in  lines]"
             # so I think that changing the limit before calling xticks is what makes it work (plot.axvline makes the limit wider)
             # Elior can you help and check if the plot is OK?
+
+
+
+class ManhattanPlot(Plot):
+    def __init__(self, save_file=None, plots_number=1):
+        super(ManhattanPlot, self).__init__(save_file, plots_number)
+
+    @draw_setup
+    def draw(self, groups_number, sites, pvalues, title = None, xtitle = None, ytitle = None, style = 'b.'):
+
+        ax = plot.axes()
+        self.manhattan(sites, pvalues, ax)
+
+        self.fig.tight_layout()
+        self.add_title(title, xtitle, ytitle)
+
+        # option #1
+        pos1 = ax.get_position() # get the original position 
+        pos2 = [pos1.x0 + 0.02, pos1.y0 + 0.1,  pos1.width/1.1, pos1.height/1.6] 
+        ax.set_position(pos2) # set a new position
+
+
+        # #  option #2
+        # self.fig.set_size_inches((12,3))
+        # pos1 = ax.get_position() # get the original position 
+        # pos2 = [pos1.x0 + 0.02, pos1.y0 + 0.2,  pos1.width/1.1, pos1.height/1.6] 
+        # ax.set_position(pos2) # set a new position
+
+
+    def manhattan(self, sites, pvalues, ax):
+
+        df = DataFrame({'sites' : sites,
+                        'minuslog10pvalue' : -log10(pvalues),
+                        'chromosome' : ['ch%i' % (i+1) for i in randint.rvs(0,23,size=len(sites))]}) # todo change this
+
+        df.chromosome = df.chromosome.astype('category')
+        df.chromosome = df.chromosome.cat.set_categories(['ch%i' % (i+1) for i in range(23)], ordered=True)
+        df = df.sort_values('chromosome')
+
+        # How to plot gene vs. -log10(pvalue) and colour it by chromosome?
+        df['ind'] = range(len(df))
+        df_grouped = df.groupby(('chromosome'))
+
+        colors = cycle(['green','pink','blue', 'yellow'])
+        x_labels = []
+        x_labels_pos = []
+        for num, (name, group) in enumerate(df_grouped):
+            clr = colors.next()
+            group.plot(kind='scatter', x='ind', y='minuslog10pvalue',color=clr, ax=ax, edgecolors='none')
+            x_labels.append(name)
+            x_labels_pos.append((group['ind'].iloc[-1] - (group['ind'].iloc[-1] - group['ind'].iloc[0])/2))
+        
+        
+        plot.plot(  [0.5]* len(pvalues), 'r-') # add red line
+
+        ax.set_xticks(x_labels_pos)
+        ax.set_xticklabels(x_labels,  rotation='vertical')
+        ax.set_xlim([0, len(df)])
+        ax.set_ylim([0, 3.5]) # todo change this?
 
