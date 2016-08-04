@@ -60,6 +60,7 @@ class LMMParser(ModuleParser):
             kinship_data = None
 
             if args.kinship == 'refactor': # kinship and data to test are the same
+                # todo if --lmm provoded woth --refactor there is no need to run refactor twice in order to find ranked sites.
                 logging.info("Running lmm with refactor kinship...")
                 refactor_meth_data = meth_data.copy() #todo need to copy?
                 self.refactor.run(args, refactor_meth_data, output_perfix)

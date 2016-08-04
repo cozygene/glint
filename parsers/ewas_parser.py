@@ -3,6 +3,7 @@ import logging
 from utils import common
 import argparse
 from module_parser import ModuleParser
+from lmm_parser import LMMParser
 from modules import ewas, methylation_data
 
 
@@ -19,8 +20,9 @@ class EWASParser(ModuleParser):
         ewas.add_argument('--logreg', action='store_const', const='logistic_regression', help = "Run a logistic regression analysis")
         # Note: lmm module is handled not the very best way since there was no time. it appears here under "EWAS" but the glin.py handles it as 
         # an independed module
-        # ewas.add_argument('--lmm', dependencies = ["--ewas"], action='store_const', const='logistic_regression', help = "Run a linear mixed model test. More explanation and options described under \"lmm\"")
+        ewas.add_argument('--lmm', dependencies = ["--ewas"], action='store_const', const='logistic_regression', help = "Run a linear mixed model test. More explanation and options described under \"lmm\"")
         
+        self.lmm_parser = LMMParser(parser)
         super(EWASParser, self).__init__(ewas)
 
     def validate_args(self, args):
@@ -29,6 +31,9 @@ class EWASParser(ModuleParser):
         if not args.datafile.name.endswith(methylation_data.GLINT_FORMATTED_EXTENSION):
             self.required_args.append('pheno')
 
+        if args.lmm:
+            self.lmm_parser.validate_args(args)
+            self.all_args.extend(self.lmm_parser.all_args)
         # default test is linear regression
         if not args.logreg and not args.lmm:
             logging.info("No EWAS test was chosen, running linerar regression by default.")
@@ -39,9 +44,6 @@ class EWASParser(ModuleParser):
                 self.tests.append(args.logreg)
             if args.linreg is not None:
                 self.tests.append(args.linreg)
-            if args.lmm is not None:
-                self.tests.append(args.lmm)
-
 
         super(EWASParser, self).validate_args(args)
 
@@ -50,8 +52,14 @@ class EWASParser(ModuleParser):
             if meth_data.phenotype is None and args.pheno is None:
                 common.terminate("phenotype file wasn't supplied")
 
-            self.module  = ewas.EWAS(methylation_data = meth_data, tests_list = self.tests)
-            self.module.run()
+            # ewas test must be called after refactor
+            if args.lmm:
+                self.lmm_parser.run(args = args,
+                                     meth_data = meth_data,
+                                     output_perfix = args.out)
+            else:
+                self.module  = ewas.EWAS(methylation_data = meth_data, tests_list = self.tests)
+                self.module.run()
         except Exception :
             logging.exception("in ewas")
             raise
