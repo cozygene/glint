@@ -132,6 +132,10 @@ class ModulesArgumentParsers(object):
             self.predictor_parser.run(args)
             return
 
+        if self.args.plot and not self.args.ewas: # if user asked to run plot without running EWAS test, run plot and quit
+            self.plot_parser.run(args)
+            return
+
         self.meth_parser.run(self.args)
         self.meth_parser.preprocess_samples_data() # preprocess samples before refactor and before ewas
         if self.args.refactor:
@@ -147,8 +151,11 @@ class ModulesArgumentParsers(object):
         # ewas tests must be called after refactor
         if self.args.ewas:
             ewas_meth_data = self.meth_parser.module.copy()
-            self.ewas_parser.run(args = self.args,
-                                 meth_data = ewas_meth_data)
+            ewas_results = self.ewas_parser.run(args = self.args,
+                                               meth_data = ewas_meth_data)
+            # if self.args.plot: # if not selected should we plot by default?
+            #     self.plot_parser.run(args, result = ewas_results)
+
 
 
         if self.args.epi:
