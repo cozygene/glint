@@ -206,7 +206,7 @@ class LMM(Module):
         for site_i, site_name in enumerate(cpgnames):  
             UX[:,0] = UX_all[:, site_i]
             
-            ll, beta, F = lleval(Uy, UX, Sd, yKy, logdetK, logdetXX, reml=reml)
+            ll, beta, F = lleval(Uy, UX, Sd, yKy, logdetK, logdetXX, reml=reml) # Note that the order of coefficient in beta is: site under test, covaraites, intercept
             # Calculate sigms_g, sigms_e
             sigma_g = np.sum([ ((Uy[i] - np.dot(UX[i,:],beta))**2) / Sd[i] for i in range(number_of_samples)])
             if reml:
@@ -237,8 +237,12 @@ class LMM(Module):
         beta_est = [res[4] for res in results]
         sigma_g_est = [res[5] for res in results]
         sigma_e_est = [res[6] for res in results]
+        if reml:
+            stats = [res[3] for res in results]
+        else:
+            stats = [res[2] for res in results]
 
-        return sorted_cpgnames, sorted_cpg_indices, p_vals, beta_est, sigma_e_est, sigma_g_est
+        return sorted_cpgnames, sorted_cpg_indices, p_vals, beta_est, sigma_e_est, sigma_g_est, stats
 
 
 
