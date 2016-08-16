@@ -181,6 +181,10 @@ class LMM(Module):
         yKy = UyS.T.dot(Uy) 
         logdetK = np.log(Sd).sum()
 
+        num_of_non_zero_eigenvalues = len(Sd)
+        num_of_zero_eigenvalues = number_of_samples - num_of_non_zero_eigenvalues
+        logging.debug("found %d zero eigenvalue" % num_of_zero_eigenvalues)
+        ss
         #Compute null LL
         if (covars.shape[1]>0):
             XX = covars.T.dot(covars)       
@@ -208,7 +212,8 @@ class LMM(Module):
             
             ll, beta, F = lleval(Uy, UX, Sd, yKy, logdetK, logdetXX, reml=reml) # Note that the order of coefficient in beta is: site under test, covaraites, intercept
             # Calculate sigms_g, sigms_e
-            sigma_g = np.sum([ ((Uy[i] - np.dot(UX[i,:],beta))**2) / Sd[i] for i in range(number_of_samples)])
+            sigma_g = np.sum([ ((Uy[i] - np.dot(UX[i,:],beta))**2) / Sd[i] for i in range(num_of_non_zero_eigenvalues)])
+            sigma_g += np.sum([ ((Uy[i] - np.dot(UX[i,:],beta))**2) / np.exp(logdelta) for i in range(num_of_zero_eigenvalues)])
             if reml:
                 sigma_g = (sigma_g/(number_of_samples-UX.shape[1]))**0.5
             else:
