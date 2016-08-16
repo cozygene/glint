@@ -156,7 +156,7 @@ class LMM(Module):
 
         if not is_covars_normalized:
             covars = tools.standardize(covars, axis = 0)
-        covars = np.concatenate((covars, np.ones((number_of_samples, 1))), axis=1)
+        covars = np.concatenate((covars,np.ones((number_of_samples, 1))), axis=1)
         
         # if log delta is not supplied - calculate ir
         if logdelta is None:
@@ -207,7 +207,16 @@ class LMM(Module):
             UX[:,0] = UX_all[:, site_i]
             
             ll, beta, F = lleval(Uy, UX, Sd, yKy, logdetK, logdetXX, reml=reml)
-            results.append((site_i, site_name, ll, F))
+            # Calculate sigms_g, sigms_e
+            sigma_g = np.sum([ ((Uy[i] - np.dot(UX[i,:],beta))**2) / Sd[i] for i in range(number_of_samples)])
+            if reml:
+                sigma_g = (sigma_g/(number_of_samples-UX.shape[1]))**0.5
+            else:
+                sigma_g = (sigma_g/number_of_samples)**0.5
+
+            sigma_e = (np.exp(logdelta) * (sigma_g**2))**0.5
+            
+            results.append((site_i, site_name, ll, F, beta, sigma_g, sigma_e))
                     
         #sort and print results
         if reml:
@@ -224,7 +233,12 @@ class LMM(Module):
 
         sorted_cpg_indices = [res[0] for res in results]    # sorted_cpg_indices[i] is the index of sorted_cpgnames[i] in cpgnames. i.e cpgnames[sorted_cpg_indices[i]] == sorted_cpgnames[i]
         sorted_cpgnames = [res[1] for res in results]
-        return sorted_cpgnames, sorted_cpg_indices, p_vals 
+
+        beta_est = [res[4] for res in results]
+        sigma_g_est = [res[5] for res in results]
+        sigma_e_est = [res[6] for res in results]
+
+        return sorted_cpgnames, sorted_cpg_indices, p_vals, beta_est, sigma_e_est, sigma_g_est
 
 
 
