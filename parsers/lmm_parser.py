@@ -27,6 +27,7 @@ class LMMParser(ModuleParser):
             return val
         lmm_parser.add_argument('--reml', type=reml_value, default=1, help='type 1 to use REML (restricted maximum likelihood) or 0 to use ML. Default is 1 (REML)')
         lmm_parser.add_argument('--logdelta', type=float, default=None, help='The value of log(delta) to use. Infers it from the data by default (if not specified)')
+        lmm_parser.add_argument('--norm', action='store_true', help='Supply this flag in order to normalize covariates matrix (if this flag is not supplied the matrix is not normalized)')
         
         # def pc_num_value(val):
         #     val = int(val)
@@ -84,7 +85,9 @@ class LMMParser(ModuleParser):
 
             # initialize lmm with kinship
             module = lmm.LMM(kinship)
-            sorted_cpgnames, sorted_cpg_indices, pvalues = module.run(data, pheno, covars, meth_data.cpgnames, False, args.logdelta, args.reml)
+            sorted_cpgnames, pvalues, intercept_beta, covariates_betas, site_beta, sigma_e, sigma_g, statistics = \
+                  module.run(data, pheno, covars, meth_data.cpgnames, args.norm, args.logdelta, args.reml)
+
 
             output_file = LMM_OUT_SUFFIX if output_perfix is None else output_perfix + LMM_OUT_SUFFIX
             logging.info("saving LMM output to file %s" % output_file)
