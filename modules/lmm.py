@@ -136,7 +136,7 @@ class LMM(Module):
     
     
     
-    def run(self, data, pheno, covars, cpgnames, is_covars_normalized = False, logdelta = None, reml=True):
+    def run(self, data, pheno, covars, cpgnames, normalize_covars = False, logdelta = None, reml=True):
         """
         preprocess data and run lmm. 
         
@@ -144,9 +144,9 @@ class LMM(Module):
         data - the methylation data to test (matrix of n sampels by m sites)
         pheno - the phenotype    (a 1D vector of size n (sampels) )
         covars - the covariates.(matrix of n sampels by x covariates or empty)
-        is_covars_normalized - is the covariates matrix (supplied with param 'covar') is normalized (default is False).
-                                if False - covars will be normalized.
-                               Note that covariates will be normalized according to asix=0. transpose before calling this function if needed.
+        normalize_covars - wether to normalize the covariates matrix (supplied with param 'covar') (True - normalize, False - do not normalize)
+                             default is False.
+                             Note that covariates will be normalized according to asix=0. transpose before calling this function if needed.
         
         data returned is sorted by pvalues (and is all of type ndarray)
         """
@@ -155,7 +155,7 @@ class LMM(Module):
         if covars is None:
             covars = np.empty((number_of_samples, 0))
 
-        if not is_covars_normalized:
+        if normalize_covars:
             covars = tools.standardize(covars, axis = 0)
         covars = np.concatenate((covars,np.ones((number_of_samples, 1))), axis=1)
         
