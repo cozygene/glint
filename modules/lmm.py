@@ -147,7 +147,8 @@ class LMM(Module):
         is_covars_normalized - is the covariates matrix (supplied with param 'covar') is normalized (default is False).
                                 if False - covars will be normalized.
                                Note that covariates will be normalized according to asix=0. transpose before calling this function if needed.
-                
+        
+        data returned is sorted by pvalues (and is all of type ndarray)
         """
         # preprocess covariates and add a column of ones - before calc logdelta
         number_of_samples = pheno.shape[0]
@@ -163,12 +164,33 @@ class LMM(Module):
             logdelta = findLogDelta(self.U, self.s, pheno, covars, reml=(reml>0))
 
 
-        return self.lmm(data, pheno, covars, cpgnames, logdelta, reml)
+        sorted_cpgnames, sorted_cpg_indices, p_vals, beta_est, sigma_e_est, sigma_g_est, statistics = \
+                             self.lmm(data, pheno, covars, cpgnames, logdelta, reml)
 
+        beta_est = np.array(beta_est)
+        intercept_beta = beta_est[:,-1]     # interception coeff
+        site_beta = beta_est[:,0]           # site coeff
+        covariates_betas = beta_est[:,1:-1] # coeff for each covariate
+
+        return  np.array(sorted_cpgnames),  \
+                p_vals,                     \
+                intercept_beta,             \
+                covariates_betas,           \
+                site_beta,                  \
+                np.array(sigma_e_est),      \
+                np.array(sigma_g_est),      \
+                np.array(statistics)
 
 
     def lmm(self, data, phe, covars, cpgnames, logdelta, reml=True):
-
+        """
+        returns output sorted by pvalues:
+        sorted_cpgnames, sorted_cpg_indices, p_vals, beta_est, sigma_e_est, sigma_g_est, statistics
+        where beta_est is 2d array where beta_est[i] is the coefficients of site i 
+            beta_est[i][0] is the coefficient of the interception
+            beta_est[i][-1] is the coefficient of site i
+            beta_est[i][1:-1] is the coefficient of the covariates
+        """
         logging.info('Running LMM...')
         number_of_samples = phe.shape[0]
         t0 = time.time()
@@ -184,7 +206,6 @@ class LMM(Module):
         num_of_non_zero_eigenvalues = len(Sd)
         num_of_zero_eigenvalues = number_of_samples - num_of_non_zero_eigenvalues
         logging.debug("found %d zero eigenvalue" % num_of_zero_eigenvalues)
-        ss
         #Compute null LL
         if (covars.shape[1]>0):
             XX = covars.T.dot(covars)       
@@ -222,8 +243,9 @@ class LMM(Module):
             sigma_e = (np.exp(logdelta) * (sigma_g**2))**0.5
             
             results.append((site_i, site_name, ll, F, beta, sigma_g, sigma_e))
-                    
+                
         #sort and print results
+
         if reml:
             results.sort(key = lambda t: t[3], reverse=True)    
             fDist = stats.f(1, number_of_samples - 1)
@@ -242,12 +264,14 @@ class LMM(Module):
         beta_est = [res[4] for res in results]
         sigma_g_est = [res[5] for res in results]
         sigma_e_est = [res[6] for res in results]
-        if reml:
-            stats = [res[3] for res in results]
-        else:
-            stats = [res[2] for res in results]
 
-        return sorted_cpgnames, sorted_cpg_indices, p_vals, beta_est, sigma_e_est, sigma_g_est, stats
+        statistics=[]
+        if reml:
+            statistics = [res[3] for res in results]
+        else:
+            statistics = [res[2] for res in results]
+
+        return sorted_cpgnames, sorted_cpg_indices, p_vals, beta_est, sigma_e_est, sigma_g_est, statistics
 
 
 
