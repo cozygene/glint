@@ -81,7 +81,7 @@ elif os.name == 'posix': # Unix
 
 
     
-GLINT_OBLIGATORY_DEPENDENCIES = ['numpy', 'scipy', 'sklearn', 'matplotlib']
+GLINT_OBLIGATORY_DEPENDENCIES = ['numpy', 'scipy', 'sklearn', 'matplotlib', 'pandas']
 GLINT_OPTIONAL_DEPENDENCIES = []
 
 # def setup_glint():

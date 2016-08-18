@@ -4,8 +4,8 @@ from utils import common
 import argparse
 from module_parser import ModuleParser
 from refactor_parser import RefactorParser
-from modules import lmm, methylation_data
-from numpy import savetxt, column_stack
+from modules import lmm, methylation_data, ewas
+from numpy import savetxt, column_stack, array
 
 LMM_OUT_SUFFIX = "lmm.txt"
 
@@ -85,10 +85,22 @@ class LMMParser(ModuleParser):
 
             # initialize lmm with kinship
             module = lmm.LMM(kinship)
+
+            #run lmm
             sorted_cpgnames, pvalues, intercept_beta, covariates_betas, site_beta, sigma_e, sigma_g, statistics = \
                   module.run(data, pheno, covars, meth_data.cpgnames, args.norm, args.logdelta, args.reml)
 
+            # generate LMM output file 
+            # create file titles - 
+            num_of_covars = covariates_betas.shape[1]
+            covars_beta_titles = ["V%d" % (i+1) for i in range(num_of_covars)]
+            additional_results = column_stack((intercept_beta, covariates_betas, site_beta, statistics, sigma_e, sigma_g))
+            titles = ['intercept'] + covars_beta_titles + ['beta', 'statistic', 'sigma-e', 'sigma-g']
+            
+            # generate result - by EWAS output format
+            ewas_res = ewas.EWASResultsCreator("LMM", sorted_cpgnames, pvalues, additional_results, array(titles))  
 
+            # save results
             output_file = LMM_OUT_SUFFIX if output_perfix is None else output_perfix + LMM_OUT_SUFFIX
             logging.info("saving LMM output to file %s" % output_file)
             savetxt(output_file, column_stack((sorted_cpgnames, pvalues)), fmt = '%s16')

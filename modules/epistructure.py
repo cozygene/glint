@@ -7,6 +7,10 @@ class Epistructure(Module):
     EPISTRUCTURE_FILE_SUFFIX = ".epistructure.txt"
 
     def __init__(self, meth_data, informative_list):
+        """
+        informative_list - list of sites (cpgnames) to use 
+        meth_data - MethylationData object with data of m sites X  n samples
+        """
         self.informative_sites = informative_list
         self.meth_data = meth_data
 

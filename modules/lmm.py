@@ -144,7 +144,7 @@ class LMM(Module):
         data - the methylation data to test (matrix of n sampels by m sites)
         pheno - the phenotype    (a 1D vector of size n (sampels) )
         covars - the covariates.(matrix of n sampels by x covariates or empty)
-        normalize_covars - wether to normalize the covariates matrix (supplied with param 'covar') (True - normalize, False - do not normalize)
+        normalize_covars - whether to normalize the covariates matrix (supplied with param 'covar') (True - normalize, False - do not normalize)
                              default is False.
                              Note that covariates will be normalized according to asix=0. transpose before calling this function if needed.
         
@@ -167,7 +167,11 @@ class LMM(Module):
         sorted_cpgnames, sorted_cpg_indices, p_vals, beta_est, sigma_e_est, sigma_g_est, statistics = \
                              self.lmm(data, pheno, covars, cpgnames, logdelta, reml)
 
+        
         beta_est = np.array(beta_est)
+        number_of_betas =  beta_est.shape[1]
+        if number_of_betas < 2:
+            common.terminate("some coefficient is missing")
         intercept_beta = beta_est[:,-1]     # interception coeff
         site_beta = beta_est[:,0]           # site coeff
         covariates_betas = beta_est[:,1:-1] # coeff for each covariate
@@ -207,12 +211,11 @@ class LMM(Module):
         num_of_zero_eigenvalues = number_of_samples - num_of_non_zero_eigenvalues
         logging.debug("found %d zero eigenvalue" % num_of_zero_eigenvalues)
         #Compute null LL
-        if (covars.shape[1]>0):
-            XX = covars.T.dot(covars)       
-            [Sxx,Uxx]= la.eigh(XX)
-            logdetXX  = np.log(Sxx).sum()
-            null_ll, beta_0, null_F = lleval(Uy, UX, Sd, yKy, logdetK, logdetXX, reml=reml)
-            logging.debug('null LL: %s' %null_ll)
+        XX = covars.T.dot(covars)       
+        [Sxx,Uxx]= la.eigh(XX)
+        logdetXX  = np.log(Sxx).sum()
+        null_ll, beta_0, null_F = lleval(Uy, UX, Sd, yKy, logdetK, logdetXX, reml=reml)
+        logging.debug('null LL: %s' %null_ll)
 
         #Add an extra column to UX, that will hold UX for the tested site
         UX = np.concatenate((np.zeros((UX.shape[0], 1)), UX), axis=1)

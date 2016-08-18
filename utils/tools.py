@@ -5,7 +5,7 @@ import pca
 from scipy.linalg import eigh
 import numpy as np
 import common
-
+from statsmodels.sandbox.stats.multicomp import fdrcorrection0
 
 def low_rank_approximation(O, k):
     """
@@ -70,3 +70,13 @@ def standardize(X, axis=0):
     X -= sites_mean
     X /= sites_std
     return X
+
+def FDR(pvalues):
+    """
+    pvalues - list of p p-values
+    returns a list of q-values
+    """
+    # res[1] is a vector with the "q-values" (these are the FDR-adjusted p-values)
+    res = fdrcorrection0(pvalues) 
+    return res[1]
+
