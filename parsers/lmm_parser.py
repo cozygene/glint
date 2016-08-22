@@ -62,7 +62,6 @@ class LMMParser(ModuleParser):
                 common.terminate("phenotype file wasn't supplied")
 
             kinship_data = None
-
             if args.kinship == 'refactor': # kinship and data to test are the same
                 # todo if --lmm provoded woth --refactor there is no need to run refactor twice in order to find ranked sites.
                 logging.info("Running lmm with refactor kinship...")
@@ -71,7 +70,7 @@ class LMMParser(ModuleParser):
 
                 logging.info("using best %s sites suggested by refactor as data for kinship..." % args.t)
                 t_best_sites = self.refactor.module.ranked_sites[:args.t]
-
+                
                 data_for_kinship = meth_data.copy() #todo need to copy?
                 data_for_kinship.include(t_best_sites)
                 
@@ -103,7 +102,6 @@ class LMMParser(ModuleParser):
                 data_site_i = data[:,i].reshape((-1,1)) # n samples by 1 site
                 res = module.run(data_site_i, pheno, covars, [meth_data.cpgnames[i]], args.norm, args.logdelta, args.reml)
                 cpgname, pvalue, intercept_beta, covariates_beta, site_beta, sigma_e, sigma_g, statistic = res
-                res_per_site.append([sorted_cpgnames[0], pvalues[0], intercept_beta[0], covariates_betas[0], site_beta[0], sigma_e[0], sigma_g[0], statistics[0]])
                 
                 cpgnames.append(cpgname[0])
                 pvalues.append(pvalue[0])
@@ -124,7 +122,7 @@ class LMMParser(ModuleParser):
             ewas_res = ewas.EWASResultsCreator("LMM", array(cpgnames), array(pvalues), statistic = array(stats),\
                                               intercept_coefs = array(intercepts_betas), covars_coefs = array(covars_betas), \
                                               site_coefs = array(sites_betas), sigma_g = array(sigmas_g), sigma_e = array(sigmas_e))
-            
+
             # save results
             output_file = "results" + LMM_OUT_SUFFIX if output_perfix is None else output_perfix + LMM_OUT_SUFFIX
             ewas_res.save(output_file)
