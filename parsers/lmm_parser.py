@@ -28,7 +28,7 @@ class LMMParser(ModuleParser):
         lmm_parser.add_argument('--reml', type=reml_value, default=1, help='type 1 to use REML (restricted maximum likelihood) or 0 to use ML. Default is 1 (REML)')
         lmm_parser.add_argument('--logdelta', type=float, default=None, help='The value of log(delta) to use. Infers it from the data by default (if not specified)')
         lmm_parser.add_argument('--norm', action='store_true', help='Supply this flag in order to normalize covariates matrix (if this flag is not supplied the matrix is not normalized)')
-        
+        lmm_parser.add_argument('--calc', action='store_true', help='Supply this float in order to generate logdelta for each site seperatly (if not specified - one logdelta will be generated. Note that this flag has no meaning when --logdelta is supplied too')
         # def pc_num_value(val):
         #     val = int(val)
         #     if val < 0:
@@ -50,6 +50,9 @@ class LMMParser(ModuleParser):
             self.refactor = RefactorParser(self.parser)
             self.required_args.extend(self.refactor.required_args)
             self.all_args.extend(self.refactor.all_args)
+
+        if args.logdelta and args.calc:
+          logging.warning("LMM will use the same logdelta for all sites. logdelta that was supplied is %s" % args.logdelta)
 
         super(LMMParser, self).validate_args(args)
       
@@ -86,17 +89,44 @@ class LMMParser(ModuleParser):
             # initialize lmm with kinship
             module = lmm.LMM(kinship)
 
-            #run lmm
-            lmm_results = module.run(data, pheno, covars, meth_data.cpgnames, args.norm, args.logdelta, args.reml)
-            sorted_cpgnames, pvalues, intercept_beta, covariates_betas, site_beta, sigma_e, sigma_g, statistics =  lmm_results
+            if args.calc: # run lmm for each site so logdelta will be calculated for each site (TODO move this option as an argument of LMM class)
+              cpgnames=[]
+              pvalues=[]
+              intercepts_betas=[]
+              covars_betas=[]
+              sites_betas=[]
+              sigmas_g=[]
+              sigmas_e=[]
+              stats=[]
+
+              for i in range(meth_data.sites_size):
+                data_site_i = data[:,i].reshape((-1,1)) # n samples by 1 site
+                res = module.run(data_site_i, pheno, covars, [meth_data.cpgnames[i]], args.norm, args.logdelta, args.reml)
+                cpgname, pvalue, intercept_beta, covariates_beta, site_beta, sigma_e, sigma_g, statistic = res
+                res_per_site.append([sorted_cpgnames[0], pvalues[0], intercept_beta[0], covariates_betas[0], site_beta[0], sigma_e[0], sigma_g[0], statistics[0]])
+                
+                cpgnames.append(cpgname[0])
+                pvalues.append(pvalue[0])
+                intercepts_betas.append(intercept_beta[0])
+                covars_betas.append(covariates_beta[0])
+                sites_betas.append(site_beta[0])
+                sigmas_e.append(sigma_e[0])
+                sigmas_g.append(sigma_g[0])
+                stats.append(statistic[0])
+
+            else: # run lmm on all data - logdelta is calculated once.
+              #run lmm
+              lmm_results = module.run(data, pheno, covars, meth_data.cpgnames, args.norm, args.logdelta, args.reml)
+              cpgnames, pvalues, intercepts_betas, covars_betas, sites_betas, sigmas_e, sigmas_g, stats =  lmm_results
+            
 
             # generate result - by EWAS output format
-            ewas_res = ewas.EWASResultsCreator("LMM", sorted_cpgnames, pvalues, statistic = statistics,\
-                                              intercept_coefs = intercept_beta, covars_coefs = covariates_betas, \
-                                              site_coefs = site_beta, sigma_g = sigma_g, sigma_e = sigma_e)
-
+            ewas_res = ewas.EWASResultsCreator("LMM", array(cpgnames), array(pvalues), statistic = array(stats),\
+                                              intercept_coefs = array(intercepts_betas), covars_coefs = array(covars_betas), \
+                                              site_coefs = array(sites_betas), sigma_g = array(sigmas_g), sigma_e = array(sigmas_e))
+            
             # save results
-            output_file = LMM_OUT_SUFFIX if output_perfix is None else output_perfix + LMM_OUT_SUFFIX
+            output_file = "results" + LMM_OUT_SUFFIX if output_perfix is None else output_perfix + LMM_OUT_SUFFIX
             ewas_res.save(output_file)
 
             return ewas_res

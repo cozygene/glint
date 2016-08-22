@@ -75,7 +75,7 @@ class EWASParser(ModuleParser):
 
             # save results
             output_perfix = args.out
-            output_file = LINREG_OUT_SUFFIX if output_perfix is None else output_perfix + LINREG_OUT_SUFFIX
+            output_file = "results" + LINREG_OUT_SUFFIX if output_perfix is None else output_perfix + LINREG_OUT_SUFFIX
             ewas_res.save(output_file)
             return ewas_res
 

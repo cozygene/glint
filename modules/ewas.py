@@ -123,15 +123,23 @@ class EWASResults(object):
 
 
 class EWASResultsCreator(EWASResults):
-    def __init__(self, test_name, cpgnames, pvalues, qvalues = None, statistic = None, intercept_coefs = None, covars_coefs = None, site_coefs = None, sigma_g = None, sigma_e = None, sites_info_obj = None):
+    def __init__(self, test_name, cpgnames, pvalues, qvalues = None, statistic = None, intercept_coefs = None,\
+                 covars_coefs = None, site_coefs = None, sigma_g = None, sigma_e = None, sites_info_obj = None):
         """
-        cpgnames - list of cpgnames
-        pvalues - list of pvalues for each cpg (i.e pvalues[i] is the pvalue of site named cpgnames[i])
-        extradata - a matrix with extra information about the sites (coefficients, statistics)
-                    dimensions of n by t where n is number of sites and t is number of extra data
-                    transpose extradata before calling this function if needed
-        extradata_titles - the titles to be written in the output file, explaining each column in extradata
-                            extradata_title[i] is the title describing the extradata found in extradata[:,i] (i'th column)
+        all inputs must be numpy arrays!
+
+        cpgnames - array (numpy array) of cpgnames
+        pvalues - array (numpy array) of pvalues for each cpg (i.e pvalues[i] is the pvalue of site named cpgnames[i])
+        
+        optional arguments:
+        qvalues -  the qvalues array
+        statistic - array with the t-statistic for each site
+        intercept_coefs - array with the coefficients of the intercepts
+        covars_coefs - array or matrix with the coefficients for each covariates
+        site_coefs - the coefficients of the site under test
+        sigma_g - lmm value for each site
+        sigma_e - lmm value for each site
+        sites_info_obj - SiteInfo bject describing the cpgnames
         """
         logging.info("Generating %s results file..." % test_name)
         super(EWASResultsCreator, self).__init__(test_name, cpgnames, pvalues, qvalues, statistic, intercept_coefs, covars_coefs, site_coefs, sigma_g, sigma_e, sites_info_obj)
