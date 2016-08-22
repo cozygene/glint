@@ -5,6 +5,7 @@ from numpy import array
 import numpy as np
 from numpy.linalg import inv
 from scipy.stats import t
+import statsmodels.api as sm
 
 # TODO make sure the functions here don't change the values of the data: http://scikit-learn.org/stable/modules/generated/sklearn.linear_model.LinearRegression.html#sklearn.linear_model.LinearRegression.fit (see the "copy_X" param)
 
@@ -12,6 +13,45 @@ def get_dim(vector):
     if vector.ndim == 1 or (vector.ndim == 2 and vector.shape[1] == 1):
         return 1
     return 2
+
+class LogisticRegression(object):
+    def __init__(self):
+        pass   
+
+    @staticmethod
+    def fit_model(y, x, covars = None):
+        """
+        y is n X 1, x is n X 1 and covars (optional) is n X p
+        Returns three arrays of (1+p+m) X 1 - coefficients, t-statistic and p-values:
+                coefficients - the oefficients array where coefficients[0] if the coef of the intercept
+                                                           coefficients[-1] if the coef of the site under test (the m from input x)
+                                                           coefficients[1],..., coefficients[p+1] the coefficient of the covariates
+                t-statistic - again index 0 if for the intercept, index -1 for site under test and 1 to p+1 for covars
+                p-values - again index 0 if for the intercept, index -1 for site under test and 1 to p+1 for covars
+        to sum up - in order to get the coeffs,  p-values and the t-statistic of the site under test (input x) extract coefficients[-1], t-statistic[-1] and p-values[-1]
+        """
+        if x.ndim == 1:
+            x = x.reshape(-1,1) # make sure dim is (n,1) and not(n,)
+        if y.ndim == 1:
+            y = y.reshape(-1, 1)
+
+        # X should have a column of ones, the site of interest and the covariates
+        X = x
+        if covars is not None:
+            X = column_stack((covars, X))
+        n = X.shape[0] # number of sites
+        X = np.concatenate((np.ones((n,1)), X), axis=1)
+        
+       
+        logit = sm.Logit(y,X)
+        result = logit.fit(disp=False) # False disable the print of "Optimization terminated successfully" message
+
+        #  from doc - 
+        # result.params # The parameters of a fitted model  - same as coef if you print result.summary()
+        # result.pvalues # p values
+        # result.tvalues # Return the t-statistic for a given parameter estimate.
+        return result.params, result.pvalues, result.tvalues #coefficients, t-statistic and p-values
+        
 
 class LinearRegression(object):
 
@@ -149,6 +189,3 @@ class LinearRegression(object):
             pvals[i] = t.sf(abs(Ts[i]), df=n-p)*2
 
         return beta, Ts, pvals #coefficients, t-statistic and p-values
-
-class LogisticRegression(object):
-    pass

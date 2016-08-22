@@ -51,7 +51,7 @@ class Refactor(Module):
             common.terminate("choose fs from feature_selection options: %s (selected fs: %s)" % ( self.FEATURE_SELECTION, feature_selection ))
         elif feature_selection == 'phenotype' and self.meth_data.phenotype is None:
             common.terminate("must provide a phenotype file when selected feature 'phenotype'")
-        elif feature_selection == 'controls' and (self.meth_data.phenotype is None or not self._is_binary_vector(self.meth_data.phenotype)):
+        elif feature_selection == 'controls' and (self.meth_data.phenotype is None or not tools.is_binary_vector(self.meth_data.phenotype)):
             common.terminate("must provide a phenotype file in a binary format when selected feature 'controls'")
 
         return getattr(self, self.FEATURE_FUNC_NAME_FORMAT.format(feature_option_name=feature_selection))
@@ -92,22 +92,6 @@ class Refactor(Module):
             common.terminate("number of components must be at least k and smaller than the number of samples size. num_comp = %s, samples = %s, k = %s" % (num_comp, self.meth_data.samples_size, self.k))
 
         return num_comp if num_comp else self.k
-
-
-    """
-    gets a vector of ints/doubles and checks:
-        if that is a vector
-        if all it's values are 0 or 1
-    """
-    def _is_binary_vector(self, vector):
-        values = self.meth_data.phenotype.squeeze()
-        if values.ndim != 1: # two dimentions is not a vector
-            return False
-
-        if set(values) != set([0,1]): #has values that are not 0 or 1
-            return False       
-
-        return True
 
     def run( self ):
         # TODO use module name from config file instead of "ReFACTor"

@@ -80,3 +80,20 @@ def FDR(pvalues):
     res = fdrcorrection0(pvalues) 
     return res[1]
 
+
+
+def is_binary_vector(vector):
+    """
+    gets a vector of ints/doubles and returns True if:
+        if that is a vector and
+        if all it's values are 0 or 1
+    otherwise returns false
+    """
+    if not (vector.ndim == 1 or (vector.ndim == 2 and vector.shape[1] == 1)): # two dimentions is not a vector
+        return False
+
+    values = vector.squeeze()
+    if set(values) != set([0,1]): #has values that are not 0 or 1
+        return False       
+
+    return True

@@ -6,7 +6,10 @@ from module_parser import ModuleParser
 from lmm_parser import LMMParser
 from modules import ewas, methylation_data
 
-LINREG_OUT_SUFFIX = ".linreg.txt"
+
+
+LINREG_OUT_SUFFIX = ".glint.linreg.txt"
+LOGREG_OUT_SUFFIX = ".glint.logreg.txt"
 
 """""
 EWAS
@@ -60,25 +63,30 @@ class EWASParser(ModuleParser):
                                    meth_data = meth_data,
                                    output_perfix = args.out)
     
+    def runRegression(self, meth_data, regression_class, test_name, output_file):
+        module = regression_class(methylation_data = meth_data)
+
+        #run lin reg and save result by EWAS output format
+        results = module.run()
+        cpgnames, pvalues, fstats, intercept_beta, covars_betas, site_beta = results
+
+        ewas_res = ewas.EWASResultsCreator(test_name, cpgnames, pvalues, statistic = fstats,              \
+                                          intercept_coefs = intercept_beta, covars_coefs = covars_betas, \
+                                          site_coefs = site_beta)
+
+        # save results
+        ewas_res.save(output_file)
+        return ewas_res
+
     def runLinReg(self, args, meth_data):
-                    # initialize lmm with kinship
-            module = ewas.LinearRegression(methylation_data = meth_data)
+        output_perfix = args.out
+        output_file = "results" + LINREG_OUT_SUFFIX if output_perfix is None else output_perfix + LINREG_OUT_SUFFIX
+        return self.runRegression(meth_data, ewas.LinearRegression, "LinReg", output_file)
 
-            #run lmm
-            results = module.run()
-            cpgnames, pvalues, fstats, intercept_beta, covars_betas, site_beta = results
-
-            # generate result - by EWAS output format
-            ewas_res = ewas.EWASResultsCreator("LinReg", cpgnames, pvalues, statistic = fstats,              \
-                                              intercept_coefs = intercept_beta, covars_coefs = covars_betas, \
-                                              site_coefs = site_beta)
-
-            # save results
-            output_perfix = args.out
-            output_file = "results" + LINREG_OUT_SUFFIX if output_perfix is None else output_perfix + LINREG_OUT_SUFFIX
-            ewas_res.save(output_file)
-            return ewas_res
-
+    def runLogReg(self, args, meth_data):
+        output_perfix = args.out
+        output_file = "results" + LOGREG_OUT_SUFFIX if output_perfix is None else output_perfix + LOGREG_OUT_SUFFIX
+        return self.runRegression(meth_data, ewas.LogisticRegression, "LogReg", output_file)
 
     def run(self, args, meth_data):
         try:
@@ -89,9 +97,11 @@ class EWASParser(ModuleParser):
             if args.lmm:
                 return self.runLMM(args, meth_data)
                 
-            
             if args.linreg:
                 return self.runLinReg(args, meth_data)
+
+            if args.logreg:
+                return self.runLogReg(args, meth_data)
 
         except Exception :
             logging.exception("in ewas")

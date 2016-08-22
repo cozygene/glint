@@ -7,7 +7,7 @@ from refactor_parser import RefactorParser
 from modules import lmm, methylation_data, ewas
 from numpy import savetxt, column_stack, array
 
-LMM_OUT_SUFFIX = ".lmm.txt"
+LMM_OUT_SUFFIX = ".glint.lmm.txt"
 
 class LMMParser(ModuleParser):
     def __init__(self, parser):

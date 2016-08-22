@@ -3,29 +3,32 @@ from utils import regression, tools#, plot
 from numpy import column_stack, ones, savetxt, array, insert, vstack, loadtxt, append, where
 from module import Module
 from utils import common, plot, sitesinfo
+import statsmodels.api as sm
 import logging
+
 
 """
 copy meth_data in advance
 """
-class LinearRegression(Module):
-    def __init__(self, methylation_data):
+
+class Regression(Module):
+    """
+        regression_test_function - a function that return the coefs, fstats, p_value such that:  
+                                    the value at index -1 describes the site under test
+                                    the value at index 0 describes the intercept
+                                    all other values describe the coefficients
+    """
+    def __init__(self, methylation_data, regression_test_name, regression_test_function):
         self.meth_data = methylation_data
+        self.regression_function = regression_test_function
+        self.test_name = regression_test_name
 
-    def run(self):
-        logging.info('running linear regression test...');
-        #running association tests
-        res =  self._linear_regression_test()
-        logging.info('EWAS is Done!')
-        return res
-
-        
-    def _linear_regression_test(self, output_filename = None):
+    def regression(self):
         """
-        linear regression test
+        regression test
         returns output sorted by p-values 
 
-        return values:
+        return values (sorted by p-values)
             sorted_cpgnames - a list of cpgnames 
             sorted_pvalues - a list of p values 
             sorted_fstats - list of t-statistic 
@@ -35,10 +38,9 @@ class LinearRegression(Module):
 
         sorted_pvalues[i] is the pvalue of the site sorted_cpgnames[i] (sorted_fstats[i] is its statistic and so on..)
         """
-        logging.info("running linear regression test...")
         output = []           
         for i, site in enumerate(self.meth_data.data):
-            coefs, fstats, p_value = regression.LinearRegression.fit_model(self.meth_data.phenotype, site, covars = self.meth_data.covar)
+            coefs, fstats, p_value = self.regression_function(self.meth_data.phenotype, site, covars = self.meth_data.covar)
             
             # Note: if you add more info to site info note to:
             #       -   keep p_value at index 1 since the data is sorted by index 1
@@ -61,6 +63,35 @@ class LinearRegression(Module):
         else:
             sorted_covars_betas   = output[:,4:-1].astype(float)
         return sorted_cpgnames , sorted_pvalues, sorted_fstats, sorted_intercept_beta, sorted_covars_betas, sorted_site_beta
+
+
+class LogisticRegression(Regression):
+    """
+        Only for cases where the phenotype is binary
+    """
+    
+    def __init__(self, methylation_data):
+        super(LogisticRegression, self).__init__(methylation_data, "LogReg", regression.LogisticRegression.fit_model)
+        if not tools.is_binary_vector(self.meth_data.phenotype):
+            common.terminate("logistic regression test -phenotype must be binary")
+
+    def run(self):
+        logging.info("running logistic regression test...")
+        results = self.regression()
+        logging.info('EWAS logistic regressio is Done!')
+        return results
+
+
+class LinearRegression(Regression):
+    def __init__(self, methylation_data):
+        super(LinearRegression, self).__init__(methylation_data, "LinReg", regression.LinearRegression.fit_model)
+    
+    def run(self):
+        logging.info('running linear regression test...');
+        #running association tests
+        results =  self.regression()
+        logging.info('EWAS linear regression  is Done!')
+        return results
 
 
 class EWASResults(object):
