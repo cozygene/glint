@@ -23,7 +23,7 @@ class Epistructure(Module):
 
         if save_file:
             output_filename = save_file + self.EPISTRUCTURE_FILE_SUFFIX
-            savetxt(output_filename, pca_out.P[:,range(num_of_pcs)].transpose()) # transpose will save it sitesXsamples, otherwise samplesXsites
+            savetxt(output_filename, pca_out.P[:,range(num_of_pcs)]) # saves it as samples X PCs
             logging.info("first %s PCs are saved to %s" % (num_of_pcs, output_filename))
         
 
