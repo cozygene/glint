@@ -1,5 +1,5 @@
 import os
-from utils import LinearRegression, tools#, plot
+from utils import regression, tools#, plot
 from numpy import column_stack, ones, savetxt, array, insert, vstack, loadtxt, append, where
 from module import Module
 from utils import common, plot, sitesinfo
@@ -8,93 +8,59 @@ import logging
 """
 copy meth_data in advance
 """
-class EWAS(Module):
-    AVALIABLE_TESTS = ['linear_regression', 'logistic_regression']
-    TEST_FUNC_NAME_FORMAT = "_{test_name}_test"   # feature selections function name format
-
-    def __init__(self, methylation_data, tests_list):
+class LinearRegression(Module):
+    def __init__(self, methylation_data):
         self.meth_data = methylation_data
-        self.test_handlers = self._get_test_handler(tests_list)
 
     def run(self):
-        logging.info('starting EWAS...');
+        logging.info('running linear regression test...');
         #running association tests
-        results = [test_handler(output_filename = 'ewas_' + test_name) for (test_name,test_handler) in self.test_handlers]
+        res =  self._linear_regression_test()
         logging.info('EWAS is Done!')
-        return results
+        return res
 
-    def _get_test_handler(self, tests_list):
-        # check that the tests in test_list are all optional tests (found in AVALIABLE_TESTS)
-        if set(set(tests_list).difference(set(self.AVALIABLE_TESTS))) == 0:
-            common.terminate('tests %s are not available' % str(set(tests_list).difference(set(self.AVALIABLE_TESTS))))
-
-        return [(test,getattr(self, self.TEST_FUNC_NAME_FORMAT.format(test_name=test))) for test in tests_list]
-
-    def _logistic_regression_test(self, output_filename = None):
-        logging.warning("logistic regression is not supported for the moment...") #todo when implementing remove this
-        pass
         
     def _linear_regression_test(self, output_filename = None):
         """
         linear regression test
+        returns output sorted by p-values 
+
+        return values:
+            sorted_cpgnames - a list of cpgnames 
+            sorted_pvalues - a list of p values 
+            sorted_fstats - list of t-statistic 
+            sorted_intercept_beta - coefficients of the intercept
+            sorted_covars_betas - coefficients of the covariates
+            sorted_site_beta - coefficients of the site under test
+
+        sorted_pvalues[i] is the pvalue of the site sorted_cpgnames[i] (sorted_fstats[i] is its statistic and so on..)
         """
         logging.info("running linear regression test...")
         output = []           
         for i, site in enumerate(self.meth_data.data):
-            coefs, fstats, p_value = LinearRegression.bla(self.meth_data.phenotype, site, covars = self.meth_data.covar) #TODO add test
-            # coefs, fstats, p_value = LinearRegression.fit_model(self.meth_data.phenotype, site, covars = self.meth_data.covar) #TODO add test
-            #order is: cpgnames, pvalues, t-statistic, intercept coeffs, covariates coeffs (could be a matrix)          
-            #order is: cpgnames, pvalues, t-statistic, intercept coeffs, covariates coeffs (could be a matrix), site under test coeffs
-            output.append([self.meth_data.cpgnames[i], p_value[-1], fstats[-1], coefs[0], coefs[1:-1], coefs[-1]])
+            coefs, fstats, p_value = regression.LinearRegression.fit_model(self.meth_data.phenotype, site, covars = self.meth_data.covar)
+            
+            # Note: if you add more info to site info note to:
+            #       -   keep p_value at index 1 since the data is sorted by index 1
+            #       -   increase / decrease number of values in the line if  output.shape[1] = X
+            site_info = [self.meth_data.cpgnames[i], p_value[-1], fstats[-1]]
+            site_info.extend([coefs[i] for i in range(coefs.size)]) 
+            output.append(site_info) 
+            
 
         
         output.sort(key = lambda x: x[1]) # sort output by p-value (1 is p-value index)
-        sorted_cpgnames = array(output[:,0])
-        sorted_pvalues  = array(output[:,1]).astype(float)
-        sorted_fstats   = array(output[:,2]).astype(float)
-        sorted_intercept_beta = array(output[:,3]).astype(float)
-        sorted_covars_betas   = array(output[:,4]).astype(float)
-        sorted_site_beta      = array(output[:,5]).astype(float)
-        # output = array(output)
-
-        #cpgnames, pvalues, intercept-beta 
-                # intercept_beta,             \
-                # covariates_betas,           \
-                # site_beta,                  \
-                # np.array(sigma_e_est),      \
-                # np.array(sigma_g_est),      \
-                # np.array(statistics)
-        return  sorted_cpgnames , sorted_pvalues, sorted_fstats, sorted_intercept_beta, sorted_covars_betas, sorted_site_beta
-        # if output_filename:
-            # qqplot_out = output_filename + '_qqplot' # TODO Elior, change this name (qqplot output file name)?
-            # logging.info("savings results to %s and qq-plot to %s" % (output_filename, qqplot_out))  
-            # savetxt(output_filename, output, fmt='%s')
-            # plot the p-value
-            # qqplot = plot.QQPlot(save_file = qqplot_out)
-            # qqplot.draw(output[:,1].astype(float), title = "TODO Elior, CHANGE THIS", xtitle="TODO Elior, change this x", ytitle = "TODO Elior, change this y")
-
-            
-
-            # qqplot = plot.ManhattanPlot(save_file = "ManhattanPlot-reut")
-            # qqplot.draw(  1, self.meth_data.cpgnames, output[:,1].astype(float), title = "TODO Elior, CHANGE THIS", xtitle="TODO Elior, change this x", ytitle = "TODO Elior, change this y")
-
-
-        return output
-
-    def bla():
-        sorted_cpgnames , sorted_pvalues, sorted_fstats, sorted_intercept_beta, sorted_covars_betas, sorted_site_beta = _linear_regression_test()
-        num_of_covars = sorted_covars_betas.shape[1]
-        covars_beta_titles = ["V%d" % (i+1) for i in range(num_of_covars)]
-        additional_results = column_stack((intercept_beta, sorted_covars_betas, site_beta, statistics, sigma_e, sigma_g))
-        titles = ['intercept'] + covars_beta_titles + ['beta', 'statistic', 'sigma-e', 'sigma-g']
-        
-        # generate result - by EWAS output format
-        ewas_res = ewas.EWASResultsCreator("LMM", sorted_cpgnames, pvalues, additional_results, array(titles))  
-
-        # save results
-        output_file = LMM_OUT_SUFFIX if output_perfix is None else output_perfix + LMM_OUT_SUFFIX
-        ewas_res.save(output_file)
-        return ewas_res
+        output = array(output)
+        sorted_cpgnames = output[:,0]
+        sorted_pvalues  = output[:,1].astype(float)
+        sorted_fstats   = output[:,2].astype(float)
+        sorted_intercept_beta = output[:,3].astype(float)
+        sorted_site_beta      = output[:,-1].astype(float)
+        if  output.shape[1] == 5: # there is no covariates coefficient
+            sorted_covars_betas = None
+        else:
+            sorted_covars_betas   = output[:,4:-1].astype(float)
+        return sorted_cpgnames , sorted_pvalues, sorted_fstats, sorted_intercept_beta, sorted_covars_betas, sorted_site_beta
 
 
 class EWASResults(object):
