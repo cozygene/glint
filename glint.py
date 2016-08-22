@@ -132,9 +132,9 @@ class ModulesArgumentParsers(object):
             self.predictor_parser.run(args)
             return
 
-        if self.args.plot and not self.args.ewas: # if user asked to run plot without running EWAS test, run plot and quit
-            self.plot_parser.run(args)
-            return
+        # if self.args.plot and not self.args.ewas: # if user asked to run plot without running EWAS test, run plot and quit
+        #     self.plot_parser.run(args)
+        #     return
 
         self.meth_parser.run(self.args)
         self.meth_parser.preprocess_samples_data() # preprocess samples before refactor and before ewas
