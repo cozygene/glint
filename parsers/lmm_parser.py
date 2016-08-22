@@ -102,8 +102,9 @@ class LMMParser(ModuleParser):
 
             # save results
             output_file = LMM_OUT_SUFFIX if output_perfix is None else output_perfix + LMM_OUT_SUFFIX
-            logging.info("saving LMM output to file %s" % output_file)
-            savetxt(output_file, column_stack((sorted_cpgnames, pvalues)), fmt = '%s16')
+            ewas_res.save(output_file)
+            return ewas_res
+
 
         except Exception :
             logging.exception("in lmm")

@@ -72,7 +72,7 @@ class EWASResults(object):
     PVALUE_INDEX = 3
     QVALUE_INDEX = 4
     EXTRA_START_INDEX = 5
-    EXTRA_END_INDEX = -3
+    EXTRA_END_INDEX = -2
     GENE_INDEX = -2
     CATEGORY_INDEX = -1 #island
 
@@ -84,6 +84,7 @@ class EWASResults(object):
     GENE_TITLE = "UCSC_RefGene_Name" #gene
     CATEGORY_TITLE = "Relation_to_UCSC_CpG_Island" #island
 
+    DELIMITER = ','
 
     def __init__(self, test_name, cpgnames, pvalues, extradata, extradata_titles, qvalues = None, sites_info_obj = None):
         self.test_name = test_name
@@ -91,7 +92,7 @@ class EWASResults(object):
         self.pvalues = pvalues
         self.extradata = extradata
         self.extradata_titles = extradata_titles
-        
+        self.extradata_type = extradata.dtype
 
         if qvalues is None:
             self.qvalues = tools.FDR(pvalues)
@@ -120,19 +121,23 @@ class EWASResultsCreator(EWASResults):
 
     def generate_data(self):
 
-        titles = insert(self.extradata_titles, 0, [self.CPGNAMES_TITLE, self.CHR_TITLE, self.POSITION_TITLE, self.PVALUE_TITLE, self.QVALUE_TITLE]) #add test name to title
-        append(titles, [self.GENE_TITLE, self.CATEGORY_TITLE])
-        data = column_stack((self.cpgnames, self.sites_info.chromosomes, self.sites_info.positions, self.pvalues, self.qvalues, self.extradata, self.sites_info.genes, self.sites_info.categories))
+        titles = insert(self.extradata_titles, 0, \
+                         [self.CPGNAMES_TITLE.format(test_name = self.test_name), self.CHR_TITLE, self.POSITION_TITLE, \
+                         self.PVALUE_TITLE, self.QVALUE_TITLE] ) #add test name to title
+        titles = append(titles, [self.GENE_TITLE, self.CATEGORY_TITLE])
+        data = column_stack((self.cpgnames, self.sites_info.chromosomes, self.sites_info.positions,\
+                             self.pvalues, self.qvalues, self.extradata, self.sites_info.genes, self.sites_info.categories))
         output = vstack((titles, data))
         return output
         
     def save(self, output_filename):
         logging.info("%s results are saved to file %s" %(self.test_name, output_filename))
-        savetxt(output_filename, self.output, fmt = "%s")
+        savetxt(output_filename, self.output, fmt = "%s", delimiter=self.DELIMITER)
         
 class EWASResultsParser(EWASResults):
     """docstring for EWASResultsParser"""
     def __init__(self, results_filemame):
+        logging.info("Reading resultds from file %s" % results_filemame)
         data = self.readfile(results_filemame)
         test_name, cpgnames, pvalues, qvalues, extra, extratitles, sites_info = self.parsedata(data)
         super(EWASResultsParser, self).__init__(test_name, cpgnames, pvalues, extra, extratitles, qvalues = qvalues, sites_info_obj = sites_info)
@@ -141,7 +146,7 @@ class EWASResultsParser(EWASResults):
         if not os.path.exists(filename):
             common.terminate("No such file %s" % filename)
 
-        data = loadtxt(filename , dtype = str)
+        data = loadtxt(filename , dtype = str, delimiter=self.DELIMITER)
 
         if data.ndim != 2:
             common.terminate("Something wrong with the data in file %s. It is not 2D matrix" % filename)
@@ -159,9 +164,14 @@ class EWASResultsParser(EWASResults):
         genes = data[:, self.GENE_INDEX]
         categories = data[:, self.CATEGORY_INDEX]
         cpgnames = data[:, self.CPGNAMES_INDEX]
-        pvalues = data[:, self.PVALUE_INDEX]
-        qvalues = data[:, self.QVALUE_INDEX]
+        pvalues = data[:, self.PVALUE_INDEX].astype(float)
+        qvalues = data[:, self.QVALUE_INDEX].astype(float)
         extra = data[:, self.EXTRA_START_INDEX:self.EXTRA_END_INDEX]
-        return test_name, cpgnames, pvalues, qvalues, extra, titles[self.EXTRA_START_INDEX:self.EXTRA_END_INDEX], SitesInfo(cpgnames, chromosomes, positions, genes, categories)
+        try:
+            extra = extra.astype(float)
+        except:
+            pass
+        return test_name, cpgnames, pvalues, qvalues, extra, titles[self.EXTRA_START_INDEX:self.EXTRA_END_INDEX], \
+                sitesinfo.SitesInfo(cpgnames, chromosomes, positions, genes, categories)
         
 

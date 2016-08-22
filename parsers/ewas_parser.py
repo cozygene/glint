@@ -54,9 +54,10 @@ class EWASParser(ModuleParser):
 
             # ewas test must be called after refactor
             if args.lmm:
-                self.lmm_parser.run(args = args,
-                                     meth_data = meth_data,
-                                     output_perfix = args.out)
+                #return lmm results object
+                return self.lmm_parser.run(args = args,
+                                           meth_data = meth_data,
+                                           output_perfix = args.out)
             else:
                 self.module  = ewas.EWAS(methylation_data = meth_data, tests_list = self.tests)
                 self.module.run()
