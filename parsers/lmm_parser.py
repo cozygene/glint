@@ -87,22 +87,18 @@ class LMMParser(ModuleParser):
             module = lmm.LMM(kinship)
 
             #run lmm
-            sorted_cpgnames, pvalues, intercept_beta, covariates_betas, site_beta, sigma_e, sigma_g, statistics = \
-                  module.run(data, pheno, covars, meth_data.cpgnames, args.norm, args.logdelta, args.reml)
+            lmm_results = module.run(data, pheno, covars, meth_data.cpgnames, args.norm, args.logdelta, args.reml)
+            sorted_cpgnames, pvalues, intercept_beta, covariates_betas, site_beta, sigma_e, sigma_g, statistics =  lmm_results
 
-            # generate LMM output file 
-            # create file titles - 
-            num_of_covars = covariates_betas.shape[1]
-            covars_beta_titles = ["V%d" % (i+1) for i in range(num_of_covars)]
-            additional_results = column_stack((intercept_beta, covariates_betas, site_beta, statistics, sigma_e, sigma_g))
-            titles = ['intercept'] + covars_beta_titles + ['beta', 'statistic', 'sigma-e', 'sigma-g']
-            
             # generate result - by EWAS output format
-            ewas_res = ewas.EWASResultsCreator("LMM", sorted_cpgnames, pvalues, additional_results, array(titles))  
+            ewas_res = ewas.EWASResultsCreator("LMM", sorted_cpgnames, pvalues, statistic = statistics,\
+                                              intercept_coefs = intercept_beta, covars_coefs = covariates_betas, \
+                                              site_coefs = site_beta, sigma_g = sigma_g, sigma_e = sigma_e)
 
             # save results
             output_file = LMM_OUT_SUFFIX if output_perfix is None else output_perfix + LMM_OUT_SUFFIX
             ewas_res.save(output_file)
+
             return ewas_res
 
 
