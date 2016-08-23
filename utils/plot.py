@@ -235,7 +235,7 @@ class ManhattanPlot(Plot):
 
         ax.axhline(y=-log10(0.05/number_of_sites), color='r',linestyle='-')
         
-        ax.set_xticks([space_for_each_chr*(i+1) for i in range(number_of_chr)])
+        ax.set_xticks([space_for_each_chr*i+space_for_each_chr/2 for i in range(number_of_chr)])
         ax.set_xticklabels(x_labels,  rotation='vertical')
         ax.set_xlim([0, len(df)])
         ax.set_ylim([0, max(df.minuslog10pvalue) + 0.2])
