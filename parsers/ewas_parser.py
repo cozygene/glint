@@ -43,6 +43,8 @@ class EWASParser(ModuleParser):
             test_counter += 1
         if args.linreg:
             test_counter += 1
+        if args.wilc:
+            test_counter +=1
         if test_counter > 1:
             common.terminate("Choose only one EWAS test.")
 
@@ -52,7 +54,8 @@ class EWASParser(ModuleParser):
             self.all_args.extend(self.lmm_parser.all_args)
 
         # default test is linear regression
-        if args.linreg or (not args.logreg and not args.lmm):
+        if test_counter == 0:
+            args.linreg = True
             logging.info("No EWAS test was chosen, running linerar regression by default.")
 
 
