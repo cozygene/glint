@@ -19,8 +19,7 @@ def draw_setup(function):
         if self.plots_number > 1:
             # open a subplot
             plot.subplot(self.nrows, self.ncols, self.current_draw_index)
-        
-        #run function
+
         output = function(self, *args, **kwargs)
 
         self.current_draw_index += 1
@@ -37,12 +36,12 @@ def draw_setup(function):
         
     return wrapper
 
-
 class Plot(object):
     def __init__(self, save_file=None, plots_number=1):
 
         assert plots_number > 0
         self.save_file = save_file
+
 
         self.plots_number = plots_number
         self.current_draw_index = 1
@@ -68,6 +67,9 @@ class Plot(object):
 
 
 class QQPlot(Plot):
+    X_LABEL = "Expected -log(p-values)"
+    Y_LABEL = "Observed -log(p-values)"
+
     def __init__(self, save_file=None, plots_number=1):
         super(QQPlot, self).__init__(save_file, plots_number)
 
@@ -93,6 +95,11 @@ class QQPlot(Plot):
         # axis limit
         plot.xlim(0, xlim)
         plot.ylim(0, round(y.max()))
+
+        if ytitle is None:
+            ytitle = self.Y_LABEL
+        if xtitle is None:
+            xtitle = self.X_LABEL
 
         self.add_title(title, xtitle, ytitle)
 
@@ -157,16 +164,20 @@ class PCAScatterPlot(Plot):
 
 
 class ManhattanPlot(Plot):
+    Y_LABEL = "-log(p-value)"
+
     def __init__(self, save_file=None, plots_number=1):
         super(ManhattanPlot, self).__init__(save_file, plots_number)
 
     @draw_setup
-    def draw(self, groups_number, sites, pvalues, title = None, xtitle = None, ytitle = None, style = 'b.'):
+    def draw(self, sites, pvalues, chromosomes, positions, title = None, xtitle = None, ytitle = None, style = 'b.'):
 
         ax = plot.axes()
-        self.manhattan(sites, pvalues, ax)
+        self.manhattan(sites, pvalues, chromosomes, positions, ax)
 
         self.fig.tight_layout()
+        if ytitle is None:
+            ytitle = self.Y_LABEL
         self.add_title(title, xtitle, ytitle)
 
         # option #1
@@ -182,34 +193,97 @@ class ManhattanPlot(Plot):
         # ax.set_position(pos2) # set a new position
 
 
-    def manhattan(self, sites, pvalues, ax):
+    """
+    each chromosome coresponding to its number of samples - no red line
+    not sorted by position
+    """
+    def manhattan_not_relative(self, sites, pvalues, chromosomes, ax):
+        # thiese two lines make sure that chromosomes will be sorted by int value and not string value
+        # (chromosomes are list from the values [1,2,..., X, Y] )
+        chromosomes = [int(ch) if ch.isdigit() else  ch for ch in chromosomes]
+        all_chromosomes = set(chromosomes)
 
         df = DataFrame({'sites' : sites,
                         'minuslog10pvalue' : -log10(pvalues),
-                        'chromosome' : ['ch%i' % (i+1) for i in randint.rvs(0,23,size=len(sites))]}) # todo change this
+                        'chromosome' : chromosomes})
 
         df.chromosome = df.chromosome.astype('category')
-        df.chromosome = df.chromosome.cat.set_categories(['ch%i' % (i+1) for i in range(23)], ordered=True)
         df = df.sort_values('chromosome')
-
+        df.chromosome = df.chromosome.cat.set_categories(all_chromosomes, ordered=True)
+        
         # How to plot gene vs. -log10(pvalue) and colour it by chromosome?
         df['ind'] = range(len(df))
         df_grouped = df.groupby(('chromosome'))
-
-        colors = cycle(['green','pink','blue', 'yellow'])
+        
+        colors = cycle(['blue','grey'])
         x_labels = []
         x_labels_pos = []
         for num, (name, group) in enumerate(df_grouped):
             clr = colors.next()
+            import pdb
+            # pdb.set_trace()
             group.plot(kind='scatter', x='ind', y='minuslog10pvalue',color=clr, ax=ax, edgecolors='none')
-            x_labels.append(name)
             x_labels_pos.append((group['ind'].iloc[-1] - (group['ind'].iloc[-1] - group['ind'].iloc[0])/2))
+            x_labels.append('ch%s' % name)
         
+        # plot.plot(0.5, 'r-') # add red line at -log_10(0.05/<number of sites>)
         
-        plot.plot(  [0.5]* len(pvalues), 'r-') # add red line
+        plot.plot(-log10(0.05/len(sites)), 'r-') # add red line at -log_10(0.05/<number of sites>)
 
         ax.set_xticks(x_labels_pos)
         ax.set_xticklabels(x_labels,  rotation='vertical')
         ax.set_xlim([0, len(df)])
         ax.set_ylim([0, 3.5]) # todo change this?
+
+
+
+    """
+    each chromosome normalized space
+    """
+    def manhattan(self, sites, pvalues, chromosomes, positions, ax):
+        # thiese two lines make sure that chromosomes will be sorted by int value and not string value
+        # (chromosomes are list from the values [1,2,..., X, Y] )
+        chromosomes = [int(ch) if ch.isdigit() else  ch for ch in chromosomes]
+        all_chromosomes = set(chromosomes)
+        
+        number_of_sites = len(sites)
+        number_of_chr = len(all_chromosomes)
+        space_for_each_chr = float(number_of_sites/number_of_chr)
+        
+        df = DataFrame({'sites' : sites,
+                        'minuslog10pvalue' : -log10(pvalues),
+                        'positions' : positions,
+                        'chromosome' : chromosomes})
+        
+        df.chromosome = df.chromosome.astype('category')
+        df = df.sort_values('chromosome')
+        df.chromosome = df.chromosome.cat.set_categories(all_chromosomes, ordered=True)
+        
+        df['ind'] = range(len(df))
+        df_grouped = df.groupby(('chromosome'))
+        
+        colors = cycle(['darkblue','skyblue','darkgrey'])
+        x_labels = []
+        for num, (name, group) in enumerate(df_grouped):
+            # x-axis is determined by the position of the chromosome (the positions are normalized to the space
+            # that is assigned to the chromosome) - that way, the plot is grouped by chromosome and than by sorted position
+            # y-axis is the p-value
+            group['positions'] = group['positions']%space_for_each_chr  + num*space_for_each_chr
+            clr = colors.next()
+            group.plot(kind='scatter', x='positions', y='minuslog10pvalue',color=clr, ax=ax, edgecolors='none')
+            
+            # # to set the x-axis space of each chromoseme by the amount of sites at this chromosome (more space for a chromosome
+            # # with more sites) - do something like this:
+            # # that option is good when you want to see the samples more clear at the wider chromosomes)
+            # group.plot(kind='scatter', x='ind', y='minuslog10pvalue',color=clr, ax=ax, edgecolors='none')
+            # x_labels_pos.append((group['ind'].iloc[-1] - (group['ind'].iloc[-1] - group['ind'].iloc[0])/2))
+
+            x_labels.append('ch%s' % name)
+
+        ax.axhline(y=-log10(0.05/number_of_sites), color='r',linestyle='-')
+        
+        ax.set_xticks([space_for_each_chr*(i+1) for i in range(number_of_chr)])
+        ax.set_xticklabels(x_labels,  rotation='vertical')
+        ax.set_xlim([0, len(df)])
+        ax.set_ylim([0, max(df.minuslog10pvalue) + 0.2])
 
