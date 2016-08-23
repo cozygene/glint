@@ -10,6 +10,7 @@ from modules import ewas, methylation_data
 
 LINREG_OUT_SUFFIX = ".glint.linreg.txt"
 LOGREG_OUT_SUFFIX = ".glint.logreg.txt"
+WILCOXON_OUT_SUFFIX = ".glint.wilcoxon.txt"
 
 """""
 EWAS
@@ -22,6 +23,7 @@ class EWASParser(ModuleParser):
         # since it can be supplied through the meth_data object (if .glint file was provided and not meth data matrix)
         ewas.add_argument('--linreg', action = "store_true", help = "Run a linear regression analysis (executed by default if --ewas is selected)")
         ewas.add_argument('--logreg', action = "store_true", help = "Run a logistic regression analysis")
+        ewas.add_argument('--wilc',   action = "store_true", help = "Run Wilcoxon rank-sum test")
         # Note: lmm module is handled not the very best way since there was no time. it appears here under "EWAS" but the glin.py handles it as 
         # an independed module
         ewas.add_argument('--lmm', dependencies = ["--ewas"], action = "store_true", help = "Run a linear mixed model test. More explanation and options described under \"lmm\"")
@@ -91,6 +93,16 @@ class EWASParser(ModuleParser):
         output_file = "results" + LOGREG_OUT_SUFFIX if output_perfix is None else output_perfix + LOGREG_OUT_SUFFIX
         return self.runRegression(meth_data, ewas.LogisticRegression, "LogReg", output_file)
 
+    def runWilcoxon(self, args, meth_data):
+        output_perfix = args.out
+        output_file = "results" + WILCOXON_OUT_SUFFIX if output_perfix is None else output_perfix + WILCOXON_OUT_SUFFIX
+        test_module = ewas.Wilcoxon(meth_data)
+        cpgnames, pvalues, fstats = test_module.run()
+        ewas_res = ewas.EWASResultsCreator("Wilcoxon", cpgnames, pvalues, statistic = fstats)
+        ewas_res.save(output_file)
+        return ewas_res
+
+
     def run(self, args, meth_data):
         try:
             if meth_data.phenotype is None and args.pheno is None:
@@ -105,6 +117,9 @@ class EWASParser(ModuleParser):
 
             if args.logreg:
                 return self.runLogReg(args, meth_data)
+
+            if args.wilc:
+                return self.runWilcoxon(args, meth_data)
 
         except Exception :
             logging.exception("in ewas")
