@@ -46,6 +46,8 @@ class EWASParser(ModuleParser):
         if args.linreg:
             test_counter += 1
         if args.wilc:
+            if args.covar:
+                common.terminate("Wilcoxon test cannot take any covaraites. remove --covar flag")
             test_counter +=1
         if test_counter > 1:
             common.terminate("Choose only one EWAS test.")

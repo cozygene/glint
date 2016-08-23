@@ -110,6 +110,8 @@ class Wilcoxon(Module):
         if methylation_data.samples_size < 20:
             logging.warning("wilcoxon test is for large data and should have at least 20 samples (here there are %s)" % methylation_data.samples_size)
        
+        if methylation_data.covar is not None:
+            logging.warning("wilcoxon test cannot take any covaraites - ignoring them")
         self.meth_data = methylation_data
 
 
@@ -172,7 +174,14 @@ class EWASResults(object):
     DELIMITER = ','
 
     def __init__(self, test_name, cpgnames, pvalues, qvalues = None, statistic = None, intercept_coefs = None, covars_coefs = None, site_coefs = None, sigma_g = None, sigma_e = None, sites_info_obj = None):
-        
+        """
+        siteInfo contains more info about the sites:
+            cpgnames
+            chromosomes
+            positions 
+            genes
+            categories 
+        """
         self.test_name = test_name
         self.cpgnames = cpgnames
         self.pvalues = pvalues
@@ -195,6 +204,7 @@ class EWASResults(object):
         else:
             self.qvalues = qvalues
         
+
         if sites_info_obj is None:   
             self.sites_info = sitesinfo.SitesInfoGenerator(self.cpgnames)
         else:
@@ -283,21 +293,26 @@ class EWASResultsCreator(EWASResults):
         
     def save(self, output_filename):
         output = vstack((self.title, self.data))
-        logging.info("%s results are saved to file %s" %(self.test_name, output_filename))
+        logging.info("%s results are saved to file %s" % (self.test_name, output_filename))
         savetxt(output_filename, output, fmt = "%s", delimiter=self.DELIMITER)
 
         
 class EWASResultsParser(EWASResults):
     """docstring for EWASResultsParser"""
     def __init__(self, results_filemame):
-        logging.info("Reading resultds from file %s" % results_filemame)
+        if type(results_filemame) == file:
+            filename = results_filemame.name
+        else:
+            if not os.path.exists(filename):
+                common.terminate("No such file %s" % filename)
+            filename = results_filemame
+
+        logging.info("Reading resultds from file %s" % filename)
         data = self.readfile(results_filemame)
         test_name, cpgnames, pvalues, qvalues, stats, intercept, covariates_betas, beta, sigma_g , sigma_e, sitesinfo = self.parsedata(data)
         super(EWASResultsParser, self).__init__(test_name, cpgnames, pvalues, qvalues, stats, intercept, covariates_betas, beta, sigma_g , sigma_e, sitesinfo)   
 
     def readfile(self, filename):
-        if not os.path.exists(filename):
-            common.terminate("No such file %s" % filename)
 
         data = loadtxt(filename , dtype = str, delimiter=self.DELIMITER)
 
