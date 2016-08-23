@@ -184,11 +184,11 @@ class MethylationData(Module):
         f.close()
         
         logging.info("Saving cpg names to %s" % filename + "_sites_list.txt")
-        savetxt(filename + "_sites_list.txt", self.cpgnames, fmt = '%s25')
+        savetxt(filename + "_sites_list.txt", self.cpgnames, fmt = '%s')
 
-
+        #todo remove 16 leave just %s
         logging.info("Saving samples ids to %s" % filename + "_sampless_list.txt")
-        savetxt(filename + "_sampless_list.txt", self.samples_ids, fmt = '%s25')
+        savetxt(filename + "_sampless_list.txt", self.samples_ids, fmt = '%s')
 
     def remove_lowest_std_sites(self, lowest_std_th = 0.02):
         """

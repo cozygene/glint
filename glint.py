@@ -30,9 +30,9 @@ class GlintParser(ModuleParser):
     
 
 class ModulesArgumentParsers(object):
-    FUNCTIONALITY_ARGS = [ '--gsave', '--refactor', '--ewas', '--predict'] # TODO find better way to hold arguments that cause some functionality. glint is not supposed to be aware of those args
+    FUNCTIONALITY_ARGS = ['--plot','--gsave', '--refactor', '--ewas', '--predict'] # TODO find better way to hold arguments that cause some functionality. glint is not supposed to be aware of those args
     DATA_PREPROCESSING_NOT_RELEVANT_FOR_REFACTOR = ['--include', '--exclude', '--minmean', '--maxmean']
-    SOLE_ARGS = ['--plot', '--plotpcs', '--epi'] # functilnality flags that cannot be soecified with other functionaity flags
+    SOLE_ARGS = ['--plotpcs', '--epi'] # functilnality flags that cannot be soecified with other functionaity flags
 
     def __init__(self, user_args_selection):
         self.selected_args = user_args_selection
@@ -172,7 +172,7 @@ class ModulesArgumentParsers(object):
             ewas_results = self.ewas_parser.run(args = self.args,
                                                meth_data = ewas_meth_data)
             if self.args.plot: # if not selected should we plot by default?
-                self.plot_parser.run(args, result = ewas_results)
+                self.plot_parser.run(args, ewas_result_obj = ewas_results)
 
 
 
