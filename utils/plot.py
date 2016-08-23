@@ -27,9 +27,11 @@ def draw_setup(function):
         # if finished drawing all plots, save plots
         if self.current_draw_index -1 == self.plots_number: # draw all plots
             if self.save_file:
-                logging.info("Saving plot to %s" % self.save_file)
-                # plot.savefig(self.save_file)
-                plot.savefig(self.save_file, dpi = 200) #todo change dpi?
+                logging.info("Saving plot to {filename}.png and {filename}.eps".format(filename =self.save_file))
+                plot.savefig(self.save_file + ".png" ) # low-quality, can be changed with dpi =600
+                plot.savefig(self.save_file + ".eps", format='eps') # has no dpi param
+                # formats supported eps, pdf, pgf, png, ps, raw, rgba, svg, svgz
+                # png has a dpi but eps and svg no (vector)
         plot.close()
 
         return output
@@ -101,6 +103,10 @@ class QQPlot(Plot):
         if xtitle is None:
             xtitle = self.X_LABEL
 
+        ax = plot.axes()
+        pos1 = ax.get_position() # get the original position 
+        pos2 = [pos1.x0 + 0.02, pos1.y0 + 0.1,  pos1.width/1.1, pos1.height/1.3] 
+        ax.set_position(pos2)
         self.add_title(title, xtitle, ytitle)
 
 

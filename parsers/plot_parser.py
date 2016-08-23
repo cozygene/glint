@@ -6,8 +6,8 @@ from utils import common, plot
 from module_parser import ModuleParser
 from modules import ewas
 
-QQ_PLOT_SUFFIX = ".glint.qqplot.png"
-MANHATTEN_SUFFIX = ".glint.manhattan.png"
+QQ_PLOT_SUFFIX = ".glint.qqplot"
+MANHATTEN_SUFFIX = ".glint.manhattan"
 
 class PlotParser(ModuleParser):
 
