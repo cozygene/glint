@@ -307,7 +307,7 @@ class EWASResultsParser(EWASResults):
                 common.terminate("No such file %s" % filename)
             filename = results_filemame
 
-        logging.info("Reading resultds from file %s" % filename)
+        logging.info("Reading results from file %s" % filename)
         data = self.readfile(results_filemame)
         test_name, cpgnames, pvalues, qvalues, stats, intercept, covariates_betas, beta, sigma_g , sigma_e, sitesinfo = self.parsedata(data)
         super(EWASResultsParser, self).__init__(test_name, cpgnames, pvalues, qvalues, stats, intercept, covariates_betas, beta, sigma_g , sigma_e, sitesinfo)   
