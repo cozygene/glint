@@ -29,9 +29,8 @@ class LMMParser(ModuleParser):
                 common.terminate("reml must be 0 or 1")
             return val
         lmm_parser.add_argument('--reml', type=reml_value, default=1, help='type 1 to use REML (restricted maximum likelihood) or 0 to use ML. Default is 1 (REML)')
-        lmm_parser.add_argument('--logdelta', type=float, default=None, help='The value of log(delta) to use. Infers it from the data by default (if not specified)')
         lmm_parser.add_argument('--norm', action='store_true', help='Supply this flag in order to normalize covariates matrix (if this flag is not supplied the matrix is not normalized)')
-        lmm_parser.add_argument('--calc', action='store_true', help='Supply this float in order to generate logdelta for each site seperatly (if not specified - one logdelta will be generated. Note that this flag has no meaning when --logdelta is supplied too')
+        lmm_parser.add_argument('--calcld', action='store_true', help='Supply this float in order to generate logdelta for each site seperatly (if not specified - one logdelta will be generated. Note that this flag has no meaning when --logdelta is supplied too')
         # def pc_num_value(val):
         #     val = int(val)
         #     if val < 0:
@@ -53,9 +52,6 @@ class LMMParser(ModuleParser):
             self.refactor = RefactorParser(self.parser)
             self.required_args.extend(self.refactor.required_args)
             self.all_args.extend(self.refactor.all_args)
-
-        if args.logdelta and args.calc:
-          logging.warning("LMM will use the same logdelta for all sites. logdelta that was supplied is %s" % args.logdelta)
 
         super(LMMParser, self).validate_args(args)
       
@@ -95,8 +91,10 @@ class LMMParser(ModuleParser):
 
             # initialize lmm with kinship
             module = lmm.LMM(kinship)
-
-            if args.calc: # run lmm for each site so logdelta will be calculated for each site (TODO move this option as an argument of LMM class)
+            logging.info('Running LMM...')
+            
+            if args.calcld: # run lmm for each site so logdelta will be calculated for each site (TODO move this option as an argument of LMM class)
+              logging.info("LMM will calculate logdelta for each site")
               cpgnames=[]
               pvalues=[]
               intercepts_betas=[]
@@ -108,7 +106,7 @@ class LMMParser(ModuleParser):
 
               for i in range(meth_data.sites_size):
                 data_site_i = data[:,i].reshape((-1,1)) # n samples by 1 site
-                res = module.run(data_site_i, pheno, covars, [meth_data.cpgnames[i]], args.norm, args.logdelta, args.reml)
+                res = module.run(data_site_i, pheno, covars, [meth_data.cpgnames[i]], args.norm, args.reml)
                 cpgname, pvalue, intercept_beta, covariates_beta, site_beta, sigma_e, sigma_g, statistic = res
                 
                 cpgnames.append(cpgname[0])
@@ -122,7 +120,7 @@ class LMMParser(ModuleParser):
 
             else: # run lmm on all data - logdelta is calculated once.
               #run lmm
-              lmm_results = module.run(data, pheno, covars, meth_data.cpgnames, args.norm, args.logdelta, args.reml)
+              lmm_results = module.run(data, pheno, covars, meth_data.cpgnames, args.norm, args.reml)
               cpgnames, pvalues, intercepts_betas, covars_betas, sites_betas, sigmas_e, sigmas_g, stats =  lmm_results
             
 

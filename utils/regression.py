@@ -50,7 +50,7 @@ class LogisticRegression(object):
         # result.params # The parameters of a fitted model  - same as coef if you print result.summary()
         # result.pvalues # p values
         # result.tvalues # Return the t-statistic for a given parameter estimate.
-        return result.params, result.pvalues, result.tvalues #coefficients, t-statistic and p-values
+        return result.params, result.tvalues, result.pvalues #coefficients, t-statistic and p-values
         
 
 class LinearRegression(object):

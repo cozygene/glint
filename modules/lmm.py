@@ -136,7 +136,7 @@ class LMM(Module):
     
     
     
-    def run(self, data, pheno, covars, cpgnames, normalize_covars = False, logdelta = None, reml=True):
+    def run(self, data, pheno, covars, cpgnames, normalize_covars = False, reml=True):
         """
         preprocess data and run lmm. 
         
@@ -159,9 +159,7 @@ class LMM(Module):
             covars = tools.standardize(covars, axis = 0)
         covars = np.concatenate((covars,np.ones((number_of_samples, 1))), axis=1)
         
-        # if log delta is not supplied - calculate ir
-        if logdelta is None:
-            logdelta = findLogDelta(self.U, self.s, pheno, covars, reml=(reml>0))
+        logdelta = findLogDelta(self.U, self.s, pheno, covars, reml=(reml>0))
 
 
         sorted_cpgnames, sorted_cpg_indices, p_vals, beta_est, sigma_e_est, sigma_g_est, statistics = \
@@ -195,10 +193,9 @@ class LMM(Module):
             beta_est[i][-1] is the coefficient of site i
             beta_est[i][1:-1] is the coefficient of the covariates
         """
-        logging.info('Running LMM...')
         number_of_samples = phe.shape[0]
         t0 = time.time()
-        
+            
         #Prepare required matrices  
         Uy = np.dot(self.U.T, phe).flatten()
         UX = self.U.T.dot(covars)

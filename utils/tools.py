@@ -1,9 +1,9 @@
 import logging
-from numpy import dot, sqrt, diag, argsort
+from numpy import dot, sqrt, diag, argsort, where
 from numpy import min as npnim
 import pca
 from scipy.linalg import eigh
-import numpy as np
+from scipy.stats import ranksums
 import common
 from statsmodels.sandbox.stats.multicomp import fdrcorrection0
 
@@ -81,6 +81,20 @@ def FDR(pvalues):
     return res[1]
 
 
+def wilcoxon_test(y, x):
+    """
+    y - a binary vector (phenotype)
+    x - site under test
+
+    returns U statistic and p-value
+    """
+    indices_0 = where(y==0)[0] # not "sick"
+    indices_1 = where(y==1)[0] # "sick"
+    x0 = x[indices_0]
+    x1 = x[indices_1]
+    # Calculate the U statistic and the p-value of sick elemente vs non-sick elements
+    U,pval = ranksums(x0, x1)
+    return U, pval
 
 def is_binary_vector(vector):
     """

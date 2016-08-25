@@ -4,7 +4,6 @@ from numpy import column_stack, ones, savetxt, array, insert, vstack, loadtxt, a
 from module import Module
 from utils import common, plot, sitesinfo
 import statsmodels.api as sm
-from scipy.stats import ranksums
 import logging
 
 
@@ -120,7 +119,7 @@ class Wilcoxon(Module):
         pheno = self.meth_data.phenotype.reshape((-1,))
         output = []
         for i, site in enumerate(self.meth_data.data):
-            stats, pval = self.wilcoxon_test(pheno, site)
+            stats, pval = tools.wilcoxon_test(pheno, site)
             output.append([self.meth_data.cpgnames[i], pval, stats])
 
         output.sort(key = lambda x: x[1]) # sort output by p-value (1 is p-value index)
@@ -132,20 +131,6 @@ class Wilcoxon(Module):
         logging.info('EWAS wilcoxon test is Done!')
         return sorted_cpgnames, sorted_pvalues, sorted_fstats
 
-    def wilcoxon_test(self,y, x):
-        """
-        y - a binary vector (phenotype)
-        x - site under test
-
-        returns U statistic and p-value
-        """
-        indices_0 = where(y==0)[0] # not "sick"
-        indices_1 = where(y==1)[0] # "sick"
-        x0 = x[indices_0]
-        x1 = x[indices_1]
-        # Calculate the U statistic and the p-value of sick elemente vs non-sick elements
-        U,pval = ranksums(x0, x1)
-        return U, pval
 
 
 class EWASResults(object):
