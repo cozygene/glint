@@ -33,7 +33,7 @@ class _FileFormatter(_Formatter):
         message = record.getMessage()
         exception = self.formatException(record)
         
-        return '{} glint {:<10} {:<10} {:<32} {}{}'.format(timestamp, self._namespace, record.levelname, source, message, exception)
+        return '{} glint {:<3} {:<8} {:<32} {}{}'.format(timestamp, self._namespace, record.levelname, source, message, exception)
 
 
 class _ConsoleFormatter(_Formatter):

@@ -6,8 +6,8 @@ from numpy import sqrt, savetxt, column_stack
 from utils import tools, pca, LinearRegression, common
 from module import Module
 
-RANKED_FILENAME =       'refactor.out.rankedlist.txt'
-COMPONENTS_FILENAME =   'refactor.out.components.txt'
+RANKED_FILENAME =       'refactor_k_{k_val}_t_{t_val}.out.rankedlist.txt'
+COMPONENTS_FILENAME =   'refactor_k_{k_val}_t_{t_val}.out.components.txt'
 #NOTE remember to copy the matrix before making changes!!!!
 
 class Refactor(Module):
@@ -41,8 +41,8 @@ class Refactor(Module):
         self.minstd =                      self._validate_stdth(minstd)
         self.num_components =             self._validate_num_comp(num_components)
         self.bad_probes =                 bad_probes_list
-        self.ranked_output_filename =     ranked_output_filename
-        self.components_output_filename = components_output_filename
+        self.ranked_output_filename =     ranked_output_filename.format(k_val = self.k, t_val = self.t)
+        self.components_output_filename = components_output_filename.format(k_val = self.k, t_val = self.t)
         self.remove_covariates =          not suppress_covars
 
 

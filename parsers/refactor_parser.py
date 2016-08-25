@@ -44,8 +44,8 @@ class RefactorParser( ModuleParser ):
                               num_components = args.numcomp,
                               suppress_covars = args.suppress_covars,
                               bad_probes_list = bad_probes_list,
-                              ranked_output_filename = output_perfix + refactor.RANKED_FILENAME, 
-                              components_output_filename  = output_perfix + refactor.COMPONENTS_FILENAME)
+                              ranked_output_filename = output_perfix + "." + refactor.RANKED_FILENAME, 
+                              components_output_filename  = output_perfix + "." + refactor.COMPONENTS_FILENAME)
         self.module.run()
       except Exception :
         logging.exception("in refactor")
