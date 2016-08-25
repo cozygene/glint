@@ -1,3 +1,4 @@
+import os
 import sys
 import logging
 from utils import common
@@ -5,7 +6,7 @@ import argparse
 from module_parser import ModuleParser
 from refactor_parser import RefactorParser
 from modules import lmm, methylation_data, ewas
-from numpy import savetxt, column_stack, array
+from numpy import savetxt, column_stack, array, loadtxt
 
 LMM_OUT_SUFFIX = ".glint.lmm.txt"
 
@@ -15,8 +16,10 @@ class LMMParser(ModuleParser):
         lmm_parser = parser.add_argument_group('lmm', 'TODO Elior,add lmm description here')
 
         def kinship_value(val):
-            if val not in lmm.AVAILABLE_KINSHIPS:
-                common.terminate("kinship must be \"%s\"" % "\" or \"".join(lmm.AVAILABLE_KINSHIPS))
+            if val not in lmm.AVAILABLE_KINSHIPS and not os.path.exists(val):
+                common.terminate("kinship must be a matrix file or  \"%s\"" % "\" or \"".join(lmm.AVAILABLE_KINSHIPS))
+            if os.path.exists(val):
+                val = open(val, 'rb')
             return val
         lmm_parser.add_argument('--kinship', type = kinship_value, required = True, help = "The way to generate kinship matrix. Options are %s. if \"refactor\" is selected than refactor flags need to be supplied (more info udser \"refactor\" section). " % str(lmm.AVAILABLE_KINSHIPS))
         
@@ -62,7 +65,12 @@ class LMMParser(ModuleParser):
                 common.terminate("phenotype file wasn't supplied")
 
             kinship_data = None
-            if args.kinship == 'refactor': # kinship and data to test are the same
+
+            if type(args.kinship) == file: #kinship is provided via file
+                logging.info("loading kinship from %s" % args.kinship.name)
+                kinship = loadtxt(args.kinship)
+
+            elif args.kinship == 'refactor': # kinship and data to test are the same
                 # todo if --lmm provoded woth --refactor there is no need to run refactor twice in order to find ranked sites.
                 logging.info("Running lmm with refactor kinship...")
                 refactor_meth_data = meth_data.copy() #todo need to copy?
