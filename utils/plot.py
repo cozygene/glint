@@ -32,7 +32,7 @@ def draw_setup(function):
                 plot.savefig(self.save_file + ".eps", format='eps') # has no dpi param
                 # formats supported eps, pdf, pgf, png, ps, raw, rgba, svg, svgz
                 # png has a dpi but eps and svg no (vector)
-        plot.close()
+            plot.close()
 
         return output
         
@@ -52,7 +52,7 @@ class Plot(object):
             self.ncols = ceil(self.plots_number / self.nrows)
             # create windows
             self.fig, axes = plot.subplots(figsize = (self.ncols*8,self.nrows*4))
-            fig.subplots_adjust(hspace=.5)
+            self.fig.subplots_adjust(hspace=.5)
 
         else:
             self.fig, axes = plot.subplots()

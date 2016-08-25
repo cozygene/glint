@@ -21,4 +21,3 @@ class PCAKit(Module):
         output_filename = output_file_prefix + self.SCATTER_OUTPUT_FILE
         pca_scatter_plot = plot.PCAScatterPlot(pca_out, plots_number = amount, save_file = output_filename)
         pca_scatter_plot.draw()
-        logging.info("pca outliers scatter plot is saved to %s.png file"% output_filename)
