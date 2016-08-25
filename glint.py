@@ -9,7 +9,7 @@ from utils import common
 from numpy import loadtxt
 from utils import GlintArgumentParser
 from parsers import ModuleParser, RefactorParser, EWASParser, \
-                    MethylationDataParser, KitParser, PredictorParser, \
+                    MethylationDataParser, PredictorParser, \
                     EpistructureParser, LMMParser, PlotParser  #dont remove this is imported in,,,
 
         
@@ -32,7 +32,7 @@ class GlintParser(ModuleParser):
 class ModulesArgumentParsers(object):
     FUNCTIONALITY_ARGS = ['--plot','--gsave', '--refactor', '--ewas', '--predict'] # TODO find better way to hold arguments that cause some functionality. glint is not supposed to be aware of those args
     DATA_PREPROCESSING_NOT_RELEVANT_FOR_REFACTOR = ['--include', '--exclude', '--minmean', '--maxmean']
-    SOLE_ARGS = ['--plotpcs', '--epi'] # functilnality flags that cannot be soecified with other functionaity flags
+    SOLE_ARGS = ['--epi'] # functilnality flags that cannot be soecified with other functionaity flags
 
     def __init__(self, user_args_selection):
         self.selected_args = user_args_selection
@@ -59,7 +59,6 @@ class ModulesArgumentParsers(object):
         #modules in the order they'll appear on --help
         self.refactor_parser = RefactorParser(self.parser)
         self.ewas_parser = EWASParser(self.parser)
-        self.kit_parser = KitParser(self.parser)
         self.predictor_parser = PredictorParser(self.parser)
         self.epi_parser = EpistructureParser(self.parser)
         self.plot_parser = PlotParser(self.parser)
@@ -93,10 +92,6 @@ class ModulesArgumentParsers(object):
 
         self.meth_parser.validate_args(self.args)
         optional_args.extend(self.meth_parser.all_args)    
-    
-        self.kit_parser.validate_args(self.args)
-        optional_args.extend(self.kit_parser.all_args)
-
 
         self.epi_parser.validate_args(self.args)
         optional_args.extend(self.epi_parser.all_args)
@@ -150,7 +145,7 @@ class ModulesArgumentParsers(object):
             self.predictor_parser.run(args)
             return
 
-        if self.args.plot and not self.args.ewas: # if user asked to run plot without running EWAS test, run plot and quit
+        if (self.args.qqplot or args.manhattan) and not self.args.ewas: # if user asked to run plot without running EWAS test, run plot and quit
             self.plot_parser.run(args)
             return
 
@@ -166,13 +161,17 @@ class ModulesArgumentParsers(object):
 
         self.meth_parser.preprocess_sites_data() #preprocess sites after refactor and before ewas
         self.meth_parser.gsave(output_perfix = self.args.out) #save after all preprocessing #TODO maybe take gsave out from MethData module
+        
         # ewas tests must be called after refactor
+        ewas_results = None
         if self.args.ewas:
             ewas_meth_data = self.meth_parser.module.copy()
             ewas_results = self.ewas_parser.run(args = self.args,
                                                meth_data = ewas_meth_data)
-            if self.args.plot: # if not selected should we plot by default?
-                self.plot_parser.run(args, ewas_result_obj = ewas_results)
+
+        if self.args.plot: # if not selected should we plot by default?
+            plot_meth_data = self.meth_parser.module.copy()
+            self.plot_parser.run(args, meth_data = plot_meth_data, ewas_result_obj = ewas_results)
 
 
 
@@ -181,11 +180,6 @@ class ModulesArgumentParsers(object):
             self.epi_parser.run(args = self.args,
                                 meth_data = epi_met_data,
                                 output_perfix = self.args.out)
-
-        self.kit_parser.run(args = self.args,
-                              meth_data = self.meth_parser.module.copy(), # TODO this meth_data?
-                              output_perfix = self.args.out)
-
 
 if __name__ == '__main__':
     selected_args = [arg for arg in sys.argv if arg.startswith("--")] 

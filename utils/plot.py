@@ -154,7 +154,7 @@ class PCAScatterPlot(Plot):
         plot.scatter(x, y)
         # the top title will be set seperatly
         # this must be called before ax2 initiation
-        self.add_title(xtitle = xtitle, ytitle = ytitle)
+        self.add_title(title, xtitle = xtitle, ytitle = ytitle)
 
         # add vertical lines for each std to easly see outliers
         x_std = std(x)
@@ -176,11 +176,6 @@ class PCAScatterPlot(Plot):
         ax2.set_xticks([x_std*i for i in  lines])           # set ticks in the std places (dont show them with grid since this grid is wrong, that is why we use axvlines above)
         ax2.set_xticklabels(["%dsd"%i for i in lines])    # set title for each tick
        
-        plot.text(0.5, 1.11, title,
-             horizontalalignment='center',
-             fontsize=14,
-             transform = ax2.transAxes)
-
         
         # it's also possible to draw using "ax2.xaxis.grid()"
             # but it doesn't work (lines are drawn bad) without the "[plot.axvline(x=x_std*i, color='r',linestyle='-') for i in  lines]".
