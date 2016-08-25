@@ -1,5 +1,6 @@
 from numpy import std, log10, linspace, sqrt, ceil
 import matplotlib.pyplot as plot
+# import matplotlib
 import logging
 from pandas import DataFrame
 from scipy.stats import uniform
@@ -28,7 +29,7 @@ def draw_setup(function):
         if self.current_draw_index -1 == self.plots_number: # draw all plots
             if self.save_file:
                 logging.info("Saving plot to {filename}.png and {filename}.eps".format(filename =self.save_file))
-                plot.savefig(self.save_file + ".png" ) # low-quality, can be changed with dpi =600
+                plot.savefig(self.save_file + ".png" , dpi = 300) # low-quality, can be changed with dpi =600
                 plot.savefig(self.save_file + ".eps", format='eps') # has no dpi param
                 # formats supported eps, pdf, pgf, png, ps, raw, rgba, svg, svgz
                 # png has a dpi but eps and svg no (vector)
@@ -56,6 +57,27 @@ class Plot(object):
 
         else:
             self.fig, axes = plot.subplots()
+
+
+        # # todo tight layout might need to windows /unubtu
+        # if matplotlib.get_backend().lower() not in ['agg', 'macosx']:
+        #     self.fig.tight_layout() #not good for plotpcs
+        # # else:
+        # #    self.fig.set_tight_layout(True) # not good for manhattan png, not good for plotpcs
+        # # for macos:
+        # #  - plotpcs 
+        # #        - set_tight_layout: not ok
+        # #        - tight_layout: not ok + warning
+        # #        - without tight -  ok
+        # #  - manhatten 
+        # #        - set_tight_layout : not ok for png (not showing title)
+        # #        - tight_layout: ok but prints a fallout warning 
+        # #        - without tight -  the same as tight_layout
+        # #  - qqplot
+        # #        - set_tight_layout : not ok for png (ok for others)
+        # #        - tight_layout: ok + warning
+        # #        - without tight -  ok (less tight than tight_layout)
+
 
 
     def add_title(self, title = None, xtitle = None, ytitle = None):
@@ -181,7 +203,6 @@ class ManhattanPlot(Plot):
         ax = plot.axes()
         self.manhattan(sites, pvalues, chromosomes, positions, ax)
 
-        self.fig.tight_layout()
         if ytitle is None:
             ytitle = self.Y_LABEL
         self.add_title(title, xtitle, ytitle)
@@ -224,13 +245,12 @@ class ManhattanPlot(Plot):
         colors = cycle(['darkblue','skyblue','darkgrey'])
         x_labels = []
         for num, (name, group) in enumerate(df_grouped):
+            clr = colors.next()
             # x-axis is determined by the position of the chromosome (the positions are normalized to the space
             # that is assigned to the chromosome) - that way, the plot is grouped by chromosome and than by sorted position
-            # y-axis is the p-value
-            group['positions'] = group['positions']%space_for_each_chr  + num*space_for_each_chr
-            clr = colors.next()
-            group.plot(kind='scatter', x='positions', y='minuslog10pvalue',color=clr, ax=ax, edgecolors='none')
-            
+            # y-axis is the -log10(p-value)
+            xx = group['positions']%space_for_each_chr  + num*space_for_each_chr
+            ax.scatter(xx, group['minuslog10pvalue'],color=clr, edgecolors='none' )
             # # to set the x-axis space of each chromoseme by the amount of sites at this chromosome (more space for a chromosome
             # # with more sites) - do something like this:
             # # that option is good when you want to see the samples more clear at the wider chromosomes)
