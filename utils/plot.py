@@ -224,7 +224,8 @@ class ManhattanPlot(Plot):
         # thiese two lines make sure that chromosomes will be sorted by int value and not string value
         # (chromosomes are list from the values [1,2,..., X, Y] )
         chromosomes = [int(ch) if ch.isdigit() else  ch for ch in chromosomes]
-        all_chromosomes = set(chromosomes)
+        all_chromosomes = list(set(chromosomes))
+        all_chromosomes.sort() # all the chromosomes sorted
         
         number_of_sites = len(sites)
         number_of_chr = len(all_chromosomes)
@@ -236,7 +237,6 @@ class ManhattanPlot(Plot):
                         'chromosome' : chromosomes})
         
         df.chromosome = df.chromosome.astype('category')
-        df = df.sort_values('chromosome')
         df.chromosome = df.chromosome.cat.set_categories(all_chromosomes, ordered=True)
         
         df['ind'] = range(len(df))
@@ -244,13 +244,15 @@ class ManhattanPlot(Plot):
         
         colors = cycle(['darkblue','skyblue','darkgrey'])
         x_labels = []
-        for num, (name, group) in enumerate(df_grouped):
+        for (name, group) in df_grouped:
             clr = colors.next()
+            # the position of this chromosome on the x-asix is according to its index at the sorted chromosomes name list
+            x_pos = all_chromosomes.index(name) 
             # x-axis is determined by the position of the chromosome (the positions are normalized to the space
             # that is assigned to the chromosome) - that way, the plot is grouped by chromosome and than by sorted position
             # y-axis is the -log10(p-value)
-            xx = group['positions']%space_for_each_chr  + num*space_for_each_chr
-            ax.scatter(xx, group['minuslog10pvalue'],color=clr, edgecolors='none' )
+            x = group['positions']%space_for_each_chr  + x_pos*space_for_each_chr
+            ax.scatter(x, group['minuslog10pvalue'], color=clr, edgecolors='none' )
             # # to set the x-axis space of each chromoseme by the amount of sites at this chromosome (more space for a chromosome
             # # with more sites) - do something like this:
             # # that option is good when you want to see the samples more clear at the wider chromosomes)
