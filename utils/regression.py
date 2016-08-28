@@ -21,7 +21,10 @@ class LogisticRegression(object):
     @staticmethod
     def fit_model(y, x, covars = None):
         """
-        y is n X 1, x is n X 1 and covars (optional) is n X p
+        y is n X 1 - phenotype
+        x is n X 1 - site under test
+        covars (optional) is n X p
+
         Returns three arrays of (1+p+m) X 1 - coefficients, t-statistic and p-values:
                 coefficients - the oefficients array where coefficients[0] if the coef of the intercept
                                                            coefficients[-1] if the coef of the site under test (the m from input x)
@@ -154,7 +157,10 @@ class LinearRegression(object):
     @staticmethod
     def fit_model(y, x, covars = None):
         """
-        y is n X 1, x is n X 1 and covars (optional) is n X p
+        y is n X 1 - phenotype
+        x is n X 1 - site under test
+        covars (optional) is n X p
+
         Returns three arrays of (1+p+m) X 1 - coefficients, t-statistic and p-values:
                 the first is the coefficients array where coefficients[0] if the coef of the intercept
                                                           coefficients[-1] if the coef of the site under test (the m from input x)

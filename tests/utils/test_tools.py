@@ -1,6 +1,6 @@
 from numpy import loadtxt
-from utils import tools, LinearRegression
-from modules import methylation_data
+from utils import tools, regression
+from modules import methylation_data, ewas
 import logging
 from tests.test_tools import tools as tests_tools
 
@@ -61,9 +61,29 @@ class FDRTester():
         x = self.meth_data.data.transpose() # all sites  (find pvalues of all sites)
 
         # glint calc qvalues
-        _, _, pvals = LinearRegression.fit_model(y, x, covars = self.meth_data.covar)
+
+        # oprtion 1
+        pvals2 = []           
+        for i, site in enumerate(self.meth_data.data):
+            _, _, p_value = regression.LinearRegression().fit_model(y, site, covars = self.meth_data.covar)
+            
+            # Note: if you add more info to site info note to:
+            #       -   keep p_value at index 1 since the data is sorted by index 1
+            #       -   increase / decrease number of values in the line if  output.shape[1] = X
+            pvals2.append(p_value[-1]) 
+            
+
+        #option 2
+        regress = ewas.LinearRegression(methylation_data = self.meth_data)
+        results = regress.run()
+        _, pvals, _,_,_,_ = results
+
+        # _, _, pvals = LinearRegression.fit_model(y, x, covars = self.meth_data.covar)
         qvals = tools.FDR(pvals)
         # qvals = qvals[2:]
+
+        import pdb 
+        pdb.set_trace()
 
         #check correltaion
         assert(tests_tools.correlation(qvals_results, qvals))
