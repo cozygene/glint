@@ -81,7 +81,7 @@ elif os.name == 'posix': # Unix
 
 
     
-GLINT_OBLIGATORY_DEPENDENCIES = ['numpy', 'scipy', 'sklearn', 'matplotlib', 'pandas']
+GLINT_OBLIGATORY_DEPENDENCIES = ['numpy', 'scipy', 'sklearn', 'matplotlib', 'pandas', 'statsmodels']
 GLINT_OPTIONAL_DEPENDENCIES = []
 
 # def setup_glint():
@@ -256,7 +256,9 @@ def install_glint():
                 optional_dependencied.append(module)
         
         if obligatory_dependencies:
-            color_print("To run Glint you must install the following packages: %s" % str(obligatory_dependencies), BACKGROUND.BLACK + FOREGROUND.YELLOW)
+            color_print("To run Glint you must install anaconda or the following packages: %s" % str(obligatory_dependencies), BACKGROUND.BLACK + FOREGROUND.YELLOW)
+            if 'linux' in sys.platform:
+                color_print("try running sudo apt-get install " + " ".join(['python-%s' % str(package) for package in obligatory_dependencies]), BACKGROUND.BLACK + FOREGROUND.YELLOW)
         if optional_dependencied:
             color_print("To run optional scripts you must install: %s " % str(optional_dependencied), BACKGROUND.BLACK + FOREGROUND.YELLOW)
 
