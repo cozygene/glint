@@ -18,8 +18,7 @@ OPTIONAL_LEVELS =   {"warning": logging.WARNING,
 
 
 class _Formatter(logging.Formatter):
-    def __init__(self, namespace, *args, **kwargs):
-        self._namespace = namespace
+    def __init__(self, *args, **kwargs):
         super(_Formatter, self).__init__(*args, **kwargs)
 
     def formatException(self, record):
@@ -37,7 +36,7 @@ class _FileFormatter(_Formatter):
         message = record.getMessage()
         exception = self.formatException(record)
         
-        return '{} glint {:<3} {:<8} {:<32} {}{}'.format(timestamp, self._namespace, record.levelname, source, message, exception)
+        return '{} glint {:<9} {:<30} {}{}'.format(timestamp, record.levelname, source, message, exception)
 
 
 class _ConsoleFormatter(_Formatter):
@@ -46,25 +45,25 @@ class _ConsoleFormatter(_Formatter):
         message = record.getMessage()
         exception = self.formatException(record)
         
-        return '{:<10} {}{}'.format(record.levelname, message, exception)
+        return '{:<9} {}{}'.format(record.levelname, message, exception)
 
 
 
 class ConfigureLogging(object):
-    def __init__(self, loglevel=logging.INFO, namespace='', prefix = ''):
+    def __init__(self, loglevel=logging.INFO, prefix = ''):
         logging.raiseExceptions = 0
         logging.captureWarnings(True)
 
         self.logger = logging.getLogger()
 
         self.streamHandler = logging.StreamHandler()
-        self.streamHandler.setFormatter(_ConsoleFormatter(namespace))
+        self.streamHandler.setFormatter(_ConsoleFormatter())
         self.logger.addHandler(self.streamHandler)
 
 
         self.fileHandler = logging.FileHandler(os.path.join(os.path.dirname(LOG_FILE_PATH), prefix + os.path.basename(LOG_FILE_PATH)),
                                           mode='w')
-        self.fileHandler.setFormatter(_FileFormatter(namespace))
+        self.fileHandler.setFormatter(_FileFormatter())
         self.logger.addHandler(self.fileHandler)
 
         self.setLoggerLevel(loglevel)
