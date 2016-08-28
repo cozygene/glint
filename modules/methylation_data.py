@@ -7,6 +7,7 @@ from numpy import delete, isnan, where, column_stack, std, array, savetxt, in1d,
 from module import Module
 from utils import common, pca
 from bisect import bisect_right
+from utils import  sitesinfo
 
 COMPRESSED_FILENAME = "methylation_data"
 GLINT_FORMATTED_EXTENSION = ".glint" #TODO move to a config file
@@ -184,11 +185,26 @@ class MethylationData(Module):
         f.close()
         
         logging.info("Saving cpg names to %s" % filename + "_sites_list.txt")
-        savetxt(filename + "_sites_list.txt", self.cpgnames, fmt = '%s')
-
-        #todo remove 16 leave just %s
+        sites_info = sitesinfo.SitesInfoGenerator(self.cpgnames)
+        sites_data = column_stack((self.cpgnames, sites_info.chromosomes, sites_info.positions, sites_info.genes, sites_info.categories))
+        savetxt(filename + "_sites_list.txt", sites_data, delimiter='\t', fmt = '%-12s\t%-4s\t%-12s\t%-22s\t%-22s', header = "cpgnames, chromosomes, positions, genes, categories")
+        
         logging.info("Saving samples ids to %s" % filename + "_sampless_list.txt")
-        savetxt(filename + "_sampless_list.txt", self.samples_ids, fmt = '%s')
+        samples_data = self.samples_ids
+        samples_header = "samples"
+        fmt = '%-12s'
+        if self.phenotype is not None:
+            samples_data = column_stack((samples_data, self.phenotype))
+            samples_header += ", phenotype"
+            fmt += '\t%-12s'
+        if self.covar is not None:
+            samples_data = column_stack((samples_data, self.covar))
+            covar_num = self.covar.shape[1]
+            samples_header += "".join([", covariates%d"%(i+1) for i in range(covar_num)])
+            fmt += '\t%-12s' * covar_num
+
+        savetxt(filename + "_sampless_list.txt", samples_data, fmt = fmt, header = samples_header, delimiter='\t')
+
 
     def remove_lowest_std_sites(self, lowest_std_th = 0.02):
         """
