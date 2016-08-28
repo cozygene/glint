@@ -5,15 +5,17 @@ import sys
 import time
 import traceback
 
-LOGGING_LEVEL = logging.DEBUG
 LOG_FILE_PATH = 'glint.log' # TODO move to a configuration file
 LOG_FILE_MAX_BYTES = 10 * 1024
 LOG_FILE_BACKUP_COUNT = 5
 
-def format_exc_info(exc_info):
-    exceptionType, exception, tracebackObject = exc_info
-    tracebackString = ' ---> '.join(['%s:%d, in %s: %s' % (filename, lineNumber, functionName, text) for (filename, lineNumber, functionName, text) in traceback.extract_tb(tracebackObject)])
-    return '; EXCEPTION: %s, %s; TRACEBACK: %s' % (exceptionType, exception, tracebackString)
+OPTIONAL_LEVELS =   {"warning": logging.WARNING,
+                     "critical":logging.CRITICAL,
+                     "fatal":   logging.FATAL,
+                     "info":    logging.INFO,
+                     "debug":   logging.DEBUG,
+                     "error":   logging.ERROR}
+
 
 class _Formatter(logging.Formatter):
     def __init__(self, namespace, *args, **kwargs):
@@ -22,7 +24,9 @@ class _Formatter(logging.Formatter):
 
     def formatException(self, record):
         if record.exc_info is not None:
-            return format_exc_info(record.exc_info)
+            exceptionType, exception, tracebackObject = record.exc_info
+            tracebackString = ' ---> '.join(['%s:%d, in %s: %s' % (filename, lineNumber, functionName, text) for (filename, lineNumber, functionName, text) in traceback.extract_tb(tracebackObject)])
+            return '; EXCEPTION: %s, %s; TRACEBACK: %s' % (exceptionType, exception, tracebackString)
         else:
             return ''
 
@@ -46,21 +50,26 @@ class _ConsoleFormatter(_Formatter):
 
 
 
-def configureLogging(namespace, prefix = '', syslog_host='localhost'):
-    logging.raiseExceptions = 0
-    logging.captureWarnings(True)
+class ConfigureLogging(object):
+    def __init__(self, loglevel=logging.INFO, namespace='', prefix = ''):
+        logging.raiseExceptions = 0
+        logging.captureWarnings(True)
 
-    logger = logging.getLogger()
-    logger.setLevel(LOGGING_LEVEL)
+        self.logger = logging.getLogger()
 
-    streamHandler = logging.StreamHandler()
-    streamHandler.setFormatter(_ConsoleFormatter(namespace))
-    streamHandler.setLevel(LOGGING_LEVEL)
-    logger.addHandler(streamHandler)
+        self.streamHandler = logging.StreamHandler()
+        self.streamHandler.setFormatter(_ConsoleFormatter(namespace))
+        self.logger.addHandler(self.streamHandler)
 
 
-    fileHandler = logging.FileHandler(os.path.join(os.path.dirname(LOG_FILE_PATH), prefix + os.path.basename(LOG_FILE_PATH)),
-                                      mode='w')
-    fileHandler.setLevel(LOGGING_LEVEL)
-    fileHandler.setFormatter(_FileFormatter(namespace))
-    logger.addHandler(fileHandler)
+        self.fileHandler = logging.FileHandler(os.path.join(os.path.dirname(LOG_FILE_PATH), prefix + os.path.basename(LOG_FILE_PATH)),
+                                          mode='w')
+        self.fileHandler.setFormatter(_FileFormatter(namespace))
+        self.logger.addHandler(self.fileHandler)
+
+        self.setLoggerLevel(loglevel)
+
+    def setLoggerLevel(self, loglevel):
+        self.logger.setLevel(loglevel)
+        self.streamHandler.setLevel(loglevel)
+        self.fileHandler.setLevel(loglevel)

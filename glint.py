@@ -3,7 +3,6 @@ import argparse
 import os
 import sys
 from configuration import configurelogging
-configurelogging.configureLogging('') #todo should seperate each module to a different folder to have different "namespaces"?
 import logging
 from utils import common
 from numpy import loadtxt
@@ -12,19 +11,26 @@ from parsers import ModuleParser, RefactorParser, EWASParser, \
                     MethylationDataParser, PredictorParser, \
                     EpistructureParser, LMMParser, PlotParser  #dont remove this is imported in,,,
 
-        
+LOGGER = configurelogging.ConfigureLogging()
+
 class GlintParser(ModuleParser):
     def __init__(self, parser):
         optional = parser.add_argument_group('3.Optional arguments')
         optional.add_argument('-h', '--help', action='help', help = "print this help") # add help here so it will be under same group with all other optional argument
         optional.add_argument('--out', type = str,   help = "changes the prefix of the output file ")
+        def loglevel_value(val):
+            # val = int(val)
+            if val.lower() not in configurelogging.OPTIONAL_LEVELS.keys():
+                common.terminate("log level is not valid. should be one of %s" % str( configurelogging.OPTIONAL_LEVELS.keys()))
+            return configurelogging.OPTIONAL_LEVELS[val]
+        optional.add_argument('--loglevel', type = loglevel_value,  default = 'info', help = "the log level to print")
 
         modules = parser.add_argument_group('4.Glint modules')
         modules.add_argument('--refactor', action='store_true', help = "<TODO Elior, add help here>")
         modules.add_argument('--ewas',     action='store_true', help = "<TODO Elior, add help here>" )
-        modules.add_argument('--predict', action='store_true', help = "<TODO Elior, add help here methylation predictor>" )
+        modules.add_argument('--predict',  action='store_true', help = "<TODO Elior, add help here methylation predictor>" )
         modules.add_argument('--epi',      action='store_true', help = "<TODO Elior, edit>" )
-        modules.add_argument('--plot',      action='store_true', help = "<TODO Elior, edit>" )
+        modules.add_argument('--plot',     action='store_true', help = "<TODO Elior, edit>" )
 
         super(GlintParser, self).__init__(optional, modules)
     
@@ -183,11 +189,11 @@ class ModulesArgumentParsers(object):
 
 if __name__ == '__main__':
     selected_args = [arg for arg in sys.argv if arg.startswith("--")] 
-
     parser = ModulesArgumentParsers(selected_args)
 
     parser.add_arguments()
     args = parser.parse_args()
+    LOGGER.setLoggerLevel(args.loglevel)
 
     logging.info("Starting glint...")
     parser.run()
