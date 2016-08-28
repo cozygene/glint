@@ -55,9 +55,9 @@ class Plot(object):
             self.fig, axes = plot.subplots(figsize = (self.ncols*8,self.nrows*4))
             self.fig.subplots_adjust(hspace=.5)
 
-        else:
-            self.fig, axes = plot.subplots()
-
+        # else:
+        #     self.fig, axes = plot.subplots()
+        #     pass
 
         # # todo tight layout might need to windows /unubtu
         # if matplotlib.get_backend().lower() not in ['agg', 'macosx']:
@@ -206,14 +206,6 @@ class ManhattanPlot(Plot):
         pos1 = ax.get_position() # get the original position 
         pos2 = [pos1.x0 + 0.02, pos1.y0 + 0.1,  pos1.width/1.1, pos1.height/1.6] 
         ax.set_position(pos2) # set a new position
-
-
-        # #  option #2
-        # self.fig.set_size_inches((12,3))
-        # pos1 = ax.get_position() # get the original position 
-        # pos2 = [pos1.x0 + 0.02, pos1.y0 + 0.2,  pos1.width/1.1, pos1.height/1.6] 
-        # ax.set_position(pos2) # set a new position
-
 
     def manhattan(self, sites, pvalues, chromosomes, positions, ax):
         # thiese two lines make sure that chromosomes will be sorted by int value and not string value
