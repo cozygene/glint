@@ -70,16 +70,9 @@ class LinearRegressionTester():
         assert abs(coefs_covar2 - results[3]) < 1e-3
         assert abs(fstats - results[4]) < 1e-2
         assert abs(pvals - results[5]) < 1e-3
-        # # test 2 dim 
-        # coefs, fstats, pvals = LinearRegression.fit_model(self.y, self.x)
-        # for i in range(self.x.shape[1]):
-        #     assert abs(coefs[i] - results[i][0]) < 1e-3
-        #     assert abs(fstats[i] - results[i][1]) < 1e-3
-        #     assert abs(pvals[i] - results[i][2]) < 1e-3
+        # Note - there is no option to test 2 dim 
+
         logging.info("PASS")
-
-        # TODO add test fit_model with covar
-
 
 class LogisticRegressionTester():
     LIN_REG_DATA = "tests/refactor/files/demofiles/datafile2_no_bad_probes"
@@ -113,5 +106,7 @@ class LogisticRegressionTester():
         assert abs(coefs_covar2 - results[3]) < 1e-3
         assert abs(fstats - results[4]) < 1e-2
         assert abs(pvals - results[5]) < 1e-3
+
+        # Note - there is no option to test 2 dim 
         logging.info("PASS")
 

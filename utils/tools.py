@@ -92,9 +92,9 @@ def wilcoxon_test(y, x):
     indices_1 = where(y==1)[0] # "sick"
     x0 = x[indices_0]
     x1 = x[indices_1]
-    # Calculate the U statistic and the p-value of sick elemente vs non-sick elements
-    U,pval = ranksums(x0, x1)
-    return U, pval
+    # Calculate the Z statistic and the p-value of sick elemente vs non-sick elements
+    zstat ,pval = ranksums(x0, x1)
+    return zstat, pval
 
 def is_binary_vector(vector):
     """

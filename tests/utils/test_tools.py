@@ -3,7 +3,7 @@ from utils import tools, regression
 from modules import methylation_data, ewas
 import logging
 from tests.test_tools import tools as tests_tools
-
+from scipy.stats import pearsonr
 
 class ToolsTester():
     DATA_FILE = "tests/files/datafile2"
@@ -42,7 +42,7 @@ class ToolsTester():
 
 class FDRTester():
     DATA = "tests/refactor/files/demofiles/datafile2_no_bad_probes"
-    PHENO = "tests/refactor/files/demofiles/phenotype"
+    PHENO = "tests/utils/files/pheno_binary"
     COVAR = "tests/refactor/files/demofiles/covariates"
     QVALUES_RES = "tests/utils/files/qvalues.txt"
 
@@ -57,36 +57,24 @@ class FDRTester():
         # get pre-calculated qvalues
         qvals_results = loadtxt(self.QVALUES_RES, delimiter=',')
 
-        y = self.meth_data.phenotype # a binary vector (phenotype)
-        x = self.meth_data.data.transpose() # all sites  (find pvalues of all sites)
-
+        y = self.meth_data.phenotype 
         # glint calc qvalues
 
         # oprtion 1
-        pvals2 = []           
+        pvals = []           
         for i, site in enumerate(self.meth_data.data):
             _, _, p_value = regression.LinearRegression().fit_model(y, site, covars = self.meth_data.covar)
             
             # Note: if you add more info to site info note to:
             #       -   keep p_value at index 1 since the data is sorted by index 1
             #       -   increase / decrease number of values in the line if  output.shape[1] = X
-            pvals2.append(p_value[-1]) 
-            
+            pvals.append(p_value[-1]) 
 
-        #option 2
-        regress = ewas.LinearRegression(methylation_data = self.meth_data)
-        results = regress.run()
-        _, pvals, _,_,_,_ = results
-
-        # _, _, pvals = LinearRegression.fit_model(y, x, covars = self.meth_data.covar)
         qvals = tools.FDR(pvals)
-        # qvals = qvals[2:]
+        
+        # correlation
+        assert((1 - abs(pearsonr(qvals_results, qvals)[0])) < 1e-3)
 
-        import pdb 
-        pdb.set_trace()
-
-        #check correltaion
-        assert(tests_tools.correlation(qvals_results, qvals))
         logging.info("PASS")
 
 
@@ -95,8 +83,9 @@ class WilcoxonTester():
     PHENO = "tests/utils/files/pheno_binary" #binary pheno
     COVAR = "tests/refactor/files/demofiles/covariates"
 
-    # U-statistic, p-value results to comare
+    # U-statistic, Z-statistic, p-value results to compare
     U_STATS_RES = 11020.5
+    Z_STATS_RES =  0.89834
     P_VAL_RES = 0.369
 
     def __init__(self):
@@ -113,13 +102,8 @@ class WilcoxonTester():
         y = meth_data.phenotype # a binary vector (phenotype)
         x = meth_data.data[0,:]# site under test - with 0 just the first site
 
-        ustats, pval = tools.wilcoxon_test(y, x)
-        import pdb
-        print "ustats", ustats
-        print "ustats elior", self.U_STATS_RES
-        print "pvals", pval
-        print "pval elior", self.P_VAL_RES
-        pdb.set_trace() #somethin is wrong here data - all or just one site????
-        assert abs(ustats - self.U_STATS_RES) < 1e-3 #todo something is wrong
+        zstats, pval = tools.wilcoxon_test(y, x)
+
+        assert abs(zstats - self.Z_STATS_RES) < 1e-2
         assert abs(pval - self.P_VAL_RES) < 1e-3
         logging.info("PASS")
