@@ -21,30 +21,26 @@ class _Formatter(logging.Formatter):
     def __init__(self, *args, **kwargs):
         super(_Formatter, self).__init__(*args, **kwargs)
 
-    def formatException(self, record):
+    def get_record_info(self, record):
+        source = '{}:{}'.format(record.filename, record.lineno)
+        message = record.getMessage()
+        timestamp = self.formatTime(record)
+        exception = ''
         if record.exc_info is not None:
-            exceptionType, exception, tracebackObject = record.exc_info
-            tracebackString = ' ---> '.join(['%s:%d, in %s: %s' % (filename, lineNumber, functionName, text) for (filename, lineNumber, functionName, text) in traceback.extract_tb(tracebackObject)])
-            return '; EXCEPTION: %s, %s; TRACEBACK: %s' % (exceptionType, exception, tracebackString)
-        else:
-            return ''
+            exception_type, exception, traceback_obj = record.exc_info
+            traceback_str = ' ---> '.join(['%s:%d, in %s: %s' % (filename, line_number, func_name, text) for (filename, line_number, func_name, text) in traceback.extract_tb(traceback_obj)])
+            exception = '; EXCEPTION: %s, %s; TRACEBACK: %s' % (exception_type, exception, traceback_str)
+        return source, message, timestamp, exception
 
 class _FileFormatter(_Formatter):
     def format(self, record):
-        timestamp = self.formatTime(record)
-        source = '{}:{}'.format(record.filename, record.lineno)
-        message = record.getMessage()
-        exception = self.formatException(record)
-        
+        source, message, timestamp, exception = super(_FileFormatter, self).get_record_info(record)
         return '{} glint {:<9} {:<30} {}{}'.format(timestamp, record.levelname, source, message, exception)
 
 
 class _ConsoleFormatter(_Formatter):
     def format(self, record):
-        source = '{}:{}'.format(record.filename, record.lineno)
-        message = record.getMessage()
-        exception = self.formatException(record)
-        
+        source, message, timestamp, exception = super(_ConsoleFormatter, self).get_record_info(record)
         return '{:<9} {}{}'.format(record.levelname, message, exception)
 
 
