@@ -1,5 +1,5 @@
-import pandas as pd
-import numpy as np
+from pandas import Index, unique
+from numpy import loadtxt, empty, where
 import logging
 
 SITES_INFO_FILE = "utils/assets/HumanMethylationSites"
@@ -27,7 +27,7 @@ class SitesInfoGenerator(SitesInfo):
 
     def __init__(self, cpgnames_list):
         logging.info("loading information about methylation sites...")
-        data = np.loadtxt(SITES_INFO_FILE, dtype = str, ndmin = 2, delimiter=',')
+        data = loadtxt(SITES_INFO_FILE, dtype = str, ndmin = 2, delimiter=',')
         all_cpgnames = data[:, self.CPGNAME_INDEX]
         indices = self._get_cpgnames_indicis(all_cpgnames, cpgnames_list)
         relevant_data = data[indices, :]
@@ -48,10 +48,10 @@ class SitesInfoGenerator(SitesInfo):
         logging.info("searching for relevant methylation sites information...")
         
         sorted_indices = cpgnames_list.argsort()  # the indexes of cpgnames_list when values are sorted
-        orderd_indices = np.empty((len(sorted_indices)), dtype = int)# will hold the indexes in the order of cpgnames_list
+        orderd_indices = empty((len(sorted_indices)), dtype = int)# will hold the indexes in the order of cpgnames_list
 
         # get the indexes of all_cpgnames where  cpgnames_list found by the order of cpgnames_list 
-        indexes_list = np.where(pd.Index(pd.unique(cpgnames_list)).get_indexer(all_cpgnames) >= 0)[0] # faster than np.where(np.in1d
+        indexes_list = where(Index(unique(cpgnames_list)).get_indexer(all_cpgnames) >= 0)[0] # faster than np.where(np.in1d
         orderd_indices[sorted_indices] = indexes_list
 
         return orderd_indices
