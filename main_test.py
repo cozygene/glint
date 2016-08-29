@@ -1,5 +1,6 @@
 from configuration import configurelogging
-configurelogging.configureLogging("test")
+import logging
+configurelogging.ConfigureLogging(loglevel = logging.DEBUG)
 from tests.refactor import test_refactor
 from tests.ewas import test_ewas
 from tests.utils import test_lin_reg, test_pca, test_tools
@@ -20,3 +21,4 @@ test_tools.FDRTester()
 # test_kit.PCAKitTester()
 test_predictor.PredictorTester()
 replace_missing_values_test.MissingValuesTester()
+test_ewas.LMMTester()
