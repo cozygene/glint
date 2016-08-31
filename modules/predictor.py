@@ -129,8 +129,6 @@ class Predictor(Module):
 
         if there are too  many missing values is sample X: don't predict this sample methylation levels at all
 
-        TODO -if there are too many snp that we ignored in a site?
-
         input:
         plink_geno_file - path to the .geno plink file
         snp_indices - list of snp indices that we should extract from the file, each index represent a line in the .geno file (the i'th value in snp_indices is the snp_indices[i]'th line in .geno file)

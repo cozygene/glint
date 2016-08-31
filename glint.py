@@ -139,7 +139,7 @@ class ModulesArgumentParsers(object):
 
         differ = selected_args.difference(optional_args)
         if differ:
-            common.terminate("selected redundent argument" + str(list(differ))) # TODO: tell which module the arguments belong to, to user might forgot to specify --module and that msg can be confusing
+            common.terminate("selected redundent argument" + str(list(differ)))
 
         # warn if only refactor module is selected and  user selectes data management flags that are not relevant for refactor
         if self.args.refactor and len(func_args_chosen) == 1:
@@ -167,7 +167,7 @@ class ModulesArgumentParsers(object):
             self.meth_parser.module.add_covar_datas([self.refactor_parser.module.components]) # add refactor components as covariate file
 
         self.meth_parser.preprocess_sites_data() #preprocess sites after refactor and before ewas
-        self.meth_parser.gsave(output_perfix = self.args.out) #save after all preprocessing #TODO maybe take gsave out from MethData module
+        self.meth_parser.gsave(output_perfix = self.args.out) #save after all preprocessing
         
         # ewas tests must be called after refactor
         ewas_results = None

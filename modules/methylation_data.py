@@ -55,7 +55,7 @@ class MethylationData(Module):
             logging.warning("found no sites to remove")
         else:
             if len(set(range(self.sites_size)).difference(set(sites_indicies_list))) == 0:
-                logging.error("all sites are about to be remove") # TODO Elior, should we terminate or warn or error witout terminateing?
+                common.terminate("all sites are about to be remove") 
 
             self.data = delete(self.data, sites_indicies_list, axis = 0)
             self.cpgnames = delete(self.cpgnames, sites_indicies_list)
@@ -74,7 +74,7 @@ class MethylationData(Module):
             logging.warning("found no samples to remove")
         else:
             if len(set(range(self.samples_size)).difference(set(indices_list))) == 0:
-                logging.error("all samples are about to be remove") # TODO Elior, should we terminate or warn or error witout terminateing?
+                common.terminate("all samples are about to be remove")
 
             self.data = delete(self.data, indices_list, axis = 1)
             if self.phenotype is not None:
@@ -252,8 +252,7 @@ class MethylationData(Module):
             self.remove_samples_indices(list(maxpcstds_samples_indices))
 
     
-    def remove_missing_values_sites(self, missing_values_th = 0.03):
-        pass
+    # def remove_missing_values_sites(self, missing_values_th = 0.03):
         # was not tested!! 
         # nan are not supported for version 1.0
         # """
@@ -268,8 +267,7 @@ class MethylationData(Module):
         # self.exclude_sites_indices(many_nan_indices)
         # logging.debug("%s sites were excluded" % len(many_nan_indices)
 
-    def replace_missing_values_by_mean(self):
-        pass
+    # def replace_missing_values_by_mean(self):
         # was not tested!! 
         # nan are not supported for version 1.0
         # """
@@ -305,7 +303,24 @@ class MethylationData(Module):
 
 class MethylationDataLoader(MethylationData):
     """
-    TODO add class doc here
+    responsible for loading the methylation data files, which means it validates that:
+    - the data file:
+        - does not contain missing values
+        - it is a 2D matrix
+        - does not contain values which are not int or float (except the header)
+        - Note that it assumes 
+             - that there is a header (first row) with the samples names
+             - that the first column is cpg names
+    - the phenotype file (if supplied):
+        - contains the same samples and as the data file
+        - the first column is the samples ids (names)
+        - Note that only one phenotype is supported - therefore if there is more htan one phenotype only the first will be used
+    - the covariates file (is supplied):
+        - contains the same samples as the data file
+
+    if one of the condition not fulfilled the program terminates.
+
+    after validation it creates the MethylationData object
     """
     def __init__(self, datafile, phenofile = None, covarfiles = []):
         data, samples_ids, cpgnames = self._load_and_validate_datafile(datafile)
@@ -366,8 +381,7 @@ class MethylationDataLoader(MethylationData):
         if not ((samples_ids.size == matrix_sample_ids.size) and ((samples_ids == matrix_sample_ids).all())):
             if len(set(samples_ids)^set(matrix_sample_ids)) != 0:
                 common.terminate("sample ids are not identical to the sample ids in data file")
-            common.terminate("sample ids are not in the same order as in the datafile") # TODO Elior, should we terminate because sample_ids in files are not in the same order as in datafile?
-
+            common.terminate("sample ids are not in the same order as in the datafile") 
 
     def _load_and_validate_samples_info(self, samples_info, samples_size, samples_ids):
         """

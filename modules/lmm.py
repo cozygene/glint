@@ -111,7 +111,7 @@ class KinshipCreator(Module):
         self.standardize = is_normalized
 
     
-    def create_standard_kinship(self): #TODO change name
+    def create_standard_kinship(self):
         """
         compute kinship matrix ( X * X.transpose() ) / (number of sites)
         returns matrix of dimensions nXn
