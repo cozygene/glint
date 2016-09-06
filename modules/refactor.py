@@ -101,10 +101,17 @@ class Refactor(Module):
         logging.info('ReFACTor is Done!')
 
    
-    """
-    TODO add doc
-    """
+
     def _refactor( self ):
+        """
+        run refactor:
+        exclude bad probes
+        remove sites with low std
+        remove covariates
+        run feature selection
+        computing the ReFACTor components
+        find ranked list of the data features
+        """
         self._exclude_bad_probes()
         # self.meth_data.remove_missing_values_sites() # nan are not supported TODO uncomment when supported
         self.meth_data.remove_lowest_std_sites(self.minstd)

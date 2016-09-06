@@ -36,7 +36,7 @@ class LMMParser(ModuleParser):
         #     if val < 0:
         #         common.terminate("numpccovar must positive integer (0+)")
         #     return val
-        # todo use --numcomp??
+        # should  use --numcomp??
         # lmm_parser.add_argument('--numpccovar', metavar='numPCCovars', type=pc_num_value, default=0, help='The number of principal components to use as covariates. If 0 not used as covariates. Default is 0')
         
         super(LMMParser, self).__init__(lmm_parser)
@@ -67,19 +67,17 @@ class LMMParser(ModuleParser):
                 kinship = loadtxt(args.kinship)
 
             elif args.kinship == 'refactor': # kinship and data to test are the same
-                # todo if --lmm provoded woth --refactor there is no need to run refactor twice in order to find ranked sites.
+                # todo if --lmm provided with --refactor there is no need to run refactor twice in order to find ranked sites.
                 logging.info("Running lmm with refactor kinship...")
-                refactor_meth_data = meth_data.copy() #todo need to copy?
+                refactor_meth_data = meth_data.copy()
                 self.refactor.run(args, refactor_meth_data, output_perfix)
 
                 logging.info("using best %s sites suggested by refactor as data for kinship..." % args.t)
                 t_best_sites = self.refactor.module.ranked_sites[:args.t]
                 
-                data_for_kinship = meth_data.copy() #todo need to copy?
+                data_for_kinship = meth_data.copy()
                 data_for_kinship.include(t_best_sites)
                 
-                # todo handle if sample not in phenotype
-
                 # all data is of dimensions n samplesX m sites
                 kinship_data = data_for_kinship.data.transpose()
                 kinship = lmm.KinshipCreator(kinship_data, is_normalized = False).create_standard_kinship()
@@ -87,13 +85,13 @@ class LMMParser(ModuleParser):
             # all data is of dimensions n samplesX m sites
             covars = meth_data.covar # no need to transpose since covars are nXm (n samples)
             data = meth_data.data.transpose() # data to test
-            pheno = meth_data.phenotype #should transpose? todo
+            pheno = meth_data.phenotype
 
             # initialize lmm with kinship
             module = lmm.LMM(kinship)
             logging.info('Running LMM...')
             
-            if args.calcld: # run lmm for each site so logdelta will be calculated for each site (TODO move this option as an argument of LMM class)
+            if args.calcld: # run lmm for each site so logdelta will be calculated for each site (TODO sometime move this option as an argument of LMM class and not of the parser (now, parser calls LMM class with different site each time thats patchy)
               logging.info("LMM will calculate logdelta for each site")
               cpgnames=[]
               pvalues=[]

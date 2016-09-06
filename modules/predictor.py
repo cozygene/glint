@@ -8,6 +8,24 @@ from methylation_data import MethylationData
 from utils import common
 
 class Predictor(Module):
+    """
+    predict methylation level of methylation sites by snps.
+    the snps data given by plink files
+
+    ignore sample (dont predict its methylation sites) when it has more than x snps that are missing (missing values)
+    ignore snp (dont predict with it) when it has more than x samples that are missing (missing values)
+    x has default value but can be changed
+    
+    ignore sites with low score (user can select the score) (score list is in the file "sites_scores_list")
+
+    predict methylation level of a site if we have information about at least one snp that predicts it
+
+    prediction model:
+    If the model for some methylation site m is m=c1*s1+c2*s2 (model is given in the parsed data returned from convert_model_file_to_bin.py script)
+    where c1,c2 are the coefficients in the model file and s1,s2 are the values of the SNPs s1,s2,
+    then the predicted value of m for individual i will be m_i=c1*s1_i+c2*s2_i, where s1_i,s2_i are the values of SNPs s1,s2 in individual i
+    """
+    
     NA_VALUE = 9
     SITES_SCORES_FILE = 'sites_scores_list'
     SITES_SNPS_FILE = 'site_snps_list'
@@ -39,7 +57,8 @@ class Predictor(Module):
         """
         predict with following rules:
         replace missing values with mean (unless there are more htan min_missing_values missing values)
-        remove samples which have more than min_missing_values missing values (TODO: add parameter for this? a different one from the snp missing values? (this parameter is now for both samples and snps))
+        remove samples (dont predict them) which have more than min_missing_values missing snps (out of all its snps)
+        remove snps (sont predict with them) which have more than min_missing_values missing samples (out of all its samples)
         remore site with score lower than min_score
         dont predict sites that we dont have any snp (if we have at least one - predict it)
         """
