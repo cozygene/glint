@@ -12,7 +12,7 @@ extracts and saves the relevant information in a way that it will be efficient t
 The output files of the deleted scripts are
     - "sites_ids_list" a list of cpgs (that can be explained by SNPs), which describes the cpgs IDs: the id of the cpg name at line number i is i.
     - "snps_ids_list"  a list of SNPs descibing their ids:  the id of the SNP at line number i is i.
-    - "site_snps_list" which describe for each site the snps that "explain" it. the numbers in the i'th line are the ids of the snps descibe the site which is is i.
+    - "site_snps_list" which describe for each site the snps that "explain" it. the numbers in the i'th line are the ids of the snps descibe the site which id is i.
     - "sites_scores_list" the score at the i'th line is the predictions correlation of i'th site (site which id is i)
     - "sites_snps_coeff_list" the numbers at the i'th line are the coefficients of the snps which "explain" the i'th site. the j'th number is the coefficient of the j'th snp at the i'th i in the file "site_snps_list"
 

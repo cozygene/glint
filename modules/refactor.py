@@ -170,7 +170,7 @@ class Refactor(Module):
         logging.info("Running controls feature selection...")
         controls_samples_indices = [i for i, control in enumerate(self.meth_data.phenotype) if control == 0]
         if (self.k > controls_samples_indices):
-            common.terminate("k cannot be greater than controls sample")
+            common.terminate("k cannot be greater than amount of controls sample")
 
         self.meth_data.data = self.meth_data.data[:, controls_samples_indices]
         return self.meth_data.data

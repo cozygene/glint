@@ -17,6 +17,30 @@ EWAS
 """""
 class EWASParser(ModuleParser):
     def __init__(self, parser):
+        """
+        ewas allows the following tests (it allows to execute only one test at a time):
+         - linear regression - the default test
+         - logistic regression (validates that phenotype is  binary)
+         - wilcoxon rank-sum (validates that phenotype is binary, terminates if --covar flag was supplied (but not if there is covaraites in a glint file))
+         - lmm 
+
+        * terminates if phenotype file wasn't supplied (with --pheno of with glint file)
+
+        * output file is different for each test:
+            
+          -for linear and logistic regression:
+            LinReg/LogReg:ID (cpgnames), chromosome, MAPINFO (position), p-value, q-value, intercept (the intercept coefficient), V1 (first covar coefficient),...
+            , Vn (last covar coefficient), beta (site under test coefficient), statistic, UCSC_RefGene_Name (gene), Relation_to_UCSC_CpG_Island (category)
+           
+          - for wilcoxon test
+            Wilcoxon:ID (cpgnames), chromosome, MAPINFO (position), p-value, q-value, statistic, UCSC_RefGene_Name (gene), Relation_to_UCSC_CpG_Island (category)
+          
+          - for lmm see LMMParser documentation
+        
+        * plot 
+            in order to plot the output call --plot with the plot you want.
+            you can also execute plots after the test by supplying the test's result file
+        """
         ewas = parser.add_argument_group('ewas', 'TODO Elior,add ewas description here')
 
         # Note that argument '--pheno' is required for all EWAS tests. but dont add it to dependencies list (dependencies = ['--pheno'])
@@ -56,6 +80,7 @@ class EWASParser(ModuleParser):
         if args.lmm:
             self.lmm_parser.validate_args(args)
             self.all_args.extend(self.lmm_parser.all_args)
+            self.required_args.extend(self.lmm_parser.required_args)
 
         # default test is linear regression
         if test_counter == 0:

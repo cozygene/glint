@@ -12,6 +12,35 @@ LMM_OUT_SUFFIX = ".glint.lmm.txt"
 
 class LMMParser(ModuleParser):
     def __init__(self, parser):
+        """
+        LMM test
+        --kinship:  today there are two onptions for a kinship:
+                        - a path to a file with the kinship matrix
+                        - "refactor" to run refactor and use the suggested best t sites as a kinship
+                           * Note that if user selected refactor, than all refactor flags will be avaliable for him.
+                             if there is a flag required for refactor - it will be required for the kinship too (today, only k)
+                           * Note that if the user run both refactor and lmm with refactor kinship 
+                                glint.py --refactor --datafile <> --ewas --lmm --kinship refactor
+                             than refactor will be executed twice.
+        --reml:     whether to use REML (restricted maximum likelihood)  or ML (maximum likelihood)
+                    1 is for REML (default)
+                    0 is for ML
+        --norm:     if this flag is selectes than the covariates will be normalized before running LMM (if this flag is not supplied the matrix is not normalized)
+        --calcld:   if this flag is selectes than the logdelta (parameter of LMM) is calculated for each site seperatly (more accurate but takes more time)
+                    The LMM class itself "doesn't know" to calculate logdelta for each site. So to bypass that, today the way we calculate logdelta for each
+                    site is to run the LMM class (which generates the logdelta) with one site everytime instead of the whole data at once.
+                    The efficency is more or less the same in both of the options
+        
+        * terminates if phenotype file wasn't supplied (with --pheno of with glint file)
+
+        * output file is a matrix with the following columns ( at this order as for today ):
+            LMM:ID (cpgnames), chromosome, MAPINFO (position), p-value, q-value, intercept (the intercept coefficient), V1 (first covar coefficient),...
+            , Vn (last covar coefficient), beta (site under test coefficient), statistic, sigma-e, sigma-g, UCSC_RefGene_Name (gene), Relation_to_UCSC_CpG_Island (category)
+        
+        * plot 
+            in order to plot the output call --plot with the plot you want.
+            you can also execute plots after the test by supplying the test's result file
+        """
         self.parser = parser
         lmm_parser = parser.add_argument_group('lmm', 'TODO Elior,add lmm description here')
 
@@ -21,7 +50,7 @@ class LMMParser(ModuleParser):
             if os.path.exists(val):
                 val = open(val, 'rb')
             return val
-        lmm_parser.add_argument('--kinship', type = kinship_value, required = True, help = "The way to generate kinship matrix. Options are %s. if \"refactor\" is selected than refactor flags need to be supplied (more info udser \"refactor\" section). " % str(lmm.AVAILABLE_KINSHIPS))
+        lmm_parser.add_argument('--kinship', type = kinship_value, required = True, help = "The way to generate kinship matrix. Options are %s. if \"refactor\" is selected than refactor flags need to be supplied (more info under \"refactor\" section). " % str(lmm.AVAILABLE_KINSHIPS))
         
         def reml_value(val):
             val = int(val)
@@ -50,8 +79,8 @@ class LMMParser(ModuleParser):
         
         if args.kinship == 'refactor':
             self.refactor = RefactorParser(self.parser)
-            self.required_args.extend(self.refactor.required_args)
             self.all_args.extend(self.refactor.all_args)
+            self.required_args.extend(self.refactor.required_args)
 
         super(LMMParser, self).validate_args(args)
       

@@ -2,7 +2,7 @@ import os
 import sys
 import argparse
 import logging
-from utils import common, plot
+from utils import common, plot, pca
 from module_parser import ModuleParser
 from modules import ewas, kit
 from parsers import MethylationDataParser
@@ -12,9 +12,21 @@ MANHATTEN_SUFFIX = ".glint.manhattan"
 
 class QQPlotParser(ModuleParser):
     def __init__(self, parser):
+        """
+        QQPlot Notes:
+        can be run with --ewas test or get an ewas test result file (with --result flag):
+          example: glint.py --ewas --lmm --plot --qqplot --datafile...
+                or glint.py --plot --qqplot --result <file with the output of an ewas test>
+
+        * validates that either a result file was supplied or it was executed with ewas test
+
+        * by default plot will have no title unless user supplies a title with --title flag
+
+        will save output file in both .png and .eps formats
+        """
         plot = parser.add_argument_group('qqplot', 'Plotting options TODO Elior, add description which will be shown when --help')
-        plot.add_argument('--result', type = argparse.FileType('r'),  help = "an EWAS test results file (glint format). Supply this if --ewas test was not selected")
-        plot.add_argument('--title', type = str,  help = "the title for the plot")
+        plot.add_argument('--result', type = argparse.FileType('r'),  help = "an EWAS test results file (glint format). Supply this if --ewas test was not selected") 
+        plot.add_argument('--title', type = str,  help = "the title for the plot, will be left empty if not supplied")
         
         super(QQPlotParser, self).__init__(plot)
 
@@ -43,6 +55,18 @@ class QQPlotParser(ModuleParser):
 
 class ManhattanPlotParser(ModuleParser):
     def __init__(self, parser):
+        """
+        ManhattanPlot Notes:
+        can be run with --ewas test or get an ewas test result file (with --result flag):
+          example: glint.py --ewas --lmm --plot --manhattan --datafile...
+                or glint.py --plot --manhattan --result <file with the output of an ewas test>
+
+        * validates that either a result file was supplied or it was executed with ewas test
+        
+        * by default plot will have no title unless user supplies a title with --title flag
+    
+        will save output file in both .png and .eps formats
+        """
         plot = parser.add_argument_group('manhattan', 'Plotting options TODO Elior, add description which will be shown when --help')
         plot.add_argument('--result', type = argparse.FileType('r'),  help = "an EWAS test results file (glint format). Supply this if --ewas test was not selected")
         plot.add_argument('--title', type = str,  help = "the title for the plot")
@@ -72,42 +96,71 @@ class ManhattanPlotParser(ModuleParser):
         manplot.draw(ewas_result_obj.cpgnames, ewas_result_obj.pvalues, ewas_result_obj.sites_info.chromosomes, ewas_result_obj.sites_info.positions, title = args.title)
 
 
-class PCAScatterPlotParser(ModuleParser):#MethylationDataParser):
-  """
-  All the tools provided to the user which are not a module (don't have a run() function)
-  """
+class PCAScatterPlotParser(ModuleParser):
+  SCATTER_OUTPUT_FILE = "pca_std_outliers_scatter"
   def __init__(self, parser):
+    """
+    PCAScatterPlot Notes:
+
+    runs PCA and plots couples of PCs:
+      number of PCs couples to plot specified with --numpcs  flag
+      if --numpcs is i there will be (i-1) plots with the following couples: PC(1) vs PC(2), PC(2) vs PC(3),... PC(i-1) vs PC(i)
+      * assumes that (numpcs + 1) < (number of samples in data)
+
+    - plot will have no title
+
+    to run:
+          glint.py --plot --plotpcs --numcomp 3 --datafile ...
+
+
+    output file saved in both .png and .eps formats
+    """
     pca = parser.add_argument_group('plotpcs', 'TODO Elior, add description which will be shown wjen --help')
-    pca.add_argument('--numpcs', required = True, type = int, help = " number of pcs to plot TODO Elior, edit")
+    pca.add_argument('--numpcs', required = True, type = int, help = " number of pcs to plot TODO Elior, edit") 
+
 
     self.meth_data_parser = MethylationDataParser(parser)
     super(PCAScatterPlotParser, self).__init__(pca)
 
   def validate_args(self, args):
-    # if user didnt choose --ewas it means that he won't run EWAS test so he must supply his own results.
-    # in such case --result flag is required (so the user can supply the results he wants to plot)
-    plot_counter = 0
-
+    # add the methylation data parser since user can choose that module flags when he wants to plot PCA scatter
     self.meth_data_parser.validate_args(args)
     self.all_args.extend(self.meth_data_parser.all_args)
+    self.required_args.extend(self.meth_data_parser.required_args)
 
   def run(self, args, meth_data):
-    output_perfix = args.out
+    # run pca and plot PCs
+    output_perfix = '' if args.out is None else args.out
+    output_filename = output_perfix + self.SCATTER_OUTPUT_FILE
 
     try:
-      self.pca_utils = kit.PCAKit(meth_data)
-
       assert args.numpcs + 1 < meth_data.samples_size
-      self.pca_utils.draw_pca_scatter(args.numpcs, output_perfix)
+
+      logging.info("running PCA...")
+      pca_out = pca.PCA(meth_data.data.transpose()) # meth_data should be transposed before passing to pca
+      
+      pca_scatter_plot = plot.PCAScatterPlot(pca_out, plots_number = args.numpcs, save_file = output_filename)
+      pca_scatter_plot.draw()
 
     except Exception:
-      logging.exception("in utils")
+      logging.exception("in pca plot parser")
       raise
     
 
 
 class PlotParser(ModuleParser):
+  """
+  Plot Notes:
+  allows to run only one plot at a time
+  plots options:
+    - qq plot
+    - manhattan plot
+    - pca scatter plot
 
+  to see each plot flags and documentation refer to it's parser.
+
+  all plots saves output file in .png and .eps formats.
+  """
   def __init__(self, parser):
     plot = parser.add_argument_group('plot', 'Plotting options TODO Elior, add description which will be shown when --help')
     plot.add_argument('--qqplot', action='store_true',   help = "QQ-plot")
@@ -121,24 +174,25 @@ class PlotParser(ModuleParser):
 
 
   def validate_args(self, args):
-    # if user didnt choose --ewas it means that he won't run EWAS test so he must supply his own results.
-    # in such case --result flag is required (so the user can supply the results he wants to plot)
     plot_counter = 0
 
     if args.qqplot:
         plot_counter += 1
         self.qqplot_parser.validate_args(args)
         self.all_args.extend(self.qqplot_parser.all_args)
+        self.required_args.extend(self.qqplot_parser.required_args)
 
     if args.plotpcs:
         plot_counter += 1
         self.plotpcs_parser.validate_args(args)
         self.all_args.extend(self.plotpcs_parser.all_args)
+        self.required_args.extend(self.plotpcs_parser.required_args)
 
     if args.manhattan:
         plot_counter += 1
         self.manhattan_parser.validate_args(args)
         self.all_args.extend(self.manhattan_parser.all_args)
+        self.required_args.extend(self.manhattan_parser.required_args)
 
     if plot_counter == 0:
         common.terminate("plese select plot type")
@@ -153,22 +207,8 @@ class PlotParser(ModuleParser):
      (this is backed-up in the validate_args) function
     """
     try:
-      # if args.result and ewas_result_obj is not None: # user ran ewas and plot together but supplied results file - do not plot cause it could be 
-      #   logging.warning("couldn't choose between ewas results file %s and the new test results" % args.result.filename) #todo filename /file?
-      #   return
-
-      # if args.result:
-      #   ewas_result_obj = ewas.EWASResultsParser(args.result)
-      
-      # output_perfix = args.out
-
       if args.qqplot :
           return self.qqplot_parser.run(args, ewas_result_obj)
-      #   # plot the p-value
-      #   qqplot_out = "results" + QQ_PLOT_SUFFIX if output_perfix is None else output_perfix + QQ_PLOT_SUFFIX
-      #   qqplot = plot.QQPlot(save_file = qqplot_out)
-        
-      #   qqplot.draw(ewas_result_obj.pvalues, title = args.title) # todo add option for the user to choose x and y titles
 
       if args.plotpcs:
           assert(meth_data)
@@ -176,10 +216,6 @@ class PlotParser(ModuleParser):
 
       if args.manhattan:    
           return self.manhattan_parser.run(args, ewas_result_obj)
-      #   manplot_out = "results" + MANHATTEN_SUFFIX if output_perfix is None else output_perfix + MANHATTEN_SUFFIX
-      #   manplot = plot.ManhattanPlot(save_file = manplot_out)
-      #   manplot.draw(ewas_result_obj.cpgnames, ewas_result_obj.pvalues, ewas_result_obj.sites_info.chromosomes, ewas_result_obj.sites_info.positions, title = args.title)
-
 
     except Exception:
       logging.exception("in plotting")

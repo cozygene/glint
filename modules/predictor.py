@@ -21,7 +21,8 @@ class Predictor(Module):
     predict methylation level of a site if we have information about at least one snp that predicts it
 
     prediction model:
-    If the model for some methylation site m is m=c1*s1+c2*s2 (model is given in the parsed data returned from convert_model_file_to_bin.py script)
+    If the model for some methylation site m is m=c1*s1+c2*s2 (model is given in the parsed data returned from convert_model_file_to_bin.py script
+    a detailed explaintion is provided in PredictorParser)
     where c1,c2 are the coefficients in the model file and s1,s2 are the values of the SNPs s1,s2,
     then the predicted value of m for individual i will be m_i=c1*s1_i+c2*s2_i, where s1_i,s2_i are the values of SNPs s1,s2 in individual i
     """
@@ -90,7 +91,7 @@ class Predictor(Module):
         number_of_samples = self.predicted_samples.size
 
         if (number_of_samples == 0):
-            common.terminate("All samples removed. There is nothing to predick. quiting...")
+            common.terminate("All samples removed. There is nothing to predict. quiting...")
 
         # find sites with score bigger than min_score
         seterr(invalid='ignore') # to ignore the following line warning (These warnings are an intentional aspect of numpy)

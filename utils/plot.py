@@ -40,6 +40,9 @@ def draw_setup(function):
     return wrapper
 
 class Plot(object):
+    """
+    testes on ubuntu, macOS and windows
+    """
     def __init__(self, save_file=None, plots_number=1):
 
         assert plots_number > 0
@@ -55,28 +58,11 @@ class Plot(object):
             self.fig, axes = plot.subplots(figsize = (self.ncols*8,self.nrows*4))
             self.fig.subplots_adjust(hspace=.5)
 
-        # else:
+        # else: this is not woring on ubuntu
         #     self.fig, axes = plot.subplots()
         #     pass
 
-        # # todo tight layout might need to windows /unubtu
-        # if matplotlib.get_backend().lower() not in ['agg', 'macosx']:
-        #     self.fig.tight_layout() #not good for plotpcs
-        # # else:
-        # #    self.fig.set_tight_layout(True) # not good for manhattan png, not good for plotpcs
-        # # for macos:
-        # #  - plotpcs 
-        # #        - set_tight_layout: not ok
-        # #        - tight_layout: not ok + warning
-        # #        - without tight -  ok
-        # #  - manhatten 
-        # #        - set_tight_layout : not ok for png (not showing title)
-        # #        - tight_layout: ok but prints a fallout warning 
-        # #        - without tight -  the same as tight_layout
-        # #  - qqplot
-        # #        - set_tight_layout : not ok for png (ok for others)
-        # #        - tight_layout: ok + warning
-        # #        - without tight -  ok (less tight than tight_layout)
+  
 
 
 

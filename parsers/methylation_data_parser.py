@@ -8,6 +8,54 @@ from module_parser import ModuleParser
 class MethylationDataParser(ModuleParser): 
 
     def __init__(self, parser):
+        """
+        --datafile: is a path to a data file which can be matrix or .glint file.
+        --covar:    is a path to covariates file. It can get more than one covariates file by supplying a list of files:
+                        glint.py --covar path_to_covar_file1 path_to_covar_file2 ...
+                    Note that if you supply the flag more than once:
+                        glint.py --covar path_to_covar_file1 --covar path_to_covar_file2 ...
+                    only file2 will be used as covariates
+        --pheno:    path to the phenotype file. for now only one phenotype is supported.
+        --maxpcstd: exclude samples with low of high std:
+                    receives list of tuples where the first index in each tuple is the pc index and the second index is the std number:
+                        glint.py --maxpcstd (index_1,std_1) (index_2,std_2), ...(index_n,std_n)
+                    then:
+                    for each i from 1 to n:
+                        calculates the std of pc index_i, call it S
+                        exclude samples with std higher than  std_i*S or lower than -1*std_i*S
+        --include:  a path to file with a list of sites to include in the data; removes the rest of the sites.
+                    the program validates that there is no site in the list which doesn't appear in the datafile.
+        --exclude:  a path to file with a list of sites to exclude from the data; includes the rest of the sites.
+                    the program validates that there is no site in the list which doesn't appear in the datafile.
+        --keep:     a path to file with a list of samples to include in the data; removes the rest of the samples.
+                    the program validates that there is no sample in the list which doesn't appear in the datafile.
+        --remove:   a path to file with a list of samples to exclude in the data; includes the rest of the samples.
+                    the program validates that there is no sample in the list which doesn't appear in the datafile.
+        --minmean:  will remove any site with mean < minmean (terminates if minmean is not a a standard methylation value  between 0 and 1)
+        --maxmean:  will remove any site with mean > maxmean (terminates if maxmean is not a a standard methylation value: between 0 and 1)
+        --gsave:    save the data.
+                    output 3 file:
+                        1. a serialized file so next time it will be fater to load it. 
+                        2. a list of the samples that are found in the data, also saves the covariates and phenotype of the samples 
+                        3. a list of the sites that are found in the data, also saves information about each site: it's chromosome, positions genes and categories.
+                    Note that --out flag can be supplied to add a different prefix for each output file
+        
+        Notes:
+            - missing values are not supported for now
+            - the program validates that the samples in covariates and phenotype file match the samples in the datafile
+            - if a glint file is loaded (with --datafile) and a new covariates or phenotype files are provided (with --covar / --pheno) - the covariates
+               and phenotype found in the glint file are replaced with the new ones. the glint file remains the same unless --gsave is selected which will
+               save a new glint file (Note that --out flag can be supplied to add a different prefix for each output file).
+            - there are options avaliable for the programmer:
+                - get a copy of the methylation data object so if you change the data in one copy the data of the other one remains the same. (function copy)
+                - regress out the covariates from the data (today used in refactor and epistructure) (function remove_covariates)
+                - remove samples or sites by list of their indices (functions exclude_sites_indices remove_samples_indices)
+            - the program wil terminate if:
+                - there are missing values in the data file
+                - the provided stdth parameter excludes all sites ( will warn if it excluded no site)
+                - if all the sites / samples will be removed after --exclude  / --remove
+                - the covariates/phenotype file does not contain all samples that are in the datafile, or contains more samples than in the datafile
+        """
         required = parser.add_argument_group('1.Required arguments') # numbering in the group name because help print it by abc order
         required.add_argument('--datafile', type = argparse.FileType('r'), required = True,  help = "A data matrix file of beta-normalized methylation levels or a .glint file")
 
@@ -17,12 +65,12 @@ class MethylationDataParser(ModuleParser):
         optional.add_argument('--maxpcstd', metavar=('PC_INDEX (TODO Elior, change those names?', 'STD_COUNT'), type = int, action = 'append', nargs = 2, help = "TODO Elior, edit: pc index and std number of times for removing outliers")
             
         group1 = optional.add_mutually_exclusive_group(required = False)
-        group1.add_argument('--include', type = argparse.FileType('r'), help = "A list of sites to include in the data; removes the rest of the sites")
-        group1.add_argument('--exclude', type = argparse.FileType('r'), help = "A list of sites to exclude from the data; includes the rest of the sites")
+        group1.add_argument('--include', type = argparse.FileType('r'), help = "A file with a list of sites to include in the data; removes the rest of the sites")
+        group1.add_argument('--exclude', type = argparse.FileType('r'), help = "A file with a list of sites to exclude from the data; includes the rest of the sites")
 
         group2 = optional.add_mutually_exclusive_group(required = False)
-        group2.add_argument('--keep',   type = argparse.FileType('r'), help = "A list of samples to include in the data; removes the rest of the samples")
-        group2.add_argument('--remove', type = argparse.FileType('r'), help = "A list of samples to exclude in the data; includes the rest of the samples")
+        group2.add_argument('--keep',   type = argparse.FileType('r'), help = "A file with a list of samples to include in the data; removes the rest of the samples")
+        group2.add_argument('--remove', type = argparse.FileType('r'), help = "A file with a list of samples to exclude in the data; includes the rest of the samples")
 
         optional.add_argument('--gsave', action='store_true', help = "Save the data in a glint format; makes following executions faster")
 

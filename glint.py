@@ -16,6 +16,36 @@ LOGGER = configurelogging.ConfigureLogging()
 
 class GlintParser(ModuleParser):
     def __init__(self, parser):
+        """
+        --out: a prefix that will be added to any file the program will output.
+                If not supplied, default filenames will be used, and will override each other on the next run. 
+        --loglevel: the loglevel to use. default is INFO. program terminates if it is not one of the list specified in configurelogging.OPTIONAL_LEVELS
+        
+        flow:
+            First the program validates that all the required flags for all the selected mofules are specified and valid, otherwise it terminates
+            with a proper message.
+            This is done before data is loaded.
+
+            No datafile need to be provided in the following cases:
+                if --predict is selected,
+                if --qqplot --manhattan are selected without any --ewas test 
+
+            Otherwise (datafile must be provided):
+                 - samples preprocessing is done before executing anything else (remove / keep samples). The new methData will be used in the next modules
+                 - refactor is executed if asked (with a new methData copy)
+                   Its components are added (always) as covariates to the methylation data (which will be used in the next modules)
+                 - sites preprocessing is done (exclude / include sites). The new methData will be used in the next modules 
+                 - methData is saved as glint file if asked
+                 - run ewas test if asked (with a new methData copy)
+                 - run plot if asked (with a new methData copy) (with the results of the ewas test, this is OK because if ewas test wasn't selecten than plot would have been executed first (see above))
+                 - run epistructure is asked (with a new methData copy)
+                 - 
+            * Note that a new copy of methylation data object is created for any module
+            * modules that should not run together
+                 - refactor and lmm (refactor will be executed twice as documented in LMMParser)
+                 - epistructure and refactor
+                 - which more? TODO Elior
+        """
         optional = parser.add_argument_group('3.Optional arguments')
         optional.add_argument('-h', '--help', action='help', help = "print this help") # add help here so it will be under same group with all other optional argument
         optional.add_argument('--out', type = str,   help = "changes the prefix of the output file ")

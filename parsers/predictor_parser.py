@@ -15,7 +15,34 @@ SITES_SNPS_COEFF_FILE = 'parsers/assets/sites_snps_coeff_list'
 
 class PredictorParser(ModuleParser):
     def __init__(self, parser):
+        """
+        Predictor Notes:
+        predict methylation level of methylation sites by snps.
+    
+        - input: three plink files not (seperated by chromosome!):
+            - .snp file 
+            - .geno file
+            - .ind file
+        - output: a predicted methylationData object
 
+        - ignores G/C and T/A SNPs (there is no flag to disable this right now)
+        - ignores samples with more than --maxmiss snps that are missing (missing values).
+        - ignores SNPs with more than --maxmiss samples that are missing (missing values)
+        - ignores sites with low score, uses only sites with prediction correlation score at least --score
+          (sites scores list is in the file "sites_scores_list")
+        - terminates and warns if all sites are ignored.
+        - terminates and warns if all samples are ignored.
+        - predicts any site S if this site is relevant (wasn't ignored) and if we have information of at least 1 of the SNPs that predict site S.
+
+        - the model used for prediction is encoded in the "site_snps_list" and "sites_snps_coeff_list" files as follows:
+          - "site_snps_list" file (the SNPs that predicts the sites):
+              the list of numbers appear in the i'th line are list of the SNPs ids* that predict ("explain") the site which id** is i.
+              *SNPs ids list is found in "snps_ids_list" file: the name of the SNP which id is j appears at the j'th line in that file
+              **sites ids list is found in "sites_ids_list" file: the name of the site which id is i appears at the i'th line in that file
+          - "sites_snps_coeff_list" file (the coefficients of the SNPs):
+              the numbers at the i'th line are the coefficients of the SNPs which predict ("explain") the i'th site.
+              the j'th number in the i'th line is the coefficient of the j'th snp at the i'th line in the file "site_snps_list"
+        """
         predictor = parser.add_argument_group('predictor', 'predict methylation levels by SNPs. TODO Elior,add ewas description here')
         predictor.add_argument('--psnp',  type = argparse.FileType('r'), required = True, help = "plink .snp file")
         predictor.add_argument('--pgeno',  type = argparse.FileType('r'), required = True, help = "pling .geno file")
