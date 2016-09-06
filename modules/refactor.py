@@ -6,8 +6,8 @@ from numpy import sqrt, savetxt, column_stack
 from utils import tools, pca, LinearRegression, common
 from module import Module
 
-RANKED_FILENAME =       'refactor_k_{k_val}_t_{t_val}.out.rankedlist.txt'
-COMPONENTS_FILENAME =   'refactor_k_{k_val}_t_{t_val}.out.components.txt'
+RANKED_FILENAME =       'refactor_k_{k_val}_t_{t_val}.rankedlist.txt'
+COMPONENTS_FILENAME =   'refactor_k_{k_val}_t_{t_val}.components.txt'
 #NOTE remember to copy the matrix before making changes!!!!
 
 class Refactor(Module):
@@ -24,7 +24,7 @@ class Refactor(Module):
                   t = 500,
                   minstd = 0.02,
                   num_components = None,
-                  suppress_covars = False,
+                  remove_covars = False,
                   bad_probes_list = [],
                   feature_selection = 'normal',
                   ranked_output_filename = RANKED_FILENAME,
@@ -43,7 +43,7 @@ class Refactor(Module):
         self.bad_probes =                 bad_probes_list
         self.ranked_output_filename =     ranked_output_filename.format(k_val = self.k, t_val = self.t)
         self.components_output_filename = components_output_filename.format(k_val = self.k, t_val = self.t)
-        self.remove_covariates =          not suppress_covars
+        self.remove_covariates =          remove_covars
 
 
     def _validate_fs(self, feature_selection):
@@ -116,7 +116,8 @@ class Refactor(Module):
         # self.meth_data.remove_missing_values_sites() # nan are not supported TODO uncomment when supported
         self.meth_data.remove_lowest_std_sites(self.minstd)
         # self.meth_data.replace_missing_values_by_mean() # nan are not supported TODO uncomment when supported
-        self._remove_covariates()
+        if self.remove_covariates:
+            self.meth_data.remove_covariates()
 
         # feature selection
         distances = self.feature_selection_handler()
@@ -144,13 +145,6 @@ class Refactor(Module):
         """
         logging.info("excluding bad sites...")
         self.meth_data.exclude(self.bad_probes)
-
-    def _remove_covariates(self):
-        if self.remove_covariates and self.meth_data.covar is not None:
-            logging.info("Removing covariates...")
-            residuals = LinearRegression.regress_out(self.meth_data.data.transpose(), self.meth_data.covar)
-            residuals = residuals.transpose()
-            self.meth_data.data = residuals
 
     """
     TODO add doc

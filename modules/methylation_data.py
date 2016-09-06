@@ -5,9 +5,8 @@ import logging
 from pickle import dump
 from numpy import delete, isnan, where, column_stack, std, array, savetxt, in1d, mean
 from module import Module
-from utils import common, pca
+from utils import common, pca, LinearRegression, sitesinfo
 from bisect import bisect_right
-from utils import  sitesinfo
 
 COMPRESSED_FILENAME = "methylation_data"
 GLINT_FORMATTED_EXTENSION = ".glint" #TODO move to a config file
@@ -293,12 +292,23 @@ class MethylationData(Module):
 
     def add_covar_datas(self, covardata_list):
         """
+        adds new covariates to the existing covariates 
         covardata is the covariates data (without the colums of the sample_ids)
         assumes covardata is in the right format and is sorted by sample_ids as datafile is sorted
         """
         if self.covar is not None:
             covardata_list.insert(0, self.covar)
         self.covar = column_stack(tuple(covardata_list))
+
+    def remove_covariates(self):
+        """
+        regress out the covariates from the data and update the data
+        """
+        if self.covar is not None:
+            logging.info("Removing covariates...")
+            residuals = LinearRegression.regress_out(self.data.transpose(), self.covar)
+            residuals = residuals.transpose()
+            self.data = residuals
 
 
 class MethylationDataLoader(MethylationData):

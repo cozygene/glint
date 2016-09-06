@@ -14,10 +14,14 @@ class Epistructure(Module):
         self.informative_sites = informative_list
         self.meth_data = meth_data
 
-    def capture_ancestry(self, num_of_pcs = 2, save_file = None):
+    def capture_ancestry(self, num_of_pcs = 2, remove_covariates = False, save_file = None):
         logging.info("Running epistructure...")
         logging.info("Removing non-informative sites...")
         self.meth_data.include(self.informative_sites)
+
+        if remove_covariates:
+            self.meth_data.remove_covariates()
+
         logging.info("running PCA...")
         pca_out = pca.PCA(self.meth_data.data.transpose()) # meth_data should be transposed before passing to pca
 
