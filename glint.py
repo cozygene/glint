@@ -188,16 +188,16 @@ class ModulesArgumentParsers(object):
 
         self.meth_parser.run(self.args)
         self.meth_parser.preprocess_samples_data() # preprocess samples before refactor and before ewas
+        self.meth_parser.preprocess_sites_data() #preprocess sites before refactor and before ewas
+        
         if self.args.refactor:
             refactor_meth_data = self.meth_parser.module.copy()
             self.refactor_parser.run(args = self.args,
                                     meth_data = refactor_meth_data,
                                     output_perfix = self.args.out)
             logging.info("adding refactor components to covariates, set --gsave to save new methData")
-            self.meth_parser.module.add_covar_datas([self.refactor_parser.module.components]) # add refactor components as covariate file
+            self.meth_parser.module.add_covar_datas(self.refactor_parser.module.components, ["rc%d"%i for i in range(1,self.refactor_parser.module.components.shape[1] + 1)]) # add refactor components as covariate file
 
-        self.meth_parser.preprocess_sites_data() #preprocess sites after refactor and before ewas
-        self.meth_parser.gsave(output_perfix = self.args.out) #save after all preprocessing
         
         # ewas tests must be called after refactor
         ewas_results = None
@@ -217,6 +217,8 @@ class ModulesArgumentParsers(object):
             self.epi_parser.run(args = self.args,
                                 meth_data = epi_met_data,
                                 output_perfix = self.args.out)
+        self.meth_parser.gsave(output_perfix = self.args.out) #save after all preprocessing  add epi and refactor covars 
+        
 
 if __name__ == '__main__':
     selected_args = [arg for arg in sys.argv if arg.startswith("--")] 
