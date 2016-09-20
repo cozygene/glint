@@ -31,9 +31,11 @@ This script should be executed once, in cases when:
   For each predicting SNP we have 3 values: "rs" id (the identifier of the SNP - note that it doesn't always start with "rs"),
   reference allele, coefficient.
 """
+# the path to the model file which will be preproccesed 
+KORA_MODEL_FILE_PATH =  "enter the path here" #KORA_model_multiple_snps_W_50_M_10.txt" 
 
-KORA_MODEL_FILE_PATH = "/Users/yedidimr/Downloads/KORA_model_multiple_snps_W_50_M_10.txt" # put here the path to this file
-BAD_PROBES_FILE_PATH = "parsers/assets/artifacts_chen.2013.txt" # put here the path to the artifacts file
+ # path to the list artifacts sites
+BAD_PROBES_FILE_PATH = "parsers/assets/artifacts_chen.2013.txt"
 SITE_ID_INDEX = 0
 PREDICTION_CORRELATION_SCORE_INDEX = 2
 NUMBER_OF_PREDICTIONG_SNPS_INDEX = 4
