@@ -26,7 +26,7 @@ class RefactorParser( ModuleParser ):
              if controls feature selected -  k cannot be greater than amount of controls samples found in the controls phenotype.
               program terminates otherwise.
       --t: t cannot be greater than the number of sites or smaller than k. program terminates otherwise.
-      --minstd: minstd cannot be greater than 1 and smaller than 0. program terminates otherwise.
+      --stdth:  cannot be greater than 1 and smaller than 0. program terminates otherwise.
       --numcomp: number of components must be at least k and smaller than the number of samples size. program terminates otherwise.
       --covar - list of the names of covariates to use.
                 if flag is not set will not use any covariates. if set and no name if specified will use all of the covariates. o
@@ -49,7 +49,7 @@ class RefactorParser( ModuleParser ):
       refactor.add_argument('--t',       type = int, default = 500, help = "The number of sites to use for computing the ReFACtor components (DEFAULT=500)")
       refactor.add_argument('--numcomp', type = int, help = "The number of ReFACTor components to output (DEFAULT=K)")
       refactor.add_argument('--fs',      type = str, default = 'normal', help = "feature selection mode; options: normal, controls, phenotype (DEFAULT=normal)")
-      refactor.add_argument('--minstd',  type = float, default = 0.02, help = "threshold for excluding low variance sites (DEFAULT=0.02) (all sites with std lower than this threshold will be excluded)") # all sites with std lower than --minstd will be excluded 
+      refactor.add_argument('--stdth',  type = float, default = 0.02, help = "threshold for excluding low variance sites (DEFAULT=0.02) (all sites with std lower than this threshold will be excluded)") 
       refactor.add_argument('--covar', type = str, nargs='*', help = "list of covariates names to use. If no name is specified will use all the covariates. If flag is not set, will not use any covariate")
       refactor.add_argument('--pheno', type = str, nargs='*', help = "list of phenotypes names to use. If no name is specified will use all the phenotypes. If flag is not set, will not use any phenotype")
         
@@ -65,7 +65,7 @@ class RefactorParser( ModuleParser ):
         self.module  = refactor.Refactor(methylation_data = meth_data, 
                               k = args.k, 
                               t = args.t, 
-                              minstd = args.minstd,
+                              minstd = args.stdth,
                               feature_selection = args.fs.lower().strip(), 
                               num_components = args.numcomp,
                               use_covars = args.covar,

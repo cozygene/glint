@@ -19,11 +19,16 @@ class EWASParser(ModuleParser):
     def __init__(self, parser):
         """
         ewas allows the following tests (it allows to execute only one test at a time):
+         - stdth - as described in the help
+         - covar - list of the names of covariates to use.
+                if flag is not set will not use any covariates. if set and no name if specified will use all of the covariates. o
+                therwise (names specified) will only use the covariates which name is in the list
+         - pheno - list of names of phenotypes to use. behaves liske --covar
+         -stdth threshold for excluding low variance sites (all sites with std lower than this threshold will be excluded
          - linear regression - the default test
          - logistic regression (validates that phenotype is  binary)
          - wilcoxon rank-sum (validates that phenotype is binary, terminates if --covar flag was supplied (but not if there is covaraites in a glint file))
          - lmm 
-
         * terminates if phenotype file wasn't supplied (with --pheno of with glint file)
 
         * output file is different for each test:
@@ -44,10 +49,19 @@ class EWASParser(ModuleParser):
         ewas = parser.add_argument_group('ewas', 'TODO Elior,add ewas description here')
 
         # phenotype is required for all EWAS tests
-        ewas.add_argument('--pheno', required = True, type = str, nargs='*', help = "list of phenotypes names to use")
+        ewas.add_argument('--pheno', required = True, type = str, nargs='*', help = "list of phenotypes names to use. If no name is specified will use all the phenotypes. If flag is not set, will not use any phenotype")
         # covar is for lmm, linreg and logreg tests
-        ewas.add_argument('--covar', type = str, nargs='*', help = "list of covariates names to use")
-        
+        ewas.add_argument('--covar', type = str, nargs='*', help = "list of covariates names to use. If no name is specified will use all the covariates. If flag is not set, will not use any covariate")
+        def std_value(num):
+            try:
+                num = float(num)
+            except:
+                common.terminate("minstd must be a float between 0 and 1")
+            if not (num <= 1 and num >=0):
+                common.terminate("minstd must be a float between 0 and 1")
+            return num
+        ewas.add_argument('--stdth',  type = std_value, help = "threshold for excluding low variance sites (all sites with std lower than this threshold will be excluded)")  
+      
         ewas.add_argument('--linreg', action = "store_true", help = "Run a linear regression analysis (executed by default if --ewas is selected)")
         ewas.add_argument('--logreg', action = "store_true", help = "Run a logistic regression analysis")
         ewas.add_argument('--wilc',   action = "store_true", help = "Run Wilcoxon rank-sum test")
@@ -61,10 +75,10 @@ class EWASParser(ModuleParser):
     def validate_args(self, args):
         # make sure user choose only one EWAS test (mutually exlusive group is not supported...)
         # argument pheno is required for all ewas tests - it can be supplied through --pheno flag of .glint meth data file
-        # So, if the datafile supplied is not .glint file - pheno must be supplied as a flag 
+        # So, if the datafile supplied is not .glint file - pheno must be supplied as a flag         
         if not args.datafile.name.endswith(methylation_data.GLINT_FORMATTED_EXTENSION):
             self.required_args.append('phenofiles')
-            
+
         super(EWASParser, self).validate_args(args)
         
         if len(args.pheno) > 1: # 0 is all phenotypes in the data (which could be one)
@@ -142,6 +156,9 @@ class EWASParser(ModuleParser):
 
     def run(self, args, meth_data):
         try:
+            if args.stdth is not None:
+                meth_data.remove_lowest_std_sites(args.stdth)
+
             pheno = meth_data.get_phenotype_subset(args.pheno)
             if (pheno.shape[1] != 1): # check if selected more than one phenotype
                 common.terminate("must supply only one phenotype for EWAS")

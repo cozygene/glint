@@ -85,7 +85,18 @@ class MethylationDataParser(ModuleParser):
 
         optional.add_argument('--minmean', type = methylation_value, help = "A threshold for the minimal mean methylation level to consider")
         optional.add_argument('--maxmean', type = methylation_value, help = "A threshold for the maximal mean methylation level to consider")
-
+        
+        def std_value(num):
+            try:
+                num = float(num)
+            except:
+                common.terminate("minstd must be a float between 0 and 1")
+            
+            if not (num <= 1 and num >=0):
+                common.terminate("minstd must be a float between 0 and 1")
+            return num
+        optional.add_argument('--minstd',  type = std_value, help = "threshold for excluding low variance sites (all sites with std lower than this threshold will be excluded)")
+      
         super(MethylationDataParser, self).__init__(required, optional)
         
     def validate_args(self, args):
@@ -143,6 +154,8 @@ class MethylationDataParser(ModuleParser):
             self.module.exclude_sites_with_low_mean(self.args.minmean)
         if self.args.maxmean is not None:
             self.module.exclude_sites_with_high_mean(self.args.maxmean)
+        if self.args.minstd is not None:
+            self.module.remove_lowest_std_sites(self.args.minstd)
 
     # must  be called after run
     def preprocess_samples_data(self):
