@@ -10,7 +10,7 @@ class FeatureSelectionTester():
     FAKE_CONTROL = "tests/refactor/files/feature_selection/control"
     def __init__(self):
         logging.info("Testing Started on FeatureSelectionTester")
-        self.fs_meth_data = methylation_data.MethylationDataLoader(datafile = self.FAKE_DATA, phenofile = self.FAKE_CONTROL)
+        self.fs_meth_data = methylation_data.MethylationDataLoader(datafile = self.FAKE_DATA, phenofile = [self.FAKE_CONTROL])
         self.test_controls_fs()
         self.test_phenotype_fs()
         logging.info("Testing Finished on FeatureSelectionTester")
@@ -28,9 +28,15 @@ class FeatureSelectionTester():
         module  = refactor.Refactor(methylation_data = refactor_meth_data, 
                       k = 2, 
                       feature_selection = "controls",
-                      t=5)
-        index =0
-        res = module.feature_selection_handler()
+                      t=5, 
+                      use_phenos = [])
+        meth_data = self.fs_meth_data.copy()
+        
+        controls_samples_indices = where(phenotype == 0)[0]
+        remove_indices = delete(range(meth_data.samples_size), controls_samples_indices)
+        meth_data.remove_samples_indices(remove_indices)
+
+        res = meth_data.data
 
         # controls fs suppose to change methylation data
         assert array_equal(module.meth_data.data, res)
@@ -54,9 +60,10 @@ class FeatureSelectionTester():
         module  = refactor.Refactor(methylation_data = refactor_meth_data, 
                       k = 2, 
                       feature_selection = "phenotype",
-                      t=5)
+                      t=5,
+                      use_phenos = [])
 
-        phenotype = refactor_meth_data._load_and_validate_phenotype(self.FAKE_CONTROL, refactor_meth_data.samples_size, refactor_meth_data.samples_ids)
+        phenotype, phenoname = refactor_meth_data._load_and_validate_phenotype([self.FAKE_CONTROL], refactor_meth_data.samples_size, refactor_meth_data.samples_ids)
         # validate phenotype feature selection output (res_data) is correlated to our linear regression for (site, phenotype)
         res_data = module.feature_selection_handler()
         for i,site in enumerate(self.fs_meth_data.data):
@@ -93,7 +100,7 @@ class RefactorTester():
 
     def __init__(self):
         logging.info("Testing Started on RefactorTester")
-        self.meth_data = methylation_data.MethylationDataLoader(datafile = self.DEMO_SMALL_DATA, covarfiles = [self.DEMO_COVAR]   , phenofile = self.DEMO_PHENO)
+        self.meth_data = methylation_data.MethylationDataLoader(datafile = self.DEMO_SMALL_DATA, covarfiles = [self.DEMO_COVAR], phenofile = [self.DEMO_PHENO])
         self.test_remove_covariates()
         self.test_low_rank_approx_distances()
         self.test_exclude_bad_probes()
@@ -104,15 +111,10 @@ class RefactorTester():
     def test_remove_covariates(self):
         logging.info("Testing removing covariates...")
         covar_meth_data = self.meth_data.copy()
+        covar_meth_data.regress_out(self.meth_data.covar) # regress out all covariates
 
-        module  = refactor.Refactor(methylation_data = covar_meth_data, 
-                                    k = 2, 
-                                    t = 500)
-
-        coavr = covar_meth_data._load_and_validate_covar([self.DEMO_COVAR], covar_meth_data.samples_size, covar_meth_data.samples_ids)
-        # remove from refactor_meth_data
-        module._remove_covariates()
-
+        coavr, covarnames = covar_meth_data._load_and_validate_covar([self.DEMO_COVAR], covar_meth_data.samples_size, covar_meth_data.samples_ids)
+        
         # remove "manually"
         for i,site in enumerate(self.meth_data.data):
             residuals = LinearRegression.regress_out(site, coavr)
@@ -134,7 +136,7 @@ class RefactorTester():
         module  = refactor.Refactor(methylation_data = dis_meth_data, 
                                     k = 5)
 
-        distances = module._calc_low_rank_approx_distances()
+        distances = module._calc_low_rank_approx_distances(dis_meth_data)
         assert distances.size == dis_meth_data.sites_size, "there must be distances as the number of sites"
         logging.info("PASS")
 
@@ -179,7 +181,7 @@ class RefactorTester():
         module  = refactor.Refactor(methylation_data = senario_meth_data, 
                                     k = 5, 
                                     t = 400,
-                                    suppress_covars = True)
+                                    use_covars = None)
         module.run()
         comp = loadtxt(self.COMP_K5_T400)
         assert module.components.shape == comp.shape
@@ -197,7 +199,7 @@ class RefactorTester():
                                     t = 400,
                                     minstd = 0.1,
                                     num_components = 7,
-                                    suppress_covars = True)
+                                    use_covars = None)
         module.run()
         comp = loadtxt(self.COMP_K5_T400_stdth01numcomp7)
         assert module.components.shape == comp.shape
@@ -214,7 +216,7 @@ class RefactorTester():
                                     k = 5, 
                                     t = 400,
                                     minstd = 0.13,
-                                    suppress_covars = True)
+                                    use_covars = None)
         module.run()
         comp = loadtxt(self.COMP_K5_T400_stdth013)
         assert module.components.shape == comp.shape
@@ -231,10 +233,12 @@ class RefactorTester():
         senario_meth_data = self.meth_data.copy()
         module  = refactor.Refactor(methylation_data = senario_meth_data, 
                                     k = 5, 
-                                    t = 400)
+                                    t = 400,
+                                    use_covars = [])
         module.run()
         comp = loadtxt(self.COMP_K5_T400_covar)
         assert module.components.shape == comp.shape
+
 
         for i in range(module.components.shape[1]):
             assert tools.correlation(module.components[:,i], comp[:,i])
@@ -248,7 +252,8 @@ class RefactorTester():
         module  = refactor.Refactor(methylation_data = senario_meth_data, 
                                     k = 5, 
                                     t = 400,
-                                    minstd = 0.08)
+                                    minstd = 0.08,
+                                    use_covars = [])
         module.run()
 
         comp = loadtxt(self.COMP_K5_T400_stdth008covar)

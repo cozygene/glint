@@ -2,7 +2,7 @@ import os
 import sys
 import logging
 from sklearn import preprocessing
-from numpy import sqrt, savetxt, column_stack
+from numpy import sqrt, savetxt, column_stack, where, delete
 from utils import tools, pca, LinearRegression, common
 from module import Module
 
@@ -24,36 +24,46 @@ class Refactor(Module):
                   t = 500,
                   minstd = 0.02,
                   num_components = None,
-                  remove_covars = False,
+                  use_covars = None,
+                  use_phenos = None,
                   bad_probes_list = [],
                   feature_selection = 'normal',
                   ranked_output_filename = RANKED_FILENAME,
                   components_output_filename = COMPONENTS_FILENAME
                 ):
-
+        """
+        if use_covars is:
+                None - no covariates will take into account
+                [] (empty list) - all covariates will take into account
+                [covar_name1, ... covar_nameX] - only covar names specified in the list will be takem into account
+        """
         self.meth_data = methylation_data
         feature_selection = feature_selection.lower().strip()
         
         # validate and process all variables
-        self.feature_selection_handler =  self._validate_fs(feature_selection) 
+        self.use_phenos = use_phenos
+        self.use_covars = use_covars
+        self.fs_preprocessing =           self._validate_fs(feature_selection) 
         self.k =                          self._validate_k(k)
         self.t =                          self._validate_t(t)
-        self.minstd =                      self._validate_stdth(minstd)
+        self.minstd =                     self._validate_stdth(minstd)
         self.num_components =             self._validate_num_comp(num_components)
         self.bad_probes =                 bad_probes_list
         self.ranked_output_filename =     ranked_output_filename.format(k_val = self.k, t_val = self.t)
         self.components_output_filename = components_output_filename.format(k_val = self.k, t_val = self.t)
-        self.remove_covariates =          remove_covars
-
 
     def _validate_fs(self, feature_selection):
         if feature_selection not in self.FEATURE_SELECTION:
-            common.terminate("choose fs from feature_selection options: %s (selected fs: %s)" % ( self.FEATURE_SELECTION, feature_selection ))
-        elif feature_selection == 'phenotype' and self.meth_data.phenotype is None:
-            common.terminate("must provide a phenotype file when selected feature 'phenotype'")
-        elif feature_selection == 'controls' and (self.meth_data.phenotype is None or not tools.is_binary_vector(self.meth_data.phenotype)):
-            common.terminate("must provide a phenotype file in a binary format when selected feature 'controls'")
-
+            common.terminate("choose feature selection from the options: %s (selected fs: %s)" % ( self.FEATURE_SELECTION, feature_selection ))
+        
+        if self.use_phenos is None:
+            if feature_selection == 'phenotype':
+                common.terminate("must provide a phenotype (--pheno) when selected feature 'phenotype'")
+            elif feature_selection == 'controls':
+                common.terminate("must provide one phenotype (--pheno) in a binary format when selected feature 'controls'")
+        elif feature_selection != 'phenotype' and feature_selection != 'controls':
+            logging.warning("you selected phenotypes but not a phenotype feature, change selection with the flag --fs (selected fs: %s)" % feature_selection)
+            
         return getattr(self, self.FEATURE_FUNC_NAME_FORMAT.format(feature_option_name=feature_selection))
 
     """
@@ -105,23 +115,20 @@ class Refactor(Module):
     def _refactor( self ):
         """
         run refactor:
-        exclude bad probes
-        remove sites with low std
-        remove covariates
-        run feature selection
-        computing the ReFACTor components
-        find ranked list of the data features
+            exclude bad probes
+            remove sites with low std
+            remove covariates
+            run feature selection
+            computing the ReFACTor components
+            find ranked list of the data features
         """
         self._exclude_bad_probes()
         # self.meth_data.remove_missing_values_sites() # nan are not supported TODO uncomment when supported
         self.meth_data.remove_lowest_std_sites(self.minstd)
         # self.meth_data.replace_missing_values_by_mean() # nan are not supported TODO uncomment when supported
-        if self.remove_covariates:
-            self.meth_data.remove_covariates()
-
+       
         # feature selection
-        distances = self.feature_selection_handler()
-        ranked_list = self._calc_low_rank_approx_distances() # returns array of the indexes in a sorted order
+        ranked_list = self._feature_selection()
 
         logging.info('Computing the ReFACTor components...')
         sites = ranked_list[0:self.t] # take best t sites indices
@@ -139,6 +146,7 @@ class Refactor(Module):
         
         return components, ranked_list
 
+
     def _exclude_bad_probes(self):
         """
         excludes bad sites from data
@@ -146,46 +154,71 @@ class Refactor(Module):
         logging.info("excluding bad sites...")
         self.meth_data.exclude(self.bad_probes)
 
-    """
-    TODO add doc
-    Note: function name must be of the format FEATURE_FUNC_NAME_FORMAT
-    """
-    def _normal_feature_handler( self ):
-        return self.meth_data.data
     
-    """
-    TODO add doc
-    Note: function name must be of the format FEATURE_FUNC_NAME_FORMAT
-    """
-    def _phenotype_feature_handler( self ):
+    def _normal_feature_handler(self, meth_data):
+        """
+        the normal feature selection does not change the data
+        Note: function name must be of the format FEATURE_FUNC_NAME_FORMAT
+        """
+        pass
+    
+    
+    def _phenotype_feature_handler(self, meth_data):
+        """
+        regress out the phenotype
+        Note: function name must be of the format FEATURE_FUNC_NAME_FORMAT
+        """
         logging.info("Running phenotype feature selection...")
-        residuals =  LinearRegression.regress_out(self.meth_data.data.transpose(), self.meth_data.phenotype)
-        return residuals.transpose()
-    
-    """
-    TODO add doc
-    Note: function name must be of the format FEATURE_FUNC_NAME_FORMAT
-    """
-    def _controls_feature_handler( self ):  
+        phenotype = meth_data.get_phenotype_subset(self.use_phenos)
+        logging.info("regressing out phenotype...")
+        meth_data.regress_out(phenotype)
+        
+
+    def _controls_feature_handler(self, meth_data):  
+        """
+        keep only the controls samples in the data
+        Note: function name must be of the format FEATURE_FUNC_NAME_FORMAT
+        """
         logging.info("Running controls feature selection...")
-        controls_samples_indices = [i for i, control in enumerate(self.meth_data.phenotype) if control == 0]
-        if (self.k > controls_samples_indices):
-            common.terminate("k cannot be greater than amount of controls sample")
+        
+        phenotype = meth_data.get_phenotype_subset(self.use_phenos)
 
-        self.meth_data.data = self.meth_data.data[:, controls_samples_indices]
-        return self.meth_data.data
+        if not tools.is_binary_vector(phenotype):
+            common.terminate("phenotype in not a binary vector (must be a 1D binary vector with 'controls' feature selection)")
+            
+        controls_samples_indices = where(phenotype == 0)[0] # assumes its a 1D binary vector
+        if (self.k > len(controls_samples_indices)):
+            common.terminate("k cannot be greater than amount of control samples")
 
+        remove_indices = delete(range(meth_data.samples_size), controls_samples_indices)
+        meth_data.remove_samples_indices(remove_indices)
+        
+    def _feature_selection(self):
+        fs_meth_data = self.meth_data.copy() # create a copy to work on for feature selection only
+        self.fs_preprocessing(fs_meth_data) # 'phenotype' or 'controls' feature selection
+        
+        covars = fs_meth_data.get_covariates_subset(self.use_covars)
+        if covars is not None:
+            logging.info("regressing out covariates...")
+            fs_meth_data.regress_out(covars)
+        else:
+            logging.info("ignoring covariates")
+
+
+        ranked_list = self._calc_low_rank_approx_distances(fs_meth_data) # returns array of the indexes in a sorted order
+        del fs_meth_data # no need for the copy of the data after found the ranked list
+        return ranked_list
 
     """
     TODO add explanation
     """
-    def _calc_low_rank_approx_distances(self):
+    def _calc_low_rank_approx_distances(self, meth_data): # feature selection
         logging.info('Computing low rank approximation of the input data and ranking sites...')
 
-        x = tools.low_rank_approximation(self.meth_data.data.transpose(), self.k)
+        x = tools.low_rank_approximation(meth_data.data.transpose(), self.k)
         x = x.transpose()
 
-        An = preprocessing.StandardScaler( with_mean = True, with_std = False ).fit(self.meth_data.data.transpose()).transform(self.meth_data.data.transpose())
+        An = preprocessing.StandardScaler( with_mean = True, with_std = False ).fit(meth_data.data.transpose()).transform(meth_data.data.transpose())
         Bn = preprocessing.StandardScaler( with_mean = True, with_std = False ).fit(x.transpose()).transform(x.transpose())
 
         # normalization

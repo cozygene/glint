@@ -28,7 +28,10 @@ class RefactorParser( ModuleParser ):
       --t: t cannot be greater than the number of sites or smaller than k. program terminates otherwise.
       --minstd: minstd cannot be greater than 1 and smaller than 0. program terminates otherwise.
       --numcomp: number of components must be at least k and smaller than the number of samples size. program terminates otherwise.
-
+      --covar - list of the names of covariates to use.
+                if flag is not set will not use any covariates. if set and no name if specified will use all of the covariates. o
+                therwise (names specified) will only use the covariates which name is in the list
+      --pheno - list of names of phenotypes to use. behaves liske --covar
 
       ReFactor Notes:
        - removes bad sites by default (and there is no option to disable it). the files with the bad sites list are found in BAD_PROBES_FILES 
@@ -47,8 +50,9 @@ class RefactorParser( ModuleParser ):
       refactor.add_argument('--numcomp', type = int, help = "The number of ReFACTor components to output (DEFAULT=K)")
       refactor.add_argument('--fs',      type = str, default = 'normal', help = "feature selection mode; options: normal, controls, phenotype (DEFAULT=normal)")
       refactor.add_argument('--minstd',  type = float, default = 0.02, help = "threshold for excluding low variance sites (DEFAULT=0.02) (all sites with std lower than this threshold will be excluded)") # all sites with std lower than --minstd will be excluded 
-      refactor.add_argument('--rmcovar', action = "store_true", help = "specify if you want to remove covariates from data") # if called with --rmcovar flag, the covariates are  removed from the data. (by default (without the flag) they are not removed). Note that this flag appears also in epistructure
-
+      refactor.add_argument('--covar', type = str, nargs='*', help = "list of covariates names to use. If no name is specified will use all the covariates. If flag is not set, will not use any covariate")
+      refactor.add_argument('--pheno', type = str, nargs='*', help = "list of phenotypes names to use. If no name is specified will use all the phenotypes. If flag is not set, will not use any phenotype")
+        
       super(RefactorParser, self).__init__(refactor)
 
 
@@ -64,7 +68,8 @@ class RefactorParser( ModuleParser ):
                               minstd = args.minstd,
                               feature_selection = args.fs.lower().strip(), 
                               num_components = args.numcomp,
-                              remove_covars = args.rmcovar,
+                              use_covars = args.covar,
+                              use_phenos = args.pheno,
                               bad_probes_list = bad_probes_list,
                               ranked_output_filename = output_perfix + "." + refactor.RANKED_FILENAME, 
                               components_output_filename  = output_perfix + "." + refactor.COMPONENTS_FILENAME)

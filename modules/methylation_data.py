@@ -3,14 +3,15 @@ import sys
 import copy
 import logging
 from pickle import dump
-from numpy import delete, isnan, where, column_stack, std, array, savetxt, in1d, mean
+from numpy import delete, isnan, where, column_stack, std, array, savetxt, in1d, mean, hstack
 from module import Module
 from utils import common, pca, LinearRegression, sitesinfo
 from bisect import bisect_right
 
 COMPRESSED_FILENAME = "methylation_data"
 GLINT_FORMATTED_EXTENSION = ".glint" #TODO move to a config file
-
+DEAFULT_COVAR_NAME = "c"
+DEFAULT_PHENO_NAME = "p"
 def validate_no_missing_values(data):
     """
     nan are not supported for version 1.0
@@ -25,12 +26,11 @@ class MethylationData(Module):
     meth_data is an numpy matrix
     samples_list, sites_list are numpy arrays
     """
-    def __init__(self, meth_data, samples_list, sites_list, phenotype = None ,covar = None):
+    def __init__(self, meth_data, samples_list, sites_list, phenotype = None ,covar = None, covarnames = None, phenonames = None):
         self.data = meth_data
         self.samples_ids = samples_list
-        self.cpgnames = sites_list
+        self.cpgnames = sites_list  # the last index of covariate loaded without name, this index wil be added to the default name
         self.sites_size, self.samples_size = self.data.shape
-
         if (len(self.samples_ids) != self.samples_size):
             common.terminate("got data with %s samples but %s samples ids" % (self.samples_size, len(self.samples_ids)))
 
@@ -42,7 +42,8 @@ class MethylationData(Module):
 
         self.phenotype = phenotype
         self.covar = covar
-
+        self.covarnames = covarnames
+        self.phenonames = phenonames
 
     def exclude_sites_indices(self, sites_indicies_list):
         """
@@ -80,6 +81,7 @@ class MethylationData(Module):
                 self.phenotype = delete(self.phenotype, indices_list, axis = 0)
             if self.covar is not None:
                 self.covar = delete(self.covar, indices_list, axis = 0)
+            
             self.samples_ids = delete(self.samples_ids, indices_list)
             size_before = self.samples_size
             self.samples_size = len(self.samples_ids)
@@ -102,17 +104,10 @@ class MethylationData(Module):
         it updates the sites_size, the cpgnames list and the list holds the average value per site
         """
         logging.info("including sites...")
-        indices_list = where(in1d(self.cpgnames , include_list))[0]
-        logging.info("include sites: %s CpGs from the reference list of %s CpGs were used" % (len(indices_list), len(include_list)))
-        self.data = self.data[indices_list, :]
-        self.cpgnames = self.cpgnames[indices_list]
-        size_before = self.sites_size
-        self.sites_size = len(self.cpgnames)
-        if (self.data.shape[0] != self.sites_size):
-            common.terminate("After including sites, methylation data sites size is %s but we got %s" % (self.data.shape[0], self.sites_size))
-        logging.debug("%s sites out of %s were included" % (self.sites_size, size_before))
-        logging.info("methylation data new size is %s sites by %s samples" % self.data.shape)
-
+        remove_indices_list = where(False == in1d(self.cpgnames , include_list))[0]
+        logging.info("include sites: %s CpGs from the reference list of %s CpGs will be included" % (len(self.cpgnames) - len(remove_indices_list), len(include_list)))
+        self.exclude_sites_indices(remove_indices_list)
+        logging.debug("methylation data new size is %s sites by %s samples" % self.data.shape)
 
     def exclude(self, exclude_list):
         """
@@ -122,7 +117,6 @@ class MethylationData(Module):
         """
         logging.info("excluding sites...")
         indices_list = where(in1d(self.cpgnames , exclude_list))[0]
-        logging.info("exclude sites: %s CpGs from the reference list of %s CpGs were used" % (len(indices_list), len(exclude_list)))
         self.exclude_sites_indices(indices_list)
         logging.debug("methylation data new size is %s sites by %s samples" % self.data.shape)
 
@@ -132,9 +126,8 @@ class MethylationData(Module):
         this function removes the samples ids not found in keep_list list from the data
         it updates the samples_size and the samples_ids list 
         """
-        logging.info("keeping samples...")
+        logging.info("keeping only samples in the file...")
         remove_indices_list = where(False == in1d(self.samples_ids , keep_list))[0]
-        logging.info("keep samples: %s samples from the reference list of %s samples were used" % (len(remove_indices_list), len(keep_list)))
         self.remove_samples_indices(remove_indices_list)
         logging.debug("methylation data new size is %s sites by %s samples" % self.data.shape)
 
@@ -144,9 +137,8 @@ class MethylationData(Module):
         this function removes the samples ids found in remove_list from the data
         it updates the samples_size and the samples_ids list 
         """
-        logging.info("removing samples...")
+        logging.info("removing the samples from the file...")
         indices_list = where(in1d(self.samples_ids , remove_list))[0]
-        logging.info("remove samples: %s samples from the reference list of %s samples were used" % (len(indices_list), len(remove_list)))
         self.remove_samples_indices(indices_list)
         logging.debug("methylation data new size is %s sites by %s samples" % self.data.shape)
         
@@ -176,34 +168,38 @@ class MethylationData(Module):
         if prefix != '' and not prefix.endswith('_'):
             prefix = prefix + "_"
         filename = prefix + COMPRESSED_FILENAME
-        methylation_data_filename = filename + GLINT_FORMATTED_EXTENSION
-
-        with open(methylation_data_filename, 'wb') as f:
-            logging.info("Saving methylation data as glint format at %s" % methylation_data_filename)
-            dump(self, f)
-        f.close()
         
-        logging.info("Saving cpg names to %s" % filename + "_sites_list.txt")
+        logging.info("Saving cpg names and info to %s" % filename + "_sites_list.txt")
         sites_info = sitesinfo.SitesInfoGenerator(self.cpgnames)
         sites_data = column_stack((self.cpgnames, sites_info.chromosomes, sites_info.positions, sites_info.genes, sites_info.categories))
         savetxt(filename + "_sites_list.txt", sites_data, delimiter='\t', fmt = '%-12s\t%-4s\t%-12s\t%-22s\t%-22s', header = "cpgnames, chromosomes, positions, genes, categories")
         
-        logging.info("Saving samples ids to %s" % filename + "_sampless_list.txt")
+        logging.info("Saving samples ids and their phenotype and covariates to %s" % filename + "_sampless_list.txt")
         samples_data = self.samples_ids
         samples_header = "samples"
         fmt = '%-12s'
+        
         if self.phenotype is not None:
             samples_data = column_stack((samples_data, self.phenotype))
-            samples_header += ", phenotype"
-            fmt += '\t%-12s'
+            pheno_num = self.phenotype.shape[1]
+            if pheno_num > 0:
+                samples_header += ", " + ", ".join(self.phenonames)
+            fmt += '\t%-12s' * pheno_num
+
         if self.covar is not None:
             samples_data = column_stack((samples_data, self.covar))
             covar_num = self.covar.shape[1]
-            samples_header += "".join([", covariates%d"%(i+1) for i in range(covar_num)])
+            if covar_num > 0:
+                samples_header += ", " + ", ".join(self.covarnames)
             fmt += '\t%-12s' * covar_num
 
         savetxt(filename + "_sampless_list.txt", samples_data, fmt = fmt, header = samples_header, delimiter='\t')
 
+        methylation_data_filename = filename + GLINT_FORMATTED_EXTENSION
+        with open(methylation_data_filename, 'wb') as f:
+            logging.info("Saving methylation data as glint format at %s" % methylation_data_filename)
+            dump(self, f)
+        f.close()
 
     def remove_lowest_std_sites(self, lowest_std_th = 0.02):
         """
@@ -290,26 +286,51 @@ class MethylationData(Module):
     def run():
         pass
 
-    def add_covar_datas(self, covardata_list):
-        """
-        adds new covariates to the existing covariates 
-        covardata is the covariates data (without the colums of the sample_ids)
-        assumes covardata is in the right format and is sorted by sample_ids as datafile is sorted
-        """
-        if self.covar is not None:
-            covardata_list.insert(0, self.covar)
-        self.covar = column_stack(tuple(covardata_list))
+    def get_phenotypes_indicis(self, names_list):
+        indices = where(in1d(self.phenonames, names_list))[0]
+        if len(indices) != len(names_list):
+            common.terminate("some phenotypes names does not match the names in the data")
+        return indices
 
-    def remove_covariates(self):
-        """
-        regress out the covariates from the data and update the data
-        """
-        if self.covar is not None:
-            logging.info("Removing covariates...")
-            residuals = LinearRegression.regress_out(self.data.transpose(), self.covar)
-            residuals = residuals.transpose()
-            self.data = residuals
+    def get_covariates_indicis(self, covariates_names_list):
+        indices = where(in1d(self.covarnames , covariates_names_list))[0]
+        if len(indices) != len(covariates_names_list):
+            common.terminate("some covariates names does not match the names in the data")
+        return indices
 
+    def get_phenotype_subset(self, names_list):
+        if names_list == None:
+            logging.info("ignoring phenotype")
+            return None
+        elif names_list == []:
+            logging.info("using all phenotypes")
+            return self.phenotype
+        else:
+            logging.info("using phenotypes %s" % ", ".join(names_list))
+            return self.phenotype[:, self.get_phenotypes_indicis(names_list)]
+    
+    def get_covariates_subset(self, names_list):
+        if names_list == None:
+            return None
+        elif names_list == []:
+            logging.info("using all covariates")
+            return self.covar
+        else:
+            logging.info("using covariates %s" % ", ".join(names_list))
+            return self.covar[:, self.get_covariates_indicis(names_list)]
+
+    def regress_out(self, matrix_to_regress):
+        """
+        ** THIS FUNCTION CHANGES THE METHYLATION DATA **
+
+        matrix_to_regress - is n X p where n is number of samples (not None)
+
+        regress out matrix_to_regress and update the data
+        """
+        residuals =  LinearRegression.regress_out(self.data.transpose(), matrix_to_regress)
+        residuals = residuals.transpose()
+        self.data = residuals
+        
 
 class MethylationDataLoader(MethylationData):
     """
@@ -332,12 +353,14 @@ class MethylationDataLoader(MethylationData):
 
     after validation it creates the MethylationData object
     """
-    def __init__(self, datafile, phenofile = None, covarfiles = []):
+    def __init__(self, datafile, phenofile = [], covarfiles = []):
         data, samples_ids, cpgnames = self._load_and_validate_datafile(datafile)
+        self._last_covar_i = 1
+        self._last_pheno_i = 1
         sites_size, samples_size = data.shape
-        phenotype = self._load_and_validate_phenotype(phenofile, samples_size, samples_ids)
-        covar = self._load_and_validate_covar(covarfiles, samples_size, samples_ids)
-        super(MethylationDataLoader, self).__init__(data, array(samples_ids), array(cpgnames), phenotype, covar)
+        phenotype, phenonames = self._load_and_validate_phenotype(phenofile, samples_size, samples_ids)
+        covar, covarnames = self._load_and_validate_covar(covarfiles, samples_size, samples_ids)
+        super(MethylationDataLoader, self).__init__(data, array(samples_ids), array(cpgnames), phenotype, covar, covarnames, phenonames)
 
     def _load_and_validate_file_of_dimentions(self, datafile, dim):
         """
@@ -346,8 +369,7 @@ class MethylationDataLoader(MethylationData):
         """
         if not isinstance(datafile, file):
             datafile = open(datafile, 'r')
-
-                    
+  
         logging.info("loading file %s..." % datafile.name)
 
         data = common.load_data_file(datafile.name, dim)
@@ -360,93 +382,127 @@ class MethylationDataLoader(MethylationData):
         """
         returns data (type=float without samples ids and cpgnames) and sample_ids list and cpgnames list
         """
-        data = self._load_and_validate_file_of_dimentions(datafile, 2)
-        samples_ids = data[0,:][1:]  # extract samples ID
-        cpgnames = data[:,0][1:]     # extract methylation sites names
-        # remove sample ID and sites names from matrix
-        # that kind of assignment will create a copy of O[1:,1:]
-        # Note that assignment like self.O = O will not create a copy
-        try:
-            data = data[1:,1:].astype(float) 
-        except ValueError:
-            common.terminate("file contains values which are not float")
-        # must be called after convertion to float
+        data, samples_ids, cpgnames = self._load_and_validate_file_of_dimentions(datafile, 2)
         logging.info("checking for missing values in datafile file...")
         validate_no_missing_values(data) #TODO remove when missing values are supported
 
         return data, samples_ids, cpgnames
 
 
-    def _validate_samples_ids(self, data, samples_size, samples_ids):
+    def _validate_samples_ids(self, matrix_sample_ids, samples_ids):
         """
         reads matrix from matrix_file_path
         validates that the matrix has number of rows as the number of sample ids
         checks that the sample ids in matrix (the first column) are the same ids as in sample_ids list
         and in the same order
         """
-        if samples_size != len(samples_ids):
-            common.terminate("the file doesn't include all sample ids %s %s"% (len(data) ,len(samples_ids)))
-
-        matrix_sample_ids = data[:,0]
         if not ((samples_ids.size == matrix_sample_ids.size) and ((samples_ids == matrix_sample_ids).all())):
             if len(set(samples_ids)^set(matrix_sample_ids)) != 0:
                 common.terminate("sample ids are not identical to the sample ids in data file")
             common.terminate("sample ids are not in the same order as in the datafile") 
 
-    def _load_and_validate_samples_info(self, samples_info, samples_size, samples_ids):
+    def _load_and_validate_samples_info(self, samples_info, samples_size, samples_ids, defaule_header_name, start_index):
         """
         samples_info - path to file containing information about samples (matrix where first column is sample_id)
         samples_info assumed to hold path (not None)
         """
-        data = self._load_and_validate_file_of_dimentions(samples_info, 2)
-        self._validate_samples_ids(data, samples_size, samples_ids)
-        # remove sample IDs from matrix
-        # that kind of assignment will create a copy of data[:,1]
-        # Note that assignment like self.O = O will not create a copy
-        try:
-            data = data[:,1:].astype(float) # use only the first phenotype
-        except ValueError:
-            common.terminate("file contains values which are not float" )
+        data, header, new_samples_ids = self._load_and_validate_file_of_dimentions(samples_info, 2)
+        self._validate_samples_ids(new_samples_ids, samples_ids)
         validate_no_missing_values(data)
-        return data
+        if header is None:
+            header = ["%s%d" % (defaule_header_name, i) for i in range(start_index, start_index + data.shape[1])]
 
-    def _load_and_validate_phenotype(self, phenofile, samples_size, samples_ids):
+        return data, header, start_index + data.shape[1]
+    
+    def _load_and_validate_samples_data_list(self, data_list, samples_size, samples_ids, defaule_header_name, start_index):
+        all_data = []
+        all_headers = []
+
+        for data in data_list:
+            datas, headers, end_index = self._load_and_validate_samples_info(data, samples_size, samples_ids, defaule_header_name, start_index)
+            start_index = end_index
+            all_data.append(datas)
+            all_headers.append(headers)
+
+        all_data = column_stack(tuple(all_data))
+        all_headers = hstack(tuple(all_headers))
+        return all_data, all_headers, end_index
+
+    def _load_and_validate_phenotype(self, phenofile_list, samples_size, samples_ids, default_pheno_name = DEFAULT_PHENO_NAME):
         """
         returns phenotype data (type=float) without samples ids
         """
-        if not phenofile:
-            return None
+        if not phenofile_list:
+            return None, None
+
         logging.info("validating phenotype file...")
-        pheno = self._load_and_validate_samples_info(phenofile, samples_size, samples_ids)
-        if len(pheno[0]) != 1:
-            logging.warning("more than one phenotype is not supported. will use only the first phenotype (first column)") # TODO remove when supported
-            pheno = pheno[:,1]
+        pheno, header, end_index = self._load_and_validate_samples_data_list(phenofile_list, samples_size, samples_ids, default_pheno_name, self._last_pheno_i)
+        self._last_pheno_i = end_index
 
-        return pheno
+        return pheno, header
+ 
 
-    def _load_and_validate_covar(self, covarfiles_list, samples_size, samples_ids):
+    def _load_and_validate_covar(self, covarfiles_list, samples_size, samples_ids, default_covar_name = DEAFULT_COVAR_NAME):
         """
         concatenate the covariates into one matrix (type=float).
         Make sure all have n rows and the ids of the samples are sorted the same order as the data file
         """
         if not covarfiles_list:
-            logging.warning("didn't supply covariates file")
-            return None
+            return None, None
+
         logging.info("validating covariates files...")
+        all_covar, all_covars_names, end_index = self._load_and_validate_samples_data_list(covarfiles_list, samples_size, samples_ids, default_covar_name, self._last_covar_i)
+        self._last_covar_i = end_index
+
+        return all_covar, all_covars_names
+
+    def add_covar_datas(self, covardata, default_covar_name = DEAFULT_COVAR_NAME):
+        """
+        adds new covariates to the existing covariates 
+        covardata is the covariates data (without the colums of the sample_ids)
+        assumes covardata is in the right format and is sorted by sample_ids as datafile is sorted
+        """
+        covarsnames = ["%s%d" % (default_covar_name, i) for i in range(self._last_covar_i, self._last_covar_i + covardata.shape[1])]
+        self._last_covar_i += covardata.shape[1]
         
-        all_covar = column_stack(tuple([self._load_and_validate_samples_info(covariates, samples_size, samples_ids) for covariates in covarfiles_list]))
-        return all_covar
+        if self.covar is not None:
+            mutual_names = set(self.covarnames).intersection(set(covarsnames))
+            if mutual_names:
+                common.terminate("more than one covariate with the names %s" % str (mutual_names))
+            self.covar = column_stack((self.covar, covardata))
+            self.covarnames = hstack((self.covarnames, covarsnames))
+        else:
+            self.covar = covardata
+            self.covarnames = covarsnames
+        logging.info("added covariates %s" % ", ".join(covarsnames))
 
-    def add_covar_files(self, covarfiles_list):
-        covardata_list = [self._load_and_validate_samples_info(covariates, self.samples_size, self.samples_ids) for covariates in covarfiles_list]
-        self.add_covar_datas(covardata_list)
+    def add_covar_files(self, covarfiles_list, default_covar_name = DEAFULT_COVAR_NAME):
+        """
+        adds covariates from a list of covariates files to the glint meth object
+        assumes self.covars is not None
+        """
+        covars, covarsnames = self._load_and_validate_covar(covarfiles_list, self.samples_size, self.samples_ids, default_covar_name)
+        logging.info("added covariates %s" % ", ".join(covarsnames))
+        self.covar = column_stack((self.covar, covars))
+        self.covarnames = hstack((self.covarnames, covarsnames))
 
-    def upload_new_covaritates_files(self, covarfiles_list):
+    def add_pheno_files(self, phenofiles_list, default_pheno_name = DEFAULT_PHENO_NAME):
+        """
+        adds phenotypes from a list of phenotype files to the glint meth object
+        assumes self.phenotype is not None
+        """
+        phenos, names = self._load_and_validate_phenotype(phenofiles_list, self.samples_size, self.samples_ids, default_pheno_name)
+        logging.info("added phenotypes %s" % ", ".join(names))
+        self.phenotype = column_stack((self.phenotype, phenos))
+        self.phenonames = hstack((self.phenonames, names))
+
+    def upload_new_covaritates_files(self, covarfiles_list, default_covar_name = DEAFULT_COVAR_NAME):
         """
         overloads self.covar with the covarfiles_list
         """
-        self.covar = self._load_and_validate_covar(covarfiles_list, self.samples_size, self.samples_ids)
+        self.covar, self.covarnames = self._load_and_validate_covar(covarfiles_list, self.samples_size, self.samples_ids, default_covar_name)
 
     def upload_new_phenotype_file(self, phenofile):
-        self.phenotype = self._load_and_validate_phenotype(phenofile, self.samples_size, self.samples_ids)
+        self.phenotype, self.phenonames = self._load_and_validate_phenotype(phenofile, self.samples_size, self.samples_ids)
+
 
