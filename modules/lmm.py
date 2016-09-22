@@ -7,7 +7,6 @@ import numpy as np
 import scipy.linalg as la
 import scipy.optimize as optimize
 import scipy.stats as stats
-import time
 import sys
 import scipy.linalg.blas as blas
 import logging
@@ -29,7 +28,6 @@ def findLogDelta(U, s, phe, covars, numIntervals=100, ldeltamin=-5, ldeltamax=5,
     phe - phenotype vector
     covars - covariates matrix
     """
-    logging.info("computing log delta...")
     #Prepare required matrices
     Uy = np.dot(U.T, phe).flatten()
     UX = np.dot(U.T, covars)
@@ -194,7 +192,6 @@ class LMM(Module):
             beta_est[i][1:-1] is the coefficient of the covariates
         """
         number_of_samples = phe.shape[0]
-        t0 = time.time()
             
         #Prepare required matrices  
         Uy = np.dot(self.U.T, phe).flatten()
@@ -254,9 +251,6 @@ class LMM(Module):
             results.sort(key = lambda t: t[2], reverse=True)
             chi2 = stats.chi2(1)
             p_vals = chi2.sf(2*(np.array([t[2] for t in results]) - null_ll))
-
-        logging.info("LMM is done in %0.2f seconds" %(time.time()-t0))
-
 
         sorted_cpg_indices = [res[0] for res in results]    # sorted_cpg_indices[i] is the index of sorted_cpgnames[i] in cpgnames. i.e cpgnames[sorted_cpg_indices[i]] == sorted_cpgnames[i]
         sorted_cpgnames = [res[1] for res in results]

@@ -15,6 +15,7 @@ this script:
 """
 
 GLINT_OBLIGATORY_DEPENDENCIES = ['numpy', 'scipy', 'sklearn', 'matplotlib', 'pandas', 'statsmodels'] # TODO move to configuration file
+
 PYTHONPATH_EXPLAIN = \
 """
 Something is wrong with the environment. This probably happened since you had python installed on your pc before you installed anaconda.

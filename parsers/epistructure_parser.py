@@ -12,11 +12,11 @@ class EpistructureParser(ModuleParser):
     def __init__(self, parser):
         """
         --savepcs:   number of captured ancestry PCs to save
-        --rmcovar:   if epistructure is called with --rmcovar flag, the covariates are  removed from the data. (by default (without the flag) they are not removed). Note that this flag appears also in refactor
         """
         epistructure_parser = parser.add_argument_group('epistructure', 'TODO Elior,add epistructure description here')
         epistructure_parser.add_argument('--savepcs', type = int, default = 2, help = "number of captured ancestry PCs to save TODO Elior, edit")
-        epistructure_parser.add_argument('--rmcovar', action = "store_true", help = "specify if you want to remove covariates from data")
+        epistructure_parser.add_argument('--covar', type = str, nargs='*', help = "list of covariates names to use. If no name is specified will use all the covariates. If flag is not set, will not use any covariate")
+      
         super(EpistructureParser, self).__init__(epistructure_parser)
         
 
@@ -26,7 +26,7 @@ class EpistructureParser(ModuleParser):
         try:
             informative_sites = loadtxt(INFORMATIVE_ANCESTRY_CPG_LIST, dtype = str)
             self.module = epistructure.Epistructure(meth_data, informative_sites)
-            self.module.capture_ancestry(args.savepcs, args.rmcovar, output_perfix)
+            self.module.capture_ancestry(args.savepcs, args.covar, output_perfix)
         except Exception :
             logging.exception("in epistructure")
             raise

@@ -16,7 +16,7 @@ class LMMTester():
 
     def __init__(self):
         logging.info("Testing Started on LMMTester")
-        self.meth_data = methylation_data.MethylationDataLoader(datafile = self.DATA, covarfiles = [self.COVAR], phenofile = self.PHENO)
+        self.meth_data = methylation_data.MethylationDataLoader(datafile = self.DATA, covarfiles = [self.COVAR], phenofile = [self.PHENO])
         self.test_pvalues()
         logging.info("Testing Finished on LMMTester")
 

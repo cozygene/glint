@@ -48,7 +48,7 @@ class FDRTester():
 
     def __init__(self):
         logging.info("Testing Started on WilcoxonTester")
-        self.meth_data = methylation_data.MethylationDataLoader(datafile = self.DATA, covarfiles = [self.COVAR], phenofile = self.PHENO)
+        self.meth_data = methylation_data.MethylationDataLoader(datafile = self.DATA, covarfiles = [self.COVAR], phenofile = [self.PHENO])
         self.test_fdr() 
         logging.info("Testing Finished on WilcoxonTester")
 
@@ -90,13 +90,13 @@ class WilcoxonTester():
 
     def __init__(self):
         logging.info("Testing Started on WilcoxonTester")
-        self.meth_data = methylation_data.MethylationDataLoader(datafile = self.DATA, covarfiles = [self.COVAR], phenofile = self.PHENO)
+        self.meth_data = methylation_data.MethylationDataLoader(datafile = self.DATA, covarfiles = [self.COVAR], phenofile = [self.PHENO])
         self._test_fit_model()
         logging.info("Testing Finished on WilcoxonTester")
 
     def _test_fit_model(self): # todo not working
         logging.info("Testing Wilcoxon")
-        meth_data = methylation_data.MethylationDataLoader(datafile = self.DATA, covarfiles = [self.COVAR], phenofile = self.PHENO)
+        meth_data = methylation_data.MethylationDataLoader(datafile = self.DATA, covarfiles = [self.COVAR], phenofile = [self.PHENO])
 
 
         y = meth_data.phenotype # a binary vector (phenotype)

@@ -52,7 +52,7 @@ class LinearRegressionTester():
 
     def _test_fit_model(self):
         logging.info("Testing linear regression: fit_model")
-        meth_data = methylation_data.MethylationDataLoader(datafile = self.LIN_REG_DATA, covarfiles = [self.LIN_REG_COVAR], phenofile = self.LIN_REG_PHENO)
+        meth_data = methylation_data.MethylationDataLoader(datafile = self.LIN_REG_DATA, covarfiles = [self.LIN_REG_COVAR], phenofile = [self.LIN_REG_PHENO])
         results = loadtxt(self.LIN_REG_FIT_MODEL)
 
         # test 1 dim
@@ -83,13 +83,13 @@ class LogisticRegressionTester():
 
     def __init__(self):
         logging.info("Testing Started on LogisticRegressionTester")
-        self.meth_data = methylation_data.MethylationDataLoader(datafile = self.LIN_REG_DATA, covarfiles = [self.LIN_REG_COVAR], phenofile = self.LIN_REG_PHENO)
+        self.meth_data = methylation_data.MethylationDataLoader(datafile = self.LIN_REG_DATA, covarfiles = [self.LIN_REG_COVAR], phenofile = [self.LIN_REG_PHENO])
         self._test_fit_model()
         logging.info("Testing Finished on LogisticRegressionTester")
 
     def _test_fit_model(self):
         logging.info("Testing logistic regression: fit_model")
-        meth_data = methylation_data.MethylationDataLoader(datafile = self.LIN_REG_DATA, covarfiles = [self.LIN_REG_COVAR], phenofile = self.LIN_REG_PHENO)
+        meth_data = methylation_data.MethylationDataLoader(datafile = self.LIN_REG_DATA, covarfiles = [self.LIN_REG_COVAR], phenofile = [self.LIN_REG_PHENO])
         results = loadtxt(self.LOG_REG_FIT_MODEL)
 
 

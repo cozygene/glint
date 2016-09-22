@@ -119,8 +119,6 @@ class RefactorTester():
         for i,site in enumerate(self.meth_data.data):
             residuals = LinearRegression.regress_out(site, coavr)
             assert len(residuals) == len(site)
-
-            # validate our residuals are corelated to res_data
             assert tools.correlation(residuals, covar_meth_data.data[i])
 
         logging.info("PASS")

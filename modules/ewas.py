@@ -13,15 +13,24 @@ copy meth_data in advance
 
 class Regression(Module):
     """
-        regression_test_function - a function that return the coefs, fstats, p_value such that:  
-                                    the value at index -1 describes the site under test
-                                    the value at index 0 describes the intercept
-                                    all other values describe the coefficients
+    regression_test_function - a function that return the coefs, fstats, p_value such that:  
+                                the value at index -1 describes the site under test
+                                the value at index 0 describes the intercept
+                                all other values describe the coefficients
     """
-    def __init__(self, methylation_data, regression_test_name, regression_test_function):
-        self.meth_data = methylation_data
+    def __init__(self, data, regression_test_name, regression_test_function, cpgnames, pheno, covars = None):
+        """
+        data - the methylation data matrix site by samples
+        cpgnames - the list of cpgnames (sites) in the same order as in data
+        pheno - the phenotypes vector (1D) to use (samples in the same order as in data) 
+        covars - the covariates matrix (can be more then 1 covariates) to use, if None- no covariates will be used (samples in the same order as in data) 
+        """
+        self.data = data
         self.regression_function = regression_test_function
         self.test_name = regression_test_name
+        self.covars = covars
+        self.pheno = pheno
+        self.cpgnames = cpgnames
 
     def regression(self):
         """
@@ -39,13 +48,14 @@ class Regression(Module):
         sorted_pvalues[i] is the pvalue of the site sorted_cpgnames[i] (sorted_fstats[i] is its statistic and so on..)
         """
         output = []           
-        for i, site in enumerate(self.meth_data.data):
-            coefs, fstats, p_value = self.regression_function(self.meth_data.phenotype, site, covars = self.meth_data.covar)
+
+        for i, site in enumerate(self.data):
+            coefs, fstats, p_value = self.regression_function(self.pheno, site, covars = self.covars)
             
             # Note: if you add more info to site info note to:
             #       -   keep p_value at index 1 since the data is sorted by index 1
             #       -   increase / decrease number of values in the line if  output.shape[1] = X
-            site_info = [self.meth_data.cpgnames[i], p_value[-1], fstats[-1]]
+            site_info = [self.cpgnames[i], p_value[-1], fstats[-1]]
             site_info.extend([coefs[i] for i in range(coefs.size)]) 
             output.append(site_info) 
             
@@ -67,13 +77,19 @@ class Regression(Module):
 
 class LogisticRegression(Regression):
     """
-        Only for cases where the phenotype is binary
+    Only for cases where the phenotype is binary
     """
     
-    def __init__(self, methylation_data):
-        super(LogisticRegression, self).__init__(methylation_data, "LogReg", regression.LogisticRegression.fit_model)
-        if not tools.is_binary_vector(self.meth_data.phenotype):
+    def __init__(self, data, cpgnames, pheno, covars = None):
+        """
+        data - the methylation data matrix site by samples
+        cpgnames - the list of cpgnames (sites) in the same order as in data
+        pheno - the phenotypes vector (1D) to use (samples in the same order as in data) 
+        covars - the covariates matrix (can be more then 1 covariates) to use, if None- no covariates will be used (samples in the same order as in data) 
+        """
+        if not tools.is_binary_vector(pheno):
             common.terminate("logistic regression test -phenotype must be binary")
+        super(LogisticRegression, self).__init__(data, "LogReg", regression.LogisticRegression.fit_model, cpgnames, pheno, covars)
 
     def run(self):
         logging.info("running logistic regression test...")
@@ -83,8 +99,14 @@ class LogisticRegression(Regression):
 
 
 class LinearRegression(Regression):
-    def __init__(self, methylation_data):
-        super(LinearRegression, self).__init__(methylation_data, "LinReg", regression.LinearRegression.fit_model)
+    def __init__(self, data, cpgnames, pheno, covars = None):
+        """
+        data - the methylation data matrix site by samples
+        cpgnames - the list of cpgnames (sites) in the same order as in data
+        pheno - the phenotypes vector (1D) to use (samples in the same order as in data) 
+        covars - the covariates matrix (can be more then 1 covariates) to use, if None- no covariates will be used (samples in the same order as in data) 
+        """
+        super(LinearRegression, self).__init__(data, "LinReg", regression.LinearRegression.fit_model, cpgnames, pheno, covars)
     
     def run(self):
         logging.info('running linear regression test...');
@@ -102,28 +124,33 @@ class Wilcoxon(Module):
     This test if for large sample sizes (n> 20) - write warning if n < 20
 
     """
-    def __init__(self, methylation_data):
-        if not tools.is_binary_vector(methylation_data.phenotype):
+    def __init__(self, data, cpgnames, pheno):
+        """
+        data - the methylation data matrix site by samples
+        cpgnames - the list of cpgnames (sites) in the same order as in data
+        pheno - the phenotypes vector (1D) to use (samples in the same order as in data) 
+        """
+        if not tools.is_binary_vector(pheno):
             common.terminate("wilcoxon test -phenotype must be binary")
 
-        if methylation_data.samples_size < 20:
+        if data.shape[1] < 20:
             logging.warning("wilcoxon test is for large data and should have at least 20 samples (here there are %s)" % methylation_data.samples_size)
        
-        if methylation_data.covar is not None:
-            logging.warning("wilcoxon test cannot take any covaraites - ignoring them")
-        self.meth_data = methylation_data
-
+        self.data = data
+        self.pheno = pheno
+        self.cpgnames = cpgnames
 
     def run(self):
         logging.info('running wilcoxon test...');    
-        pheno = self.meth_data.phenotype.reshape((-1,))
+        pheno = self.pheno.reshape((-1,))
         output = []
-        for i, site in enumerate(self.meth_data.data):
+        for i, site in enumerate(self.data):
             stats, pval = tools.wilcoxon_test(pheno, site)
-            output.append([self.meth_data.cpgnames[i], pval, stats])
+            output.append([self.cpgnames[i], pval, stats])
 
         output.sort(key = lambda x: x[1]) # sort output by p-value (1 is p-value index)
         output = array(output)
+        
         sorted_cpgnames = output[:,0]
         sorted_pvalues  = output[:,1].astype(float)
         sorted_fstats   = output[:,2].astype(float)

@@ -43,8 +43,11 @@ class EWASParser(ModuleParser):
         """
         ewas = parser.add_argument_group('ewas', 'TODO Elior,add ewas description here')
 
-        # Note that argument '--pheno' is required for all EWAS tests. but dont add it to dependencies list (dependencies = ['--pheno'])
-        # since it can be supplied through the meth_data object (if .glint file was provided and not meth data matrix)
+        # phenotype is required for all EWAS tests
+        ewas.add_argument('--pheno', required = True, type = str, nargs='*', help = "list of phenotypes names to use")
+        # covar is for lmm, linreg and logreg tests
+        ewas.add_argument('--covar', type = str, nargs='*', help = "list of covariates names to use")
+        
         ewas.add_argument('--linreg', action = "store_true", help = "Run a linear regression analysis (executed by default if --ewas is selected)")
         ewas.add_argument('--logreg', action = "store_true", help = "Run a logistic regression analysis")
         ewas.add_argument('--wilc',   action = "store_true", help = "Run Wilcoxon rank-sum test")
@@ -56,12 +59,12 @@ class EWASParser(ModuleParser):
         super(EWASParser, self).__init__(ewas)
 
     def validate_args(self, args):
-        # argument pheno is required for all ewas tests - it can be supplied through --pheno flag of .glint meth data file
-        # So, if the datafile supplied is not .glint file - pheno must be supplied as a flag 
-        if not args.datafile.name.endswith(methylation_data.GLINT_FORMATTED_EXTENSION):
-            self.required_args.append('pheno')
-        
         # make sure user choose only one EWAS test (mutually exlusive group is not supported...)
+        super(EWASParser, self).validate_args(args)
+        
+        if len(args.pheno) > 1: # 0 is all phenotypes in the data (which could be one)
+            common.terminate("must supply only one phenotype for EWAS")
+
         test_counter = 0
         if args.lmm:
             test_counter += 1
@@ -88,15 +91,17 @@ class EWASParser(ModuleParser):
             logging.info("No EWAS test was chosen, running linerar regression by default.")
 
 
-        super(EWASParser, self).validate_args(args)
+        
 
-    def runLMM(self, args, meth_data):
+    def runLMM(self, args, meth_data, pheno, covars):
         return self.lmm_parser.run(args = args,
                                    meth_data = meth_data,
-                                   output_perfix = args.out)
-    
-    def runRegression(self, meth_data, regression_class, test_name, output_file):
-        module = regression_class(methylation_data = meth_data)
+                                   output_perfix = args.out,
+                                   covars = covars,
+                                   pheno = pheno)
+
+    def runRegression(self, data, regression_class, test_name, output_file, cpgnames, pheno, covars = None):
+        module = regression_class(data, cpgnames, pheno, covars)
 
         #run lin reg and save result by EWAS output format
         results = module.run()
@@ -110,20 +115,20 @@ class EWASParser(ModuleParser):
         ewas_res.save(output_file)
         return ewas_res
 
-    def runLinReg(self, args, meth_data):
+    def runLinReg(self, args, data, cpgnames, pheno, covars):
         output_perfix = args.out
         output_file = "results" + LINREG_OUT_SUFFIX if output_perfix is None else output_perfix + LINREG_OUT_SUFFIX
-        return self.runRegression(meth_data, ewas.LinearRegression, "LinReg", output_file)
+        return self.runRegression(data, ewas.LinearRegression, "LinReg", output_file, cpgnames, pheno, covars)
 
-    def runLogReg(self, args, meth_data):
+    def runLogReg(self, args, data, cpgnames, pheno, covars):
         output_perfix = args.out
         output_file = "results" + LOGREG_OUT_SUFFIX if output_perfix is None else output_perfix + LOGREG_OUT_SUFFIX
-        return self.runRegression(meth_data, ewas.LogisticRegression, "LogReg", output_file)
+        return self.runRegression(data, ewas.LogisticRegression, "LogReg", output_file, cpgnames, pheno, covars)
 
-    def runWilcoxon(self, args, meth_data):
+    def runWilcoxon(self, args, data, cpgnames, pheno):
         output_perfix = args.out
         output_file = "results" + WILCOXON_OUT_SUFFIX if output_perfix is None else output_perfix + WILCOXON_OUT_SUFFIX
-        test_module = ewas.Wilcoxon(meth_data)
+        test_module = ewas.Wilcoxon(data, cpgnames, pheno)
         cpgnames, pvalues, fstats = test_module.run()
         ewas_res = ewas.EWASResultsCreator("Wilcoxon", cpgnames, pvalues, statistic = fstats)
         ewas_res.save(output_file)
@@ -132,21 +137,24 @@ class EWASParser(ModuleParser):
 
     def run(self, args, meth_data):
         try:
-            if meth_data.phenotype is None and args.pheno is None:
-                common.terminate("phenotype file wasn't supplied")
+            pheno = meth_data.get_phenotype_subset(args.pheno)
+            if (pheno.shape[1] != 1): # check if selected more than one phenotype
+                common.terminate("must supply only one phenotype for EWAS")
+
+            covars = meth_data.get_covariates_subset(args.covar)
 
             # ewas test must be called after refactor
             if args.lmm:
-                return self.runLMM(args, meth_data)
+                return self.runLMM(args, meth_data, pheno, covars)
                 
             if args.linreg:
-                return self.runLinReg(args, meth_data)
+                return self.runLinReg(args, meth_data.data, meth_data.cpgnames, pheno, covars)
 
             if args.logreg:
-                return self.runLogReg(args, meth_data)
+                return self.runLogReg(args, meth_data.data, meth_data.cpgnames, pheno, covars)
 
             if args.wilc:
-                return self.runWilcoxon(args, meth_data)
+                return self.runWilcoxon(args, meth_data.data, meth_data.cpgnames, pheno)
 
         except Exception :
             logging.exception("in ewas")

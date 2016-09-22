@@ -1,4 +1,5 @@
 import os
+import time
 import sys
 import logging
 from utils import common
@@ -26,11 +27,7 @@ class LMMParser(ModuleParser):
                     1 is for REML (default)
                     0 is for ML
         --norm:     if this flag is selectes than the covariates will be normalized before running LMM (if this flag is not supplied the matrix is not normalized)
-        --calcld:   if this flag is selectes than the logdelta (parameter of LMM) is calculated for each site seperatly (more accurate but takes more time)
-                    The LMM class itself "doesn't know" to calculate logdelta for each site. So to bypass that, today the way we calculate logdelta for each
-                    site is to run the LMM class (which generates the logdelta) with one site everytime instead of the whole data at once.
-                    The efficency is more or less the same in both of the options
-        
+        --oneld     select this flag to generate one logdelta value for all the sites (by default, without hte flag, it is generated seperatly for each site)
         * terminates if phenotype file wasn't supplied (with --pheno of with glint file)
 
         * output file is a matrix with the following columns ( at this order as for today ):
@@ -59,7 +56,7 @@ class LMMParser(ModuleParser):
             return val
         lmm_parser.add_argument('--reml', type=reml_value, default=1, help='type 1 to use REML (restricted maximum likelihood) or 0 to use ML. Default is 1 (REML)')
         lmm_parser.add_argument('--norm', action='store_true', help='Supply this flag in order to normalize covariates matrix (if this flag is not supplied the matrix is not normalized)')
-        lmm_parser.add_argument('--calcld', action='store_true', help='Supply this float in order to generate logdelta for each site seperatly (if not specified - one logdelta will be generated. Note that this flag has no meaning when --logdelta is supplied too')
+        lmm_parser.add_argument('--oneld', action='store_true', help='select this in order to generate logdelta once for all sites (by default logdelta is generated seperatly for each site)')
         # def pc_num_value(val):
         #     val = int(val)
         #     if val < 0:
@@ -84,11 +81,8 @@ class LMMParser(ModuleParser):
 
         super(LMMParser, self).validate_args(args)
       
-    def run(self, args, meth_data, output_perfix):
+    def run(self, args, meth_data, pheno, output_perfix, covars = None):
         try:
-            if meth_data.phenotype is None and args.pheno is None:
-                common.terminate("phenotype file wasn't supplied")
-
             kinship_data = None
 
             if type(args.kinship) == file: #kinship is provided via file
@@ -111,17 +105,18 @@ class LMMParser(ModuleParser):
                 kinship_data = data_for_kinship.data.transpose()
                 kinship = lmm.KinshipCreator(kinship_data, is_normalized = False).create_standard_kinship()
 
+            
+                    
             # all data is of dimensions n samplesX m sites
-            covars = meth_data.covar # no need to transpose since covars are nXm (n samples)
             data = meth_data.data.transpose() # data to test
-            pheno = meth_data.phenotype
 
             # initialize lmm with kinship
             module = lmm.LMM(kinship)
             logging.info('Running LMM...')
             
-            if args.calcld: # run lmm for each site so logdelta will be calculated for each site (TODO sometime move this option as an argument of LMM class and not of the parser (now, parser calls LMM class with different site each time thats patchy)
-              logging.info("LMM will calculate logdelta for each site")
+            t0 = time.time()
+            if not args.oneld: # run lmm for each site so logdelta will be calculated for each site (TODO sometime move this option as an argument of LMM class and not of the parser (now, parser calls LMM class with different site each time thats patchy)
+              logging.info("LMM calculating logdelta for each site, this will take a while...")
               cpgnames=[]
               pvalues=[]
               intercepts_betas=[]
@@ -147,9 +142,12 @@ class LMMParser(ModuleParser):
 
             else: # run lmm on all data - logdelta is calculated once.
               #run lmm
+              logging.info("computing log delta...")
               lmm_results = module.run(data, pheno, covars, meth_data.cpgnames, args.norm, args.reml)
               cpgnames, pvalues, intercepts_betas, covars_betas, sites_betas, sigmas_e, sigmas_g, stats =  lmm_results
             
+
+            logging.debug("LMM is done in %0.2f seconds" %(time.time()-t0))
 
             # generate result - by EWAS output format
             ewas_res = ewas.EWASResultsCreator("LMM", array(cpgnames), array(pvalues), statistic = array(stats),\
