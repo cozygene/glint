@@ -124,23 +124,22 @@ class Refactor(Module):
         """
         self._exclude_bad_probes()
         # self.meth_data.remove_missing_values_sites() # nan are not supported TODO uncomment when supported
-        self.meth_data.remove_lowest_std_sites(self.minstd)
+        # self.meth_data.remove_lowest_std_sites(self.minstd)
         # self.meth_data.replace_missing_values_by_mean() # nan are not supported TODO uncomment when supported
        
         # feature selection
         ranked_list = self._feature_selection()
-
         logging.info('Computing the ReFACTor components...')
-        sites = ranked_list[0:self.t] # take best t sites indices
+        sites = ranked_list[:self.t] # take best t sites indices
         pca_out = pca.PCA(self.meth_data.data[sites,:].transpose())
         score = pca_out.P
 
         logging.info('Saving a ranked list of the data features to %s...' % self.ranked_output_filename)
-        ranked_list_output = [[index + 1, self.meth_data.cpgnames[index]] for index in ranked_list]
+        ranked_list_output = [self.meth_data.cpgnames[index] for index in ranked_list]
         savetxt(self.ranked_output_filename, ranked_list_output, fmt='%s')
 
         logging.info('Saving the ReFACTor components to %s...' % self.components_output_filename)
-        components = score[:,0:self.num_components]
+        components = score[:,:self.num_components]
         components_output = column_stack((self.meth_data.samples_ids, components))
         savetxt(self.components_output_filename, components_output, fmt='%s')
         

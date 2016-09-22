@@ -203,7 +203,7 @@ class MethylationData(Module):
         methylation_data_filename = filename + ".txt"
         
         self.save_sites_and_samples(filename)
-        
+
         logging.info("Saving methylation data to %s" % methylation_data_filename)
         savetxt(methylation_data_filename, self.data, delimiter='\t')
 
@@ -314,7 +314,7 @@ class MethylationData(Module):
         pass
 
     def get_phenotypes_indicis(self, names_list):
-        if not self.phenonames: # there are no phenotypes
+        if self.phenonames is None: # there are no phenotypes
             common.terminate("there is no phenotype in the data. add phenotype files with --phenofiles")
         indices = where(in1d(self.phenonames, names_list))[0]
         if len(indices) != len(names_list):
@@ -322,7 +322,7 @@ class MethylationData(Module):
         return indices
 
     def get_covariates_indicis(self, covariates_names_list):
-        if not self.phenonames: # there are no phenotypes
+        if not self.covarnames is None: # there are no phenotypes
             common.terminate("there is no covariate in the data. add covariate files with --covarfiles")
         indices = where(in1d(self.covarnames , covariates_names_list))[0]
         if len(indices) != len(covariates_names_list):
