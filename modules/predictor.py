@@ -98,6 +98,11 @@ class Predictor(Module):
         relevant_sites_indices = where(self.sites_scores > min_score)[0]
         logging.info("remove %s sites with score lower than %s..." % (len(relevant_sites_indices), min_score))
 
+        # this code removes the sites in the list bad_sites_list (list of cpgs) from our data. it wast tested.
+        # logging.info("remove bad sites..." )
+        # bad_sites_indices = where(in1d(self.sites_name_per_id, bad_sites_list))[0]
+        # relevant_sites_indices = delete(relevant_sites_indices, bad_sites_indices)
+
         # calc prediction
         logging.info("predict methylation level...")
         site_prediction, predicted_sites_ids =  self.predict_sites(number_of_samples, relevant_snps_names, relevant_snp_occurrences, relevant_sites_indices)

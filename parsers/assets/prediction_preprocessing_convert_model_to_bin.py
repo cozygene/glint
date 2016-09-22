@@ -35,7 +35,7 @@ This script should be executed once, in cases when:
 KORA_MODEL_FILE_PATH =  "enter the path here" #KORA_model_multiple_snps_W_50_M_10.txt" 
 
  # path to the list artifacts sites
-BAD_PROBES_FILE_PATH = "parsers/assets/artifacts_chen.2013.txt"
+BAD_PROBES_FILE_PATH = "parsers/assets/polymorphic_cpgs.txt"
 SITE_ID_INDEX = 0
 PREDICTION_CORRELATION_SCORE_INDEX = 2
 NUMBER_OF_PREDICTIONG_SNPS_INDEX = 4

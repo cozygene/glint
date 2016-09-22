@@ -12,8 +12,8 @@ from numpy import loadtxt
 
 # list of files containing bad sites ids
 BAD_PROBES_FILES = [
-                    os.path.join(os.path.dirname(__file__),"assets/48639-non-specific-probes-Illumina450k.txt"),
-                    os.path.join(os.path.dirname(__file__),"assets/artifacts_chen.2013.txt"),
+                    os.path.join(os.path.dirname(__file__),"assets/HumanMethylationSites_X_Y.txt"),
+                    os.path.join(os.path.dirname(__file__), "assets/epistructure_reference_sites.txt")
                    ]
 
 class RefactorParser( ModuleParser ):

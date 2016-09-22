@@ -6,7 +6,8 @@ import argparse
 from module_parser import ModuleParser
 from modules import epistructure
 from numpy import loadtxt
-                
+
+# list of sites that are ancestry-informative                
 INFORMATIVE_ANCESTRY_CPG_LIST = os.path.join(os.path.dirname(__file__), "assets/epistructure_reference_sites.txt")
 
 class EpistructureParser(ModuleParser):

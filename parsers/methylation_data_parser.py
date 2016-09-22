@@ -5,6 +5,15 @@ from utils import common
 import argparse
 from module_parser import ModuleParser
 from numpy import loadtxt
+import os
+
+
+# cpgs on X and Y chromosomes, which increase the gender signal in refactor
+HUMAN_X_Y = os.path.join(os.path.dirname(__file__),"assets/HumanMethylationSites_X_Y.txt")
+# list of nonspecific methylation sites - cpgs that are caught by nonspecific phrobes (can catch few cpgs)
+NONSPECIFIC_PROBES = os.path.join(os.path.dirname(__file__),"assets/nonspecific_probes.txt")
+# list of methylation sites (cpgs) that are also SNPs. connecting between the genetics (and therfore ancestry) and the methylation
+POLYMORPHIC_CPGS = os.path.join(os.path.dirname(__file__),"assets/polymorphic_cpgs.txt")     
 
 class MethylationDataParser(ModuleParser): 
 
@@ -64,7 +73,7 @@ class MethylationDataParser(ModuleParser):
 
         optional = parser.add_argument_group('2.Data management options ')
         optional.add_argument('--covarfiles', type = argparse.FileType('r'), nargs='*', help = "A covariates file (or files)")
-        optional.add_argument('--phenofiles',   type = argparse.FileType('r'), nargs='*', help = "A phenotype file (or files)")
+        optional.add_argument('--phenofiles', type = argparse.FileType('r'), nargs='*', help = "A phenotype file (or files)")
         optional.add_argument('--maxpcstd', metavar=('PC_INDEX (TODO Elior, change those names?', 'STD_COUNT'), type = int, action = 'append', nargs = 2, help = "TODO Elior, edit: pc index and std number of times for removing outliers")
             
         group1 = optional.add_mutually_exclusive_group(required = False)
@@ -86,6 +95,10 @@ class MethylationDataParser(ModuleParser):
 
         optional.add_argument('--minmean', type = methylation_value, help = "A threshold for the minimal mean methylation level to consider")
         optional.add_argument('--maxmean', type = methylation_value, help = "A threshold for the maximal mean methylation level to consider")
+        
+        optional.add_argument('--rmxy', action='store_true', help = "remove methylation sites on X and Y chromosomes")
+        optional.add_argument('--rmns', action='store_true', help = "remove nonspecific sites (nonspecific probes)")
+        optional.add_argument('--rmpoly', action='store_true', help = "remove polymorphic sites (CpGs which are also SNPs)")
         
         def std_value(num):
             try:
@@ -157,6 +170,15 @@ class MethylationDataParser(ModuleParser):
             self.module.exclude_sites_with_high_mean(self.args.maxmean)
         if self.args.minstd is not None:
             self.module.remove_lowest_std_sites(self.args.minstd)
+        if self.args.rmxy is not None:
+            logging.info("excluding sites from X and Y chromosomes...")
+            self.module.exclude(loadtxt(HUMAN_X_Y, dtype = str))
+        if self.args.rmns is not None:
+            logging.info("excluding non-specific sites...")
+            self.module.exclude(loadtxt(NONSPECIFIC_PROBES, dtype = str))
+        if self.args.rmpoly is not None:
+            logging.info("excluding polymorphic sites...")
+            self.module.exclude(loadtxt(POLYMORPHIC_CPGS, dtype = str))
 
     # must  be called after run
     def preprocess_samples_data(self):
@@ -205,7 +227,6 @@ class MethylationDataParser(ModuleParser):
                 self.keep_list = self._load_and_validate_ids_in_file(args.keep, self.module.samples_ids)
             if args.remove is not None:
                 self.remove_list = self._load_and_validate_ids_in_file(args.remove, self.module.samples_ids)
-            
 
         except Exception:
             logging.exception("in methylation data")
