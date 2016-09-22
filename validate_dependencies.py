@@ -76,12 +76,14 @@ def add_anaconda_to_path():
     # if we couldn't add Anaconda to PATH, tell the user how to do it
     if not success:
         print PYTHONPATH_EXPLAIN
-
+    else:
+        print "OK"
 
     # try to import dependencies
     # if it fails, search for anaconda and 
 try:
     import_dependencies()
+    print "OK"
 except:
     if sys.platform.startswith("win") or "nt" in os.name: # you run windows
         add_anaconda_to_path()
