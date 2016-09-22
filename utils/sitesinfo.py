@@ -1,8 +1,9 @@
 from pandas import Index, unique
 from numpy import loadtxt, empty, where
 import logging
+import os
 
-SITES_INFO_FILE = "utils/assets/HumanMethylationSites"
+SITES_INFO_FILE = os.path.join(os.path.dirname(__file__), "assets/HumanMethylationSites")
 
 class SitesInfo(object):
 

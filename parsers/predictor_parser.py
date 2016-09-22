@@ -1,3 +1,4 @@
+import os
 import sys
 import logging
 from utils import common
@@ -7,11 +8,11 @@ from modules import predictor
 
                 
 
-SITES_SCORES_FILE = 'parsers/assets/sites_scores_list'
-SITES_SNPS_FILE = 'parsers/assets/site_snps_list'
-SITES_IDS_FILE ='parsers/assets/sites_ids_list'
-SNPS_IDS_FILE = 'parsers/assets/snps_ids_list'
-SITES_SNPS_COEFF_FILE = 'parsers/assets/sites_snps_coeff_list'
+SITES_SCORES_FILE = os.path.join(os.path.dirname(__file__), 'assets/sites_scores_list')
+SITES_SNPS_FILE = os.path.join(os.path.dirname(__file__), 'assets/site_snps_list')
+SITES_IDS_FILE = os.path.join(os.path.dirname(__file__), 'assets/sites_ids_list')
+SNPS_IDS_FILE = os.path.join(os.path.dirname(__file__), 'assets/snps_ids_list')
+SITES_SNPS_COEFF_FILE = os.path.join(os.path.dirname(__file__), 'assets/sites_snps_coeff_list')
 
 class PredictorParser(ModuleParser):
     def __init__(self, parser):

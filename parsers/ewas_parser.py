@@ -60,6 +60,11 @@ class EWASParser(ModuleParser):
 
     def validate_args(self, args):
         # make sure user choose only one EWAS test (mutually exlusive group is not supported...)
+        # argument pheno is required for all ewas tests - it can be supplied through --pheno flag of .glint meth data file
+        # So, if the datafile supplied is not .glint file - pheno must be supplied as a flag 
+        if not args.datafile.name.endswith(methylation_data.GLINT_FORMATTED_EXTENSION):
+            self.required_args.append('phenofiles')
+            
         super(EWASParser, self).validate_args(args)
         
         if len(args.pheno) > 1: # 0 is all phenotypes in the data (which could be one)

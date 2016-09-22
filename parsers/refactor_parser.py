@@ -12,8 +12,8 @@ from numpy import loadtxt
 
 # list of files containing bad sites ids
 BAD_PROBES_FILES = [
-                    "assets/48639-non-specific-probes-Illumina450k.txt",
-                    "assets/artifacts_chen.2013.txt",
+                    os.path.join(os.path.dirname(__file__),"assets/48639-non-specific-probes-Illumina450k.txt"),
+                    os.path.join(os.path.dirname(__file__),"assets/artifacts_chen.2013.txt"),
                    ]
 
 class RefactorParser( ModuleParser ):
@@ -61,7 +61,7 @@ class RefactorParser( ModuleParser ):
         if output_perfix is None:
           output_perfix = "output"
         bad_probes_list = set()
-        [bad_probes_list.update(loadtxt(os.path.join( os.path.dirname(__file__), probes_file), dtype=str)) for probes_file in BAD_PROBES_FILES]
+        [bad_probes_list.update(loadtxt(probes_file, dtype=str)) for probes_file in BAD_PROBES_FILES]
         self.module  = refactor.Refactor(methylation_data = meth_data, 
                               k = args.k, 
                               t = args.t, 

@@ -176,7 +176,7 @@ class MethylationData(Module):
         
         logging.info("Saving samples ids and their phenotype and covariates to %s" % filename + "_sampless_list.txt")
         samples_data = self.samples_ids
-        samples_header = "samples"
+        samples_header = "sampleid"
         fmt = '%-12s'
         
         if self.phenotype is not None:

@@ -97,7 +97,7 @@ class ManhattanPlotParser(ModuleParser):
 
 
 class PCAScatterPlotParser(ModuleParser):
-  SCATTER_OUTPUT_FILE = "pca_std_outliers_scatter"
+  SCATTER_OUTPUT_FILE = "plotpcs"
   def __init__(self, parser):
     """
     PCAScatterPlot Notes:
@@ -116,7 +116,7 @@ class PCAScatterPlotParser(ModuleParser):
     output file saved in both .png and .eps formats
     """
     pca = parser.add_argument_group('plotpcs', 'TODO Elior, add description which will be shown wjen --help')
-    pca.add_argument('--numpcs', required = True, type = int, help = " number of pcs to plot TODO Elior, edit") 
+    pca.add_argument('--numpcs', required = True, type = int, default = 2, help = " number of pcs to plot TODO Elior, edit") 
 
 
     self.meth_data_parser = MethylationDataParser(parser)
@@ -130,8 +130,7 @@ class PCAScatterPlotParser(ModuleParser):
 
   def run(self, args, meth_data):
     # run pca and plot PCs
-    output_perfix = '' if args.out is None else args.out
-    output_filename = output_perfix + self.SCATTER_OUTPUT_FILE
+    output_filename = args.out if args.out else self.SCATTER_OUTPUT_FILE
 
     try:
       assert args.numpcs + 1 < meth_data.samples_size
