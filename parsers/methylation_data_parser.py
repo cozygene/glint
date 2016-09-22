@@ -76,6 +76,7 @@ class MethylationDataParser(ModuleParser):
         group2.add_argument('--remove', type = argparse.FileType('r'), help = "A file with a list of samples to exclude in the data; includes the rest of the samples")
 
         optional.add_argument('--gsave', action='store_true', help = "Save the data in a glint format; makes following executions faster")
+        optional.add_argument('--txtsave', action='store_true', help = "Save the data in a visible format (text)")
 
         def methylation_value(num):
             num = float(num)
@@ -168,9 +169,11 @@ class MethylationDataParser(ModuleParser):
 
     # must be called after all preprocessing (preprocess_samples_data, preprocess_sites_data)
     # save methylation data in Glint format
-    def gsave(self, output_perfix):
+    def save(self, output_perfix):
         if self.args.gsave:
-            self.module.save(output_perfix)
+            self.module.save_serialized_data(output_perfix)
+        if self.args.txtsave:
+            self.module.save_raw_data(output_perfix)
 
     def run(self, args):
         try:

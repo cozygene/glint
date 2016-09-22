@@ -56,9 +56,9 @@ class PredictorParser(ModuleParser):
     def run(self, args):
         try:
             self.module  = predictor.Predictor(SITES_SCORES_FILE, SITES_SNPS_FILE, SITES_IDS_FILE, SNPS_IDS_FILE, SITES_SNPS_COEFF_FILE)
-            self.module.predict(args.score, args.psnp, args.pgeno, args.pind, args.maxmiss)
+            self.module.predict(args.score, args.snp, args.geno, args.ind, args.maxmiss)
             meth_data = self.module.meth_data()
-            meth_data.save('predicted')
+            meth_data.save_serialized_data('predicted')
         except Exception :
             logging.exception("in predictor")
             raise

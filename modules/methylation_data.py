@@ -158,23 +158,17 @@ class MethylationData(Module):
         max_values_indices = where(self.get_mean_per_site() > max_value)[0]
         self.exclude_sites_indices(max_values_indices)
 
-    def save(self, prefix = ''):
+    def save_sites_and_samples(self, prefix):
         """
-        serializes this object and saves it to methylation_data_filename
-        assumes that methylation_data_filename is a valid file 
+        save samples ids withe the covariates and phenotype
+        save cpgnames with  information on each site
         """
-        if prefix is None:
-            prefix = ''
-        if prefix != '' and not prefix.endswith('_'):
-            prefix = prefix + "_"
-        filename = prefix + COMPRESSED_FILENAME
-        
-        logging.info("Saving cpg names and info to %s" % filename + "_sites_list.txt")
+        logging.info("Saving cpg names and info to %s" % prefix + "_sites_list.txt")
         sites_info = sitesinfo.SitesInfoGenerator(self.cpgnames)
         sites_data = column_stack((self.cpgnames, sites_info.chromosomes, sites_info.positions, sites_info.genes, sites_info.categories))
-        savetxt(filename + "_sites_list.txt", sites_data, delimiter='\t', fmt = '%-12s\t%-4s\t%-12s\t%-22s\t%-22s', header = "cpgnames, chromosomes, positions, genes, categories")
+        savetxt(prefix + "_sites_list.txt", sites_data, delimiter='\t', fmt = '%-12s\t%-4s\t%-12s\t%-22s\t%-22s', header = "cpgnames, chromosomes, positions, genes, categories")
         
-        logging.info("Saving samples ids and their phenotype and covariates to %s" % filename + "_sampless_list.txt")
+        logging.info("Saving samples ids and their phenotype and covariates to %s" % prefix + "_sampless_list.txt")
         samples_data = self.samples_ids
         samples_header = "sampleid"
         fmt = '%-12s'
@@ -193,13 +187,46 @@ class MethylationData(Module):
                 samples_header += ", " + ", ".join(self.covarnames)
             fmt += '\t%-12s' * covar_num
 
-        savetxt(filename + "_sampless_list.txt", samples_data, fmt = fmt, header = samples_header, delimiter='\t')
+        savetxt(prefix + "_sampless_list.txt", samples_data, fmt = fmt, header = samples_header, delimiter='\t')
 
+    def save_raw_data(self, prefix = ''):
+        """
+        save the data matrix to a text visible file
+        save samples ids withe the covariates and phenotype
+        save cpgnames with  information on each site
+        """
+        if prefix is None:
+            prefix = ''
+        if prefix != '' and not prefix.endswith('_'):
+            prefix = prefix + "_"
+        filename = prefix + COMPRESSED_FILENAME
+        methylation_data_filename = filename + ".txt"
+        
+        self.save_sites_and_samples(filename)
+        
+        logging.info("Saving methylation data to %s" % methylation_data_filename)
+        savetxt(methylation_data_filename, self.data, delimiter='\t')
+
+
+    def save_serialized_data(self, prefix = ''):
+        """
+        serializes this object and saves it to methylation_data_filename
+        assumes that methylation_data_filename is a valid file 
+        """
+        if prefix is None:
+            prefix = ''
+        if prefix != '' and not prefix.endswith('_'):
+            prefix = prefix + "_"
+        filename = prefix + COMPRESSED_FILENAME
         methylation_data_filename = filename + GLINT_FORMATTED_EXTENSION
+
+        self.save_sites_and_samples(filename)
+
         with open(methylation_data_filename, 'wb') as f:
             logging.info("Saving methylation data as glint format at %s" % methylation_data_filename)
             dump(self, f)
         f.close()
+
 
     def remove_lowest_std_sites(self, lowest_std_th = 0.02):
         """

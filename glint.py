@@ -223,7 +223,7 @@ class ModulesArgumentParsers(object):
             self.meth_parser.module.add_covar_datas(self.epi_parser.module.components, "epi") # add refactor components as covariate file
 
 
-        self.meth_parser.gsave(output_perfix = self.args.out) #save after all preprocessing  add epi and refactor covars 
+        self.meth_parser.save(output_perfix = self.args.out) #save after all preprocessing  add epi and refactor covars 
         
 
 if __name__ == '__main__':

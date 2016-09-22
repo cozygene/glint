@@ -8,6 +8,7 @@ class Epistructure(Module):
 
     def __init__(self, meth_data, informative_list):
         """
+        PCA on subset of the sites
         informative_list - list of sites (cpgnames) to use 
         meth_data - MethylationData object with data of m sites X  n samples
         """
