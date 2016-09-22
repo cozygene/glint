@@ -4,18 +4,22 @@ from modules import methylation_data
 from utils import common
 import argparse
 from module_parser import ModuleParser
+from numpy import loadtxt
 
 class MethylationDataParser(ModuleParser): 
 
     def __init__(self, parser):
         """
         --datafile: is a path to a data file which can be matrix or .glint file.
-        --covar:    is a path to covariates file. It can get more than one covariates file by supplying a list of files:
+        --phenofiles: list of the phenotypes files
+        --covarfiles: list of covariates files. It can get more than one covariates file by supplying a list of files:
                         glint.py --covar path_to_covar_file1 path_to_covar_file2 ...
                     Note that if you supply the flag more than once:
                         glint.py --covar path_to_covar_file1 --covar path_to_covar_file2 ...
                     only file2 will be used as covariates
-        --pheno:    path to the phenotype file. for now only one phenotype is supported.
+                    The covariates file should have header specifying each covariate name or ID. If no header is supplied - default value is given as names.
+                    If glint file is supplied as datafile (and not text data file), the covariates will be added to it just for the scipt execution. if --gsave is also supplied than the new covariates will be added and saved to the old covariates
+        --covarfiles:    list of the covariates names to use. the list is subset of the names of the covariates (the names appear in the header of the covariates file or the default names)
         --maxpcstd: exclude samples with low of high std:
                     receives list of tuples where the first index in each tuple is the pc index and the second index is the std number:
                         glint.py --maxpcstd (index_1,std_1) (index_2,std_2), ...(index_n,std_n)
@@ -43,12 +47,11 @@ class MethylationDataParser(ModuleParser):
         Notes:
             - missing values are not supported for now
             - the program validates that the samples in covariates and phenotype file match the samples in the datafile
-            - if a glint file is loaded (with --datafile) and a new covariates or phenotype files are provided (with --covar / --pheno) - the covariates
-               and phenotype found in the glint file are replaced with the new ones. the glint file remains the same unless --gsave is selected which will
+            - if a glint file is loaded (with --datafile) and a new covariates or phenotype files are provided (with --covarfiles / --phenofiles) - the new covariates
+               and phenotype will be added to those found in the glint. the glint file remains the same unless --gsave is selected which will
                save a new glint file (Note that --out flag can be supplied to add a different prefix for each output file).
             - there are options avaliable for the programmer:
                 - get a copy of the methylation data object so if you change the data in one copy the data of the other one remains the same. (function copy)
-                - regress out the covariates from the data (today used in refactor and epistructure) (function remove_covariates)
                 - remove samples or sites by list of their indices (functions exclude_sites_indices remove_samples_indices)
             - the program wil terminate if:
                 - there are missing values in the data file
@@ -60,8 +63,8 @@ class MethylationDataParser(ModuleParser):
         required.add_argument('--datafile', type = argparse.FileType('r'), required = True,  help = "A data matrix file of beta-normalized methylation levels or a .glint file")
 
         optional = parser.add_argument_group('2.Data management options ')
-        optional.add_argument('--covar',   type = argparse.FileType('r'), nargs='*', help = "A covariates file")
-        optional.add_argument('--pheno',   type = argparse.FileType('r'), help = "A phenotype file")
+        optional.add_argument('--covarfiles', type = argparse.FileType('r'), nargs='*', help = "A covariates file (or files)")
+        optional.add_argument('--phenofiles',   type = argparse.FileType('r'), nargs='*', help = "A phenotype file (or files)")
         optional.add_argument('--maxpcstd', metavar=('PC_INDEX (TODO Elior, change those names?', 'STD_COUNT'), type = int, action = 'append', nargs = 2, help = "TODO Elior, edit: pc index and std number of times for removing outliers")
             
         group1 = optional.add_mutually_exclusive_group(required = False)
@@ -89,35 +92,34 @@ class MethylationDataParser(ModuleParser):
         super(MethylationDataParser, self).validate_args(args)
         self._validate_min_and_max_mean_values(args.minmean, args.maxmean)
 
-    def _load_and_validate_file_of_dimentions(self, fileobj, dim):
+    def _load_and_validate_ids_in_file(self, fileobj, optional_ids_list, dim = 1):
         """
         validates that the file contains a vector of dimentions dim
+        loads a vector file contianing ids list
+        warns if there are duplicate ids in the file or if there are ids which are not found in optional_ids_list
+        fails if this file is not a list
         """
         if not isinstance(fileobj, file):
             fileobj = open(fileobj, 'r')
+        
         logging.info("loading file %s..." % fileobj.name)
-        data = common.load_data_file(fileobj.name, dim)#, converters = lambda x: x if x != 'NA' else 'nan')#,delimiter=';', missing_values='NA', filling_values=nan)# = lambda x: x if x != 'NA' else nan)#, missing_values = '???', filling_values = 0)
-        # data = genfromtxt(args.datafile, dtype = str , delimiter=';', usemask = 'True', missing_values = 'NA', filling_values = "???")
-
-        if data is None:
+        try:
+            data = loadtxt(fileobj.name, dtype = str)
+        except:
+            common.terminate("There was error reading the file '%s', make sure you seperate the values with space, tab or comma" % (fileobj.name, dim))
+        
+        if data.ndim == 0: # file contains only one item
+            data = [data.item()]
+        elif data.ndim == 2:
             common.terminate("The file '%s' is not a %sd vector" % (fileobj.name, dim))
 
-        return data
-
-    def _load_and_validate_ids_in_file(self, filepath, optional_ids_list):
-        """
-        loads a vector file contianing ids list
-        warns if there are duplicate ids in the file or if there are ids which are not found in optional_ids_list
-        fails if this file doesn't contains a vector
-        """
-        data = self._load_and_validate_file_of_dimentions(filepath, 1)
         data_set = set(data)
         if len(data) != len(data_set):
-            logging.warning("The file %s contains ids more than once" % filepath)
+            logging.warning("The file %s contains ids more than once" % fileobj.name)
 
         diff =  data_set.difference(set(optional_ids_list))
         if diff != set([]):
-            logging.warning("The file %s contains ids that are not found in the datafile: %s" % (filepath, diff))
+            logging.warning("The file %s contains ids that are not found in the datafile: %s" % (fileobj.name, diff))
 
         return data
 
@@ -166,12 +168,12 @@ class MethylationDataParser(ModuleParser):
                 self.module = load(args.datafile) # datafile is fileType (status: open for read)
                 logging.debug("Got methylation data with %s sites and %s samples id" % (self.module.sites_size, self.module.samples_size))
                 # if phenotype or covariates supplied with metylation data, replace module covar and pheno file with new ones
-                if args.pheno is not None:
-                    self.module.upload_new_phenotype_file(args.pheno)
-                if args.covar is not None:
-                    self.module.upload_new_covaritates_files(args.covar)
+                if args.phenofiles is not None:
+                    self.module.add_pheno_files(args.phenofiles)
+                if args.covarfiles is not None:
+                    self.module.add_covar_files(args.covarfiles)
             else:
-                self.module = methylation_data.MethylationDataLoader(datafile = args.datafile, phenofile = args.pheno, covarfiles = args.covar)
+                self.module = methylation_data.MethylationDataLoader(datafile = args.datafile, phenofile = args.phenofiles, covarfiles = args.covarfiles)
 
             # load remove/keep sites/samples files and remove/keep values
             self.include_list = []
