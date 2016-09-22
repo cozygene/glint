@@ -27,7 +27,7 @@ class GlintParser(ModuleParser):
             This is done before data is loaded.
 
             No datafile need to be provided in the following cases:
-                if --predict is selected,
+                if --impute is selected,
                 if --qqplot --manhattan are selected without any --ewas test 
 
             Otherwise (datafile must be provided):
@@ -59,7 +59,7 @@ class GlintParser(ModuleParser):
         modules = parser.add_argument_group('4.Glint modules')
         modules.add_argument('--refactor', action='store_true', help = "<TODO Elior, add help here>")
         modules.add_argument('--ewas',     action='store_true', help = "<TODO Elior, add help here>" )
-        modules.add_argument('--predict',  action='store_true', help = "<TODO Elior, add help here methylation predictor>" )
+        modules.add_argument('--impute',  action='store_true', help = "<TODO Elior, add help here methylation predictor>" )
         modules.add_argument('--epi',      action='store_true', help = "<TODO Elior, edit>" )
         modules.add_argument('--plot',     action='store_true', help = "<TODO Elior, edit>" )
 
@@ -67,7 +67,7 @@ class GlintParser(ModuleParser):
     
 
 class ModulesArgumentParsers(object):
-    FUNCTIONALITY_ARGS = ['--plot', '--refactor', '--ewas', '--predict'] # TODO find better way to hold arguments that cause some functionality. glint is not supposed to be aware of those args
+    FUNCTIONALITY_ARGS = ['--plot', '--refactor', '--ewas', '--impute'] # TODO find better way to hold arguments that cause some functionality. glint is not supposed to be aware of those args
     DATA_FUNC_ARGS = ['--gsave'] 
     DATA_PREPROCESSING_NOT_RELEVANT_FOR_REFACTOR = ['--include', '--exclude', '--minmean', '--maxmean']
     SOLE_ARGS = ['--epi'] # functilnality flags that cannot be specified with other functionaity flags
@@ -111,7 +111,7 @@ class ModulesArgumentParsers(object):
 
 
         # prediction runs without datafile
-        if self.args.predict:
+        if self.args.impute:
             self.predictor_parser.validate_args(self.args)
             optional_args.extend(self.predictor_parser.all_args)
 
@@ -181,7 +181,7 @@ class ModulesArgumentParsers(object):
                 logging.warning("selected data management arguments which are not relevant for refactor: %s" % str(not_relevant_atgs))
 
     def run(self):
-        if self.args.predict:
+        if self.args.impute:
             self.predictor_parser.run(args)
             return
 
