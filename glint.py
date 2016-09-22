@@ -67,9 +67,10 @@ class GlintParser(ModuleParser):
     
 
 class ModulesArgumentParsers(object):
-    FUNCTIONALITY_ARGS = ['--plot','--gsave', '--refactor', '--ewas', '--predict'] # TODO find better way to hold arguments that cause some functionality. glint is not supposed to be aware of those args
+    FUNCTIONALITY_ARGS = ['--plot', '--refactor', '--ewas', '--predict'] # TODO find better way to hold arguments that cause some functionality. glint is not supposed to be aware of those args
+    DATA_FUNC_ARGS = ['--gsave'] 
     DATA_PREPROCESSING_NOT_RELEVANT_FOR_REFACTOR = ['--include', '--exclude', '--minmean', '--maxmean']
-    SOLE_ARGS = ['--epi'] # functilnality flags that cannot be soecified with other functionaity flags
+    SOLE_ARGS = ['--epi'] # functilnality flags that cannot be specified with other functionaity flags
 
     def __init__(self, user_args_selection):
         self.selected_args = user_args_selection
@@ -151,20 +152,22 @@ class ModulesArgumentParsers(object):
         and that the user didnt select an argument that is not an option for him (argument from a module that wasn't selected)
         """
         selected_args = set(self.selected_args)
+        data_func_args = set(self.DATA_FUNC_ARGS)
         func_args = set(self.FUNCTIONALITY_ARGS)
+        all_func_args = set(self.FUNCTIONALITY_ARGS + self.DATA_FUNC_ARGS)
         optional_args = set(optional_args)
         sole_args = set(self.SOLE_ARGS)
         args_not_relevant_for_refactor = set(self.DATA_PREPROCESSING_NOT_RELEVANT_FOR_REFACTOR)
-        func_args.update(sole_args)
+        all_func_args.update(sole_args)
 
-        func_args_chosen = selected_args.intersection(func_args)
+        func_args_chosen = selected_args.intersection(all_func_args)
         args_not_relevant_for_refactor_chosen = selected_args.intersection(args_not_relevant_for_refactor)
         sole_args_chosen = selected_args.intersection(sole_args)
 
         if len(func_args_chosen) == 0:
-            common.terminate("Nothing to do with the data, select at least one argument from %s" % ", ".join(list(func_args)))
+            common.terminate("Nothing to do with the data, select at least one argument from %s" % ", ".join(list(all_func_args)))
 
-        elif ((len(func_args_chosen) > len(sole_args_chosen)) and (len(sole_args_chosen) > 0))or (len(sole_args_chosen) > 1):
+        elif ((len(func_args_chosen) > (len(sole_args_chosen) + len(data_func_args))) and (len(sole_args_chosen) > 0))or (len(sole_args_chosen) > 1):
             common.terminate("options from %s cannot be specified with any other flags in the same command. you chose %s" % (str(list(sole_args)), str(list(func_args_chosen))))
 
         differ = selected_args.difference(optional_args)
@@ -217,6 +220,9 @@ class ModulesArgumentParsers(object):
             self.epi_parser.run(args = self.args,
                                 meth_data = epi_met_data,
                                 output_perfix = self.args.out)
+            self.meth_parser.module.add_covar_datas(self.epi_parser.module.components, "epi") # add refactor components as covariate file
+
+
         self.meth_parser.gsave(output_perfix = self.args.out) #save after all preprocessing  add epi and refactor covars 
         
 
