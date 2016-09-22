@@ -45,9 +45,9 @@ class PredictorParser(ModuleParser):
               the j'th number in the i'th line is the coefficient of the j'th snp at the i'th line in the file "site_snps_list"
         """
         predictor = parser.add_argument_group('predictor', 'predict methylation levels by SNPs. TODO Elior,add ewas description here')
-        predictor.add_argument('--psnp',  type = argparse.FileType('r'), required = True, help = "plink .snp file")
-        predictor.add_argument('--pgeno',  type = argparse.FileType('r'), required = True, help = "pling .geno file")
-        predictor.add_argument('--pind',  type = argparse.FileType('r'), required = True, help = "plink .ind file")
+        predictor.add_argument('--snp',  type = argparse.FileType('r'), required = True, help = "plink .snp file")
+        predictor.add_argument('--geno',  type = argparse.FileType('r'), required = True, help = "pling .geno file")
+        predictor.add_argument('--ind',  type = argparse.FileType('r'), required = True, help = "plink .ind file")
         predictor.add_argument('--score',  type = float, default = 0.5, help = "a score (between 0 and 1) - predict only cpgs with prediction correlation score at least S ")
         predictor.add_argument('--maxmiss',  type = float, default = 0.03, help = "The maximal amount of missing values allowed in the plink data files (percentage, number between 0 and 1). if sample X has more than <minmiss> percentage missing values (out of all it's snps) dont predict it, the same for snp")
         super(PredictorParser, self).__init__(predictor)
