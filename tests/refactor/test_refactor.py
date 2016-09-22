@@ -1,78 +1,115 @@
 from modules import refactor,methylation_data
+from parsers import refactor_parser
 from numpy import loadtxt, array_equal
 from utils import LinearRegression
 import logging
 from tests.test_tools import tools
 from pickle import load
 
-class FeatureSelectionTester():
-    FAKE_DATA  = "tests/refactor/files/feature_selection/data"
-    FAKE_CONTROL = "tests/refactor/files/feature_selection/control"
+class SenariosTester():
+    DATA  = "tests/refactor/files/test_datafile.txt"
+    COVAR  = "tests/refactor/files/test_datafile_covars.txt"
+    PHENO  = "tests/refactor/files/test_datafile_phenos.txt" #two phenotypes (the second one is binary)
+    RES1  = "tests/refactor/files/test_datafile.refactor.no_covars.components.txt" 
+    RES2  = "tests/refactor/files/test_datafile.refactor.covars.components.txt" 
+    RES3  = "tests/refactor/files/test_datafile.refactor.controls_covars.components.txt"
+    RES4  = "tests/refactor/files/test_datafile.refactor.pheno_covars.components.txt" 
+        
     def __init__(self):
-        logging.info("Testing Started on FeatureSelectionTester")
-        self.fs_meth_data = methylation_data.MethylationDataLoader(datafile = self.FAKE_DATA, phenofile = [self.FAKE_CONTROL])
-        self.test_controls_fs()
-        self.test_phenotype_fs()
-        logging.info("Testing Finished on FeatureSelectionTester")
+        logging.info("Testing Started on SenariosTester")
+        bad_probes = set()
+        [bad_probes.update(loadtxt(probes_file, dtype=str)) for probes_file in refactor_parser.BAD_PROBES_FILES]
+        self.bad_probes = list(bad_probes)
+        self.meth_data = methylation_data.MethylationDataLoader(datafile = self.DATA, covarfiles = [self.COVAR], phenofile = [self.PHENO])
+        self.test_senario1()
+        self.test_senario2()
+        self.test_senario3()
+        self.test_senario4()
+        logging.info("Testing Finished on SenariosTester")
 
-    def test_controls_fs(self):
-        """
-        test that all samples that are '1' in the FAKE_CONTROL file are deleted from FAKE_DATA file
+    def test_senario1(self):
+        logging.info("Testing clean refactor components...")
+        refactor_meth_data = self.meth_data.copy()
 
-        """
+        comp = loadtxt(self.RES1)
+
+        module  = refactor.Refactor(methylation_data = refactor_meth_data, 
+                                    k = 5, 
+                                    t = 500, 
+                                    minstd = 0,
+                                    bad_probes_list = self.bad_probes,
+                                    use_phenos = None,
+                                    use_covars = None)
+        
+        module.run()
+        assert module.components.shape == comp.shape
+        for i in range(module.components.shape[1]):
+            assert tools.correlation(module.components[:,i], comp[:,i])
+        logging.info("PASS")
+
+    def test_senario2(self):
+        logging.info("Testing ReFACTor with covariates...")
+        refactor_meth_data = self.meth_data.copy()
+
+        comp = loadtxt(self.RES2)
+
+        module  = refactor.Refactor(methylation_data = refactor_meth_data, 
+                                    k = 5, 
+                                    t=500, 
+                                    minstd = 0,
+                                    bad_probes_list = self.bad_probes,
+                                    use_phenos = None,
+                                    use_covars = [])
+        
+        module.run()
+        assert module.components.shape == comp.shape
+
+        for i in range(module.components.shape[1]):
+            assert tools.correlation(module.components[:,i], comp[:,i])
+        logging.info("PASS")
+
+    def test_senario3(self):
         logging.info("Testing controls feature selection...")
-        refactor_meth_data = self.fs_meth_data.copy()
+        refactor_meth_data = self.meth_data.copy()
 
-        controls = loadtxt(self.FAKE_CONTROL, dtype = str)
-        controls_indices = controls[:,1]
+        comp = loadtxt(self.RES3)
+
         module  = refactor.Refactor(methylation_data = refactor_meth_data, 
-                      k = 2, 
-                      feature_selection = "controls",
-                      t=5, 
-                      use_phenos = [])
-        meth_data = self.fs_meth_data.copy()
-        
-        controls_samples_indices = where(phenotype == 0)[0]
-        remove_indices = delete(range(meth_data.samples_size), controls_samples_indices)
-        meth_data.remove_samples_indices(remove_indices)
+                                    k = 5, 
+                                    t=500, 
+                                    minstd = 0,
+                                    bad_probes_list = self.bad_probes,
+                                    feature_selection = 'controls',
+                                    use_phenos = ['p2'],
+                                    use_covars = [])
+        module.run()
+        assert module.components.shape == comp.shape
 
-        res = meth_data.data
-
-        # controls fs suppose to change methylation data
-        assert array_equal(module.meth_data.data, res)
-
-        # res is the data matrix found in FAKE_DATA without the columns (samples) at index i when i is index of a 0 in FAKE_CONTROL file
-        for i in range(len(controls_indices)):
-            if controls_indices[i]=='0':
-                assert array_equal(self.fs_meth_data.data[:,i] ,res[:,index])
-                index += 1
-
-        # controls fs result will contain  number of columns (samples) as the number of 0's in the FAKE_CONTROL file
-        assert index == len(res[0])
-
-        
+        for i in range(module.components.shape[1]):
+            assert tools.correlation(module.components[:,i], comp[:,i])
         logging.info("PASS")
 
-    def test_phenotype_fs(self):
+    def test_senario4(self):
         logging.info("Testing phenotype feature selection...")
-        refactor_meth_data = self.fs_meth_data.copy()
+        refactor_meth_data = self.meth_data.copy()
+
+        comp = loadtxt(self.RES4)
 
         module  = refactor.Refactor(methylation_data = refactor_meth_data, 
-                      k = 2, 
-                      feature_selection = "phenotype",
-                      t=5,
-                      use_phenos = [])
+                                    k = 5, 
+                                    t=500, 
+                                    minstd = 0,
+                                    bad_probes_list = self.bad_probes,
+                                    feature_selection = 'phenotype',
+                                    use_phenos = ['p1'],
+                                    use_covars = [])
+        module.run()
+        assert module.components.shape == comp.shape
 
-        phenotype, phenoname = refactor_meth_data._load_and_validate_phenotype([self.FAKE_CONTROL], refactor_meth_data.samples_size, refactor_meth_data.samples_ids)
-        # validate phenotype feature selection output (res_data) is correlated to our linear regression for (site, phenotype)
-        res_data = module.feature_selection_handler()
-        for i,site in enumerate(self.fs_meth_data.data):
-            residuals = LinearRegression.regress_out(site, phenotype)
-            assert len(residuals) == len(site)
-            # validate our residuals are corelated to res_data
-            assert tools.correlation(residuals, res_data[i])
-
+        for i in range(module.components.shape[1]):
+            assert tools.correlation(module.components[:,i], comp[:,i])
         logging.info("PASS")
+
 
 class RefactorTester():
     DEMO_SMALL_DATA = "tests/files/datafile2"
@@ -100,11 +137,11 @@ class RefactorTester():
 
     def __init__(self):
         logging.info("Testing Started on RefactorTester")
+        self.meth_data = methylation_data.MethylationData
         self.meth_data = methylation_data.MethylationDataLoader(datafile = self.DEMO_SMALL_DATA, covarfiles = [self.DEMO_COVAR], phenofile = [self.DEMO_PHENO])
         self.test_remove_covariates()
         self.test_low_rank_approx_distances()
         self.test_exclude_bad_probes()
-        self.test_senarios()
 
         logging.info("Testing Finished on RefactorTester")
 
@@ -171,97 +208,3 @@ class RefactorTester():
         assert self.meth_data.sites_size - remove_count == module.meth_data.sites_size
 
         logging.info("PASS")
-
-    def test_senarios(self):
-
-        logging.info("Testing senario no.1...")
-        senario_meth_data = self.meth_data.copy()
-        module  = refactor.Refactor(methylation_data = senario_meth_data, 
-                                    k = 5, 
-                                    t = 400,
-                                    use_covars = None)
-        module.run()
-        comp = loadtxt(self.COMP_K5_T400)
-        assert module.components.shape == comp.shape
-
-        for i in range(module.components.shape[1]):
-            assert tools.correlation(module.components[:,i], comp[:,i])
-
-        assert array_equal(module.ranked_sites, loadtxt(self.RANK_K5_T400, dtype = str))
-        logging.info("PASS")
-
-        logging.info("Testing senario no.2...")
-        senario_meth_data = self.meth_data.copy()
-        module  = refactor.Refactor(methylation_data = senario_meth_data, 
-                                    k = 5, 
-                                    t = 400,
-                                    minstd = 0.1,
-                                    num_components = 7,
-                                    use_covars = None)
-        module.run()
-        comp = loadtxt(self.COMP_K5_T400_stdth01numcomp7)
-        assert module.components.shape == comp.shape
-
-        for i in range(module.components.shape[1]):
-            assert tools.correlation(module.components[:,i], comp[:,i])
-
-        assert array_equal(module.ranked_sites, loadtxt(self.RANK_K5_T400_stdth01numcomp7, dtype = str))
-        logging.info("PASS")
-
-        logging.info("Testing senario no.3...")
-        senario_meth_data = self.meth_data.copy()
-        module  = refactor.Refactor(methylation_data = senario_meth_data, 
-                                    k = 5, 
-                                    t = 400,
-                                    minstd = 0.13,
-                                    use_covars = None)
-        module.run()
-        comp = loadtxt(self.COMP_K5_T400_stdth013)
-        assert module.components.shape == comp.shape
-
-        for i in range(module.components.shape[1]):
-            assert tools.correlation(module.components[:,i], comp[:,i])
-
-        assert array_equal(module.ranked_sites, loadtxt(self.RANK_K5_T400_stdth013, dtype = str))
-        logging.info("PASS")
-
-
-
-        logging.info("Testing senario no.4...")
-        senario_meth_data = self.meth_data.copy()
-        module  = refactor.Refactor(methylation_data = senario_meth_data, 
-                                    k = 5, 
-                                    t = 400,
-                                    use_covars = [])
-        module.run()
-        comp = loadtxt(self.COMP_K5_T400_covar)
-        assert module.components.shape == comp.shape
-
-
-        for i in range(module.components.shape[1]):
-            assert tools.correlation(module.components[:,i], comp[:,i])
-
-        assert array_equal(module.ranked_sites, loadtxt(self.RANK_K5_T400_covar, dtype = str))
-        logging.info("PASS")
-
-
-        logging.info("Testing senario no.5...")
-        senario_meth_data = self.meth_data.copy()
-        module  = refactor.Refactor(methylation_data = senario_meth_data, 
-                                    k = 5, 
-                                    t = 400,
-                                    minstd = 0.08,
-                                    use_covars = [])
-        module.run()
-
-        comp = loadtxt(self.COMP_K5_T400_stdth008covar)
-        assert module.components.shape == comp.shape
-
-        for i in range(module.components.shape[1]):
-            assert tools.correlation(module.components[:,i], comp[:,i])
-
-        assert array_equal(module.ranked_sites, loadtxt(self.RANK_K5_T400_stdth008covar, dtype = str))
-        logging.info("PASS")
-
-  
-
