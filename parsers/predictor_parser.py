@@ -44,7 +44,7 @@ class PredictorParser(ModuleParser):
               the numbers at the i'th line are the coefficients of the SNPs which predict ("explain") the i'th site.
               the j'th number in the i'th line is the coefficient of the j'th snp at the i'th line in the file "site_snps_list"
         """
-        predictor = parser.add_argument_group('predictor', 'predict methylation levels by SNPs. TODO Elior,add ewas description here')
+        predictor = parser.add_argument_group('imputation', 'impute methylation levels by SNPs. TODO Elior,add ewas description here')
         predictor.add_argument('--snp',  type = argparse.FileType('r'), required = True, help = "plink .snp file")
         predictor.add_argument('--geno',  type = argparse.FileType('r'), required = True, help = "pling .geno file")
         predictor.add_argument('--ind',  type = argparse.FileType('r'), required = True, help = "plink .ind file")
