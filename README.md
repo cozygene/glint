@@ -45,6 +45,6 @@ elior..todo
 
 ### Authors
 
-This software was developed by Reut Yedidim, Noah Zaitlen, Omer Weissbrod  and Elior Rahmani. (who else? todo)
+This software was developed by Reut Yedidim, Omer Weissbrod  and Elior Rahmani.
 
 For any question and for reporting bugs please send an email to Elior Rahmani at: elior.rahmani@gmail.com
