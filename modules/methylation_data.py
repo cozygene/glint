@@ -320,7 +320,7 @@ class MethylationData(Module):
         return indices
 
     def get_covariates_indicis(self, covariates_names_list):
-        if not self.covarnames is None: # there are no phenotypes
+        if self.covarnames is None: # there are no covariates
             common.terminate("there is no covariate in the data. add covariate files with --covarfiles")
         indices = where(in1d(self.covarnames , covariates_names_list))[0]
         if len(indices) != len(covariates_names_list):
@@ -485,19 +485,23 @@ class MethylationDataLoader(MethylationData):
 
         return all_covar, all_covars_names
 
-    def add_covar_datas(self, covardata, default_covar_name = DEAFULT_COVAR_NAME):
+    def add_covar_datas(self, covardata, default_covar_name = DEAFULT_COVAR_NAME, covarsnames = None):
         """
         adds new covariates to the existing covariates 
-        covardata is the covariates data (without the colums of the sample_ids)
-        assumes covardata is in the right format and is sorted by sample_ids as datafile is sorted
+        covardata - matrix with the covariates data (without the colums of the sample_ids and the title of the covarnames)
+        covarsnames - the names of the covariates in the data. if not supplied a default name will be set
+        default_covar_name - a default name for the covariates (in case covarsnames is None)
+
+        assumes covardata is in the right format and the sample_ids order is as in the datafile 
         """
-        covarsnames = ["%s%d" % (default_covar_name, i) for i in range(self._last_covar_i, self._last_covar_i + covardata.shape[1])]
+        if covarsnames is None:
+            covarsnames = ["%s%d" % (default_covar_name, i) for i in range(self._last_covar_i, self._last_covar_i + covardata.shape[1])]
         self._last_covar_i += covardata.shape[1]
         
         if self.covar is not None:
             mutual_names = set(self.covarnames).intersection(set(covarsnames))
             if mutual_names:
-                common.terminate("more than one covariate with the names %s" % str (mutual_names))
+                common.terminate("more than one covariate with the name %s" % str (mutual_names))
             self.covar = column_stack((self.covar, covardata))
             self.covarnames = hstack((self.covarnames, covarsnames))
         else:
