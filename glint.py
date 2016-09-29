@@ -172,7 +172,16 @@ class ModulesArgumentParsers(object):
 
         differ = selected_args.difference(optional_args)
         if differ:
-            common.terminate("selected redundent argument" + str(list(differ)))
+            optional_args_str = "".join(optional_args)
+            unrecognized_args = [] # args that are not an option of glint
+            redundent_args = []    # args that are not used with the selected flag
+            for flag in differ:
+                if flag in optional_args_str:
+                    unrecognized_args.append(flag)
+                else:
+                    redundent_args.append(flag)
+            common.terminate("unrecognized argument " + ", ".join(unrecognized_args))
+            common.terminate("selected redundent argument " + ", ".join(redundent_args))
 
         # warn if only refactor module is selected and  user selectes data management flags that are not relevant for refactor
         if self.args.refactor and len(func_args_chosen) == 1:
