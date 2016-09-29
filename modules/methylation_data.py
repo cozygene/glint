@@ -360,6 +360,27 @@ class MethylationData(Module):
         residuals = residuals.transpose()
         self.data = residuals
         
+class TitleManager(object):
+    def __init__(self):
+        self.title_indexes = dict()
+
+    def get_next_index(self, title_base_name):
+        if title_base_name not in self.title_indexes:
+            self.title_indexes[title_base_name] = 1
+        return self.title_indexes[title_base_name]
+
+    def increase_next_index(self, title_base_name, count):
+        """
+        assumes title_base_name exists
+        """
+        self.title_indexes[title_base_name] = self.title_indexes[title_base_name] + count
+
+    def generate_title(self, title_base_name, count):
+        start_i = self.get_next_index(title_base_name)
+        titles_list = ["%s%d" % (title_base_name, i) for i in range(start_i, start_i + count)]
+        self.increase_next_index(title_base_name, count)
+        return titles_list
+
 
 class MethylationDataLoader(MethylationData):
     """
@@ -383,9 +404,11 @@ class MethylationDataLoader(MethylationData):
     after validation it creates the MethylationData object
     """
     def __init__(self, datafile, phenofile = [], covarfiles = []):
+        self.header_manager = TitleManager()
+        self.covarnames = None
+        self.phenonames = None
+
         data, samples_ids, cpgnames = self._load_and_validate_datafile(datafile)
-        self._last_covar_i = 1
-        self._last_pheno_i = 1
         sites_size, samples_size = data.shape
         phenotype, phenonames = self._load_and_validate_phenotype(phenofile, samples_size, samples_ids)
         covar, covarnames = self._load_and_validate_covar(covarfiles, samples_size, samples_ids)
@@ -430,32 +453,31 @@ class MethylationDataLoader(MethylationData):
                 common.terminate("sample ids are not identical to the sample ids in data file")
             common.terminate("sample ids are not in the same order as in the datafile") 
 
-    def _load_and_validate_samples_info(self, samples_info, samples_size, samples_ids, defaule_header_name, start_index):
+    def _load_and_validate_samples_info(self, data_with_samples_info, samples_size, samples_ids):
         """
-        samples_info - path to file containing information about samples (matrix where first column is sample_id)
-        samples_info assumed to hold path (not None)
+        data_with_samples_info - path to file containing information about samples (matrix where first column is sample_id)
+        data_with_samples_info assumed to hold path (not None)
         """
-        data, header, new_samples_ids = self._load_and_validate_file_of_dimentions(samples_info, 2)
+        data, header, new_samples_ids = self._load_and_validate_file_of_dimentions(data_with_samples_info, 2)
         self._validate_samples_ids(new_samples_ids, samples_ids)
         validate_no_missing_values(data)
-        if header is None:
-            header = ["%s%d" % (defaule_header_name, i) for i in range(start_index, start_index + data.shape[1])]
 
-        return data, header, start_index + data.shape[1]
+        return data, header
     
-    def _load_and_validate_samples_data_list(self, data_list, samples_size, samples_ids, defaule_header_name, start_index):
+    def _load_and_validate_samples_data(self, data_list, samples_size, samples_ids, defaule_header_name):
         all_data = []
         all_headers = []
 
-        for data in data_list:
-            datas, headers, end_index = self._load_and_validate_samples_info(data, samples_size, samples_ids, defaule_header_name, start_index)
-            start_index = end_index
-            all_data.append(datas)
-            all_headers.append(headers)
+        for datafile in data_list:
+            data, header = self._load_and_validate_samples_info(datafile, samples_size, samples_ids)
+            if header is None:
+                header = self.header_manager.generate_title(defaule_header_name, data.shape[1])
+            all_data.append(data)
+            all_headers.append(header)
 
-        all_data = column_stack(tuple(all_data))
-        all_headers = hstack(tuple(all_headers))
-        return all_data, all_headers, end_index
+        data = column_stack(tuple(all_data))
+        header = hstack(tuple(all_headers))
+        return data, header
 
     def _load_and_validate_phenotype(self, phenofile_list, samples_size, samples_ids, default_pheno_name = DEFAULT_PHENO_NAME):
         """
@@ -465,9 +487,8 @@ class MethylationDataLoader(MethylationData):
             return None, None
 
         logging.info("validating phenotype file...")
-        pheno, header, end_index = self._load_and_validate_samples_data_list(phenofile_list, samples_size, samples_ids, default_pheno_name, self._last_pheno_i)
-        self._last_pheno_i = end_index
-
+        pheno, header = self._load_and_validate_samples_data(phenofile_list, samples_size, samples_ids, default_pheno_name)
+        logging.info("new phenotypes found: %s" % ", ".join(header))
         return pheno, header
  
 
@@ -479,11 +500,41 @@ class MethylationDataLoader(MethylationData):
         if not covarfiles_list:
             return None, None
 
-        logging.info("validating covariates files...")
-        all_covar, all_covars_names, end_index = self._load_and_validate_samples_data_list(covarfiles_list, samples_size, samples_ids, default_covar_name, self._last_covar_i)
-        self._last_covar_i = end_index
+        logging.info("validating phenotype file...")
+        covar, header = self._load_and_validate_samples_data(covarfiles_list, samples_size, samples_ids, default_covar_name)
+        logging.info("new covariates found: %s" % ", ".join(header))
+        
+        return covar, header
 
-        return all_covar, all_covars_names
+    def update_covar_header(self, titles_to_add):
+        if self.covarnames is not None:
+            mutual_names = set(self.covarnames).intersection(set(titles_to_add))
+            if mutual_names:
+                common.terminate("more than one covariate with the name %s" % str (mutual_names))
+            self.covarnames = hstack((self.covarnames, titles_to_add))
+        else:
+            self.covarnames = titles_to_add
+    
+    def update_covar_data(self, new_data):
+        if self.covar is not None:
+            self.covar = column_stack((self.covar, new_data))
+        else:
+            self.covar = new_data
+
+    def update_pheno_header(self, titles_to_add):
+        if self.phenonames is not None:
+            mutual_names = set(self.phenonames).intersection(set(titles_to_add))
+            if mutual_names:
+                common.terminate("more than one phenotype with the name %s" % str (mutual_names))
+            self.phenonames = hstack((self.phenonames, titles_to_add))
+        else:
+            self.phenonames = titles_to_add
+
+    def update_pheno_data(self, new_data):
+        if self.phenotype is not None:
+            self.phenotype = column_stack((self.phenotype, new_data))
+        else:
+            self.phenotype = new_data
 
     def add_covar_datas(self, covardata, default_covar_name = DEAFULT_COVAR_NAME, covarsnames = None):
         """
@@ -495,18 +546,10 @@ class MethylationDataLoader(MethylationData):
         assumes covardata is in the right format and the sample_ids order is as in the datafile 
         """
         if covarsnames is None:
-            covarsnames = ["%s%d" % (default_covar_name, i) for i in range(self._last_covar_i, self._last_covar_i + covardata.shape[1])]
-        self._last_covar_i += covardata.shape[1]
+            covarsnames = self.header_manager.generate_title(default_covar_name, covardata.shape[1])
         
-        if self.covar is not None:
-            mutual_names = set(self.covarnames).intersection(set(covarsnames))
-            if mutual_names:
-                common.terminate("more than one covariate with the name %s" % str (mutual_names))
-            self.covar = column_stack((self.covar, covardata))
-            self.covarnames = hstack((self.covarnames, covarsnames))
-        else:
-            self.covar = covardata
-            self.covarnames = covarsnames
+        self.update_covar_data(covardata)
+        self.update_covar_header(covarsnames)
         logging.info("added covariates %s" % ", ".join(covarsnames))
 
     def add_covar_files(self, covarfiles_list, default_covar_name = DEAFULT_COVAR_NAME):
@@ -515,9 +558,8 @@ class MethylationDataLoader(MethylationData):
         assumes self.covars is not None
         """
         covars, covarsnames = self._load_and_validate_covar(covarfiles_list, self.samples_size, self.samples_ids, default_covar_name)
-        logging.info("added covariates %s" % ", ".join(covarsnames))
-        self.covar = column_stack((self.covar, covars))
-        self.covarnames = hstack((self.covarnames, covarsnames))
+        self.update_covar_data(covars)
+        self.update_covar_header(covarsnames)
 
     def add_pheno_files(self, phenofiles_list, default_pheno_name = DEFAULT_PHENO_NAME):
         """
@@ -525,9 +567,8 @@ class MethylationDataLoader(MethylationData):
         assumes self.phenotype is not None
         """
         phenos, names = self._load_and_validate_phenotype(phenofiles_list, self.samples_size, self.samples_ids, default_pheno_name)
-        logging.info("added phenotypes %s" % ", ".join(names))
-        self.phenotype = column_stack((self.phenotype, phenos))
-        self.phenonames = hstack((self.phenonames, names))
+        self.update_pheno_data(phenos)
+        self.update_pheno_header(names)
 
     def upload_new_covaritates_files(self, covarfiles_list, default_covar_name = DEAFULT_COVAR_NAME):
         """

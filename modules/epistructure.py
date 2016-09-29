@@ -23,7 +23,7 @@ class Epistructure(Module):
         covars = self.meth_data.get_covariates_subset(covars_to_regress)
         if covars is not None:
             logging.info("regressing out covariates...")
-            fs_meth_data.regress_out(covars)
+            self.meth_data.regress_out(covars)
         else:
             logging.info("ignoring covariates")
 
