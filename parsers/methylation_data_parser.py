@@ -72,8 +72,8 @@ class MethylationDataParser(ModuleParser):
         required.add_argument('--datafile', type = argparse.FileType('r'), required = True,  help = "A data matrix file of beta-normalized methylation levels or a .glint file")
 
         optional = parser.add_argument_group('2.Data management options ')
-        optional.add_argument('--covarfiles', type = argparse.FileType('r'), nargs='*', help = "A covariates file (or files)")
-        optional.add_argument('--phenofiles', type = argparse.FileType('r'), nargs='*', help = "A phenotype file (or files)")
+        optional.add_argument('--covarfile', type = argparse.FileType('r'), nargs='*', help = "A covariates file (or files)")
+        optional.add_argument('--phenofile', type = argparse.FileType('r'), nargs='*', help = "A phenotype file (or files)")
         optional.add_argument('--maxpcstd', metavar=('PC_INDEX (TODO Elior, change those names?', 'STD_COUNT'), type = int, action = 'append', nargs = 2, help = "TODO Elior, edit: pc index and std number of times for removing outliers")
             
         group1 = optional.add_mutually_exclusive_group(required = False)
@@ -170,13 +170,14 @@ class MethylationDataParser(ModuleParser):
             self.module.exclude_sites_with_high_mean(self.args.maxmean)
         if self.args.minstd is not None:
             self.module.remove_lowest_std_sites(self.args.minstd)
-        if self.args.rmxy is not None:
+
+        if self.args.rmxy:
             logging.info("excluding sites from X and Y chromosomes...")
             self.module.exclude(loadtxt(HUMAN_X_Y, dtype = str))
-        if self.args.rmns is not None:
+        if self.args.rmns:
             logging.info("excluding non-specific sites...")
             self.module.exclude(loadtxt(NONSPECIFIC_PROBES, dtype = str))
-        if self.args.rmpoly is not None:
+        if self.args.rmpoly:
             logging.info("excluding polymorphic sites...")
             self.module.exclude(loadtxt(POLYMORPHIC_CPGS, dtype = str))
 
@@ -201,17 +202,17 @@ class MethylationDataParser(ModuleParser):
         try:
             self.args = args
             self.module = None
-            if args.datafile.name.endswith(methylation_data.GLINT_FORMATTED_EXTENSION):
+            if args.datafile.name.endswith(methylation_data.GLINT_FILE_SUFFIX):
                 logging.info("Loading glint file: %s..." % args.datafile.name)
                 self.module = load(args.datafile) # datafile is fileType (status: open for read)
                 logging.debug("Got methylation data with %s sites and %s samples id" % (self.module.sites_size, self.module.samples_size))
                 # if phenotype or covariates supplied with metylation data, replace module covar and pheno file with new ones
-                if args.phenofiles is not None:
-                    self.module.add_pheno_files(args.phenofiles)
-                if args.covarfiles is not None:
-                    self.module.add_covar_files(args.covarfiles)
+                if args.phenofile is not None:
+                    self.module.add_pheno_files(args.phenofile)
+                if args.covarfile is not None:
+                    self.module.add_covar_files(args.covarfile)
             else:
-                self.module = methylation_data.MethylationDataLoader(datafile = args.datafile, phenofile = args.phenofiles, covarfiles = args.covarfiles)
+                self.module = methylation_data.MethylationDataLoader(datafile = args.datafile, phenofile = args.phenofile, covarfiles = args.covarfile)
 
             # load remove/keep sites/samples files and remove/keep values
             self.include_list = []

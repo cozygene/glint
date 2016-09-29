@@ -71,7 +71,7 @@ class LMMParser(ModuleParser):
     def validate_args(self, args):
         # argument pheno is required for all ewas tests - it can be supplied through --pheno flag of .glint meth data file
         # So, if the datafile supplied is not .glint file - pheno must be supplied as a flag 
-        if not args.datafile.name.endswith(methylation_data.GLINT_FORMATTED_EXTENSION):
+        if not args.datafile.name.endswith(methylation_data.GLINT_FILE_SUFFIX):
             self.required_args.append('phenofiles')
         
         if args.kinship == 'refactor':

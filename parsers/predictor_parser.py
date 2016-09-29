@@ -53,12 +53,17 @@ class PredictorParser(ModuleParser):
         super(PredictorParser, self).__init__(predictor)
         
 
-    def run(self, args):
+    def run(self, args, output_perfix = None):
         try:
             self.module  = predictor.Predictor(SITES_SCORES_FILE, SITES_SNPS_FILE, SITES_IDS_FILE, SNPS_IDS_FILE, SITES_SNPS_COEFF_FILE)
             self.module.predict(args.score, args.snp, args.geno, args.ind, args.maxmiss)
             meth_data = self.module.meth_data()
-            meth_data.save_serialized_data('predicted')
+            
+            prefix = "imputation"
+            if output_perfix is not None:
+                prefix = output_perfix + ".imputation"
+
+            meth_data.save_serialized_data(prefix)
         except Exception :
             logging.exception("in predictor")
             raise

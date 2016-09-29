@@ -191,7 +191,7 @@ class ModulesArgumentParsers(object):
 
     def run(self):
         if self.args.impute:
-            self.predictor_parser.run(args)
+            self.predictor_parser.run(args, output_perfix = self.args.out)
             return
 
         if (self.args.qqplot or args.manhattan) and not self.args.ewas: # if user asked to run plot without running EWAS test, run plot and quit

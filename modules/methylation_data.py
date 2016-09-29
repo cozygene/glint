@@ -8,8 +8,9 @@ from module import Module
 from utils import common, pca, LinearRegression, sitesinfo
 from bisect import bisect_right
 
-COMPRESSED_FILENAME = "methylation_data"
-GLINT_FORMATTED_EXTENSION = ".glint" #TODO move to a config file
+DEFAULT_PREFIX = "methylation_data"
+GLINT_FILE_SUFFIX = "glint" #TODO move to a config file
+DATA_SUFFIX = "txt"
 DEAFULT_COVAR_NAME = "c"
 DEFAULT_PHENO_NAME = "p"
 def validate_no_missing_values(data):
@@ -163,12 +164,14 @@ class MethylationData(Module):
         save samples ids withe the covariates and phenotype
         save cpgnames with  information on each site
         """
-        logging.info("Saving cpg names and info to %s" % prefix + "_sites_list.txt")
+        sites_filename = prefix + ".sites." + DATA_SUFFIX
+        logging.info("Saving cpg names and info to %s" % sites_filename)
         sites_info = sitesinfo.SitesInfoGenerator(self.cpgnames)
         sites_data = column_stack((self.cpgnames, sites_info.chromosomes, sites_info.positions, sites_info.genes, sites_info.categories))
-        savetxt(prefix + "_sites_list.txt", sites_data, delimiter='\t', fmt = '%-12s\t%-4s\t%-12s\t%-22s\t%-22s', header = "cpgnames, chromosomes, positions, genes, categories")
+        savetxt(sites_filename, sites_data, delimiter='\t', fmt = '%-12s\t%-4s\t%-12s\t%-22s\t%-22s', header = "cpgid, chromosome, position, gene, category")
         
-        logging.info("Saving samples ids and their phenotype and covariates to %s" % prefix + "_sampless_list.txt")
+        samples_filename = prefix + ".samples." + DATA_SUFFIX
+        logging.info("Saving samples ids and their phenotype and covariates to %s" % samples_filename)
         samples_data = self.samples_ids
         samples_header = "sampleid"
         fmt = '%-12s'
@@ -187,43 +190,38 @@ class MethylationData(Module):
                 samples_header += ", " + ", ".join(self.covarnames)
             fmt += '\t%-12s' * covar_num
 
-        savetxt(prefix + "_sampless_list.txt", samples_data, fmt = fmt, header = samples_header, delimiter='\t')
+        savetxt(samples_filename, samples_data, fmt = fmt, header = samples_header, delimiter='\t')
 
-    def save_raw_data(self, prefix = ''):
+    def save_raw_data(self, prefix = DEFAULT_PREFIX):
         """
         save the data matrix to a text visible file
         save samples ids withe the covariates and phenotype
         save cpgnames with  information on each site
         """
         if prefix is None:
-            prefix = ''
-        if prefix != '' and not prefix.endswith('_'):
-            prefix = prefix + "_"
-        filename = prefix + COMPRESSED_FILENAME
-        methylation_data_filename = filename + ".txt"
+            prefix = DEFAULT_PREFIX
         
-        self.save_sites_and_samples(filename)
+        self.save_sites_and_samples(prefix)
+
+        methylation_data_filename = prefix + "." + DATA_SUFFIX
 
         logging.info("Saving methylation data to %s" % methylation_data_filename)
         savetxt(methylation_data_filename, self.data, delimiter='\t')
 
 
-    def save_serialized_data(self, prefix = ''):
+    def save_serialized_data(self, prefix = DEFAULT_PREFIX):
         """
         serializes this object and saves it to methylation_data_filename
         assumes that methylation_data_filename is a valid file 
         """
         if prefix is None:
-            prefix = ''
-        if prefix != '' and not prefix.endswith('_'):
-            prefix = prefix + "_"
-        filename = prefix + COMPRESSED_FILENAME
-        methylation_data_filename = filename + GLINT_FORMATTED_EXTENSION
+            prefix = DEFAULT_PREFIX
 
-        self.save_sites_and_samples(filename)
-
-        with open(methylation_data_filename, 'wb') as f:
-            logging.info("Saving methylation data as glint format at %s" % methylation_data_filename)
+        self.save_sites_and_samples(prefix)
+        
+        filename = prefix + "." + GLINT_FILE_SUFFIX
+        with open(filename, 'wb') as f:
+            logging.info("Saving methylation data as glint format at %s" % filename)
             dump(self, f)
         f.close()
 
@@ -405,7 +403,7 @@ class MethylationDataLoader(MethylationData):
 
         data = common.load_data_file(datafile.name, dim)
         if data is None:
-            common.terminate("the file '%s' is not a %sd matrix" % (datafile.name, dim))
+            common.terminate("there is a problem with the format of the file '%s'" % datafile.name)
 
         return data
 
