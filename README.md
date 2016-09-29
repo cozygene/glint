@@ -8,14 +8,14 @@ Some of the features of the software include
  - ancestry estimation from methylation. 
  - generate publication-quality figures
 
-### Download
+### Download and Installation
 
-Download the latest release from <a href="put the link here" target="_blank"> !edit this!here</a>.
+1. Download the latest release from <a href="put the link here" target="_blank"> !edit this!here</a>.
+2. Install <a href="https://www.continuum.io/downloads" target="_blank">Anaconda Python version 2.7</a> (automatically includes all required dependencies).
 
-### Installation
-2. To use the Python version:
-  1. Install <a href="https://www.continuum.io/downloads" target="_blank">Anaconda Python version 2.7</a> (automatically includes all required dependencies).
-  2. Install ReFACTor by running the provided install.py file (run ```python install.py```). For more details see "Dependencies".
+  If you already have Python installed and do not want to install Anaconda Python, run "install.py" script
+
+3. Install PUTNAMEHERE by running the provided install.py file (run ```python install.py```). For more details see "Dependencies".
   
 ### Dependencies
 
