@@ -29,10 +29,8 @@ Following this command we now have *data.glint* file, a binary version of the me
 This command will generate a figure titled *pcs_plot.png*, showing scatter plots of the first two principal components (PCs) of the data. Note that an additional figure will be generated, *pcs_plot.eps*, a publication quality version of the same figure.
 
 .. image:: figs/pcs_plot.png
-    :width: 400px
+    :width: 40%
     :align: center
-    :height: 300px
-    :alt: pcs_plot.png
 
 3. For this tutorial we consider samples with values more extreme than 4 sandard deviations (SDs) in their first two PCs as outliers. Figure *pcs_plot.png* demonstrates that we currently have 2 outliers in the data. We remove these outliers by indicating for glint a threshold of 4 SDs for the maximum level of the first PC::
 
@@ -60,39 +58,51 @@ This command resulted in a file titled *data_final.epistructure.pcs.txt* (see "i
 Note that *data_final.samples.txt* includes a new covariate named "epi1", which is the first Epistructure component (by default *--epi* outputs one PC).
 
 
-6. We are now ready to run association test for each site. In this tutorial we will run EWAS on age, and since age is a continuous variable we will use linear regression. We will include in the analysis the ReFACTor components and the Epistructure components in order to account for tissue heterogeneity and population structure (using the *--covar* argument). In addition, using the *--stdth* argument we do not consider nearly constant sites having very low variability, and using the arguments *--rmxy*, *--rmns* and *--rmpoly*, we also do not consider X and Y chromosome sites, cross-reactive sites and polymorphic sites [4]_.
-
+6. We are now ready to run association test for each site. In this tutorial we will run EWAS on a simulated phenotype (selected using the *--pheno* argument, according to the phenotype's name in the phenotypes file). Since the phenotype is continuous we will use a linear regression model, and we will include the ReFACTor components and the Epistructure components in the analysis in order to account for tissue heterogeneity and population structure. In addition, using the *--stdth* argument we can neglect nearly constant sites having very low variability, and using the arguments *--rmxy*, *--rmns* and *--rmpoly*, we can also neglect X and Y chromosome sites, cross-reactive sites and polymorphic sites [4]_.
 
 ::
 
-	python ../glint.py --datafile data_final.glint --ewas --linear --pheno age --covar rc1,rc2,rc3,rc4,rc5,rc6,epi1 --stdth 0.01 --rmxy --rmns --rmpoly
+	python glint.py --datafile data_final.glint --ewas --linreg --pheno y1 --covar rc1 rc2 rc3 rc4 rc5 rc6 epi1 --stdth 0.01 --rmxy --rmns --rmpoly
 
-This command outputs a file titled *results.txt* with the results of the association test. Note that the results are sorted by their association p-value.
+This command outputs a file titled *results.glint.linreg.txt* with the results of the association test. Note that the results are sorted by their association p-value.
+
+.. image:: figs/results.glint.qqplot.png
+    :width: 40%
+    :align: center
+
+.. image:: figs/results.glint.manhattan.png
+    :width: 40%
+    :align: center
+
+7. Lastly, we would like to plot the results in the results.glint.linreg.txt file. glint allows to visualize the data by plotting a qq-plot (*--qqplot*) and a Manahattan plot (*--manhattan*) as follows.::
+
+	python glint.py --plot --qqplot --manhattan --results results.glint.linreg.txt
+
+This command will generate two figures, titled *pcs_plot.png*, *results.glint.qqplot.png* and *results.glint.manhattan.png*, showing a qq-plot and a Manhattan plot of the results. In
+
+Finally, in our example we found a single significant association in chromosome 15, as reflected in the qq-plot and in the Manhattan plot. The phenotype we used here was simulated to be correlated with the cell composition, therefore performing uncorrected analysis is expected to result in many spurious assocaitions. We can easily see that by running an unadjusted EWAS by simply repeating the EWAS analysis, this time without including the covaraites, and then plotting the results as follows:
+
+::
+
+	python glint.py --datafile data_final.glint --ewas --linreg --pheno y1 --stdth 0.01 --rmxy --rmns --rmpoly --out unadjusted
+	python glint.py --plot --qqplot --manhattan --results unadjusted.glint.linreg.txt --out unadjusted
 
 
+.. image:: figs/unadjusted.glint.qqplot.png
+    :width: 40%
+    :align: center
 
-7. Lastly, we would like to plot the results in results.txt. glint currently allows to visualize the data by plotting a QQ-plot (--qqplot) and a Manahattan plot (--manhattan) as follows.::
+.. image:: figs/unadjusted.glint.manhattan.png
+    :width: 40%
+    :align: center
 
-	python ../glint.py --plot --qqplot --manhattan
-
-The figures are in .. 
-
-#. As a comparison, we run the EWAS without adjusting for the refactor and epustruct components and plot again..
-
-TODO: add a step that removes X,Y chr, cross reactive and poolymorphic sites before the EWAS. Note that these should be removed before the EWAS, since for example Epistructure uses the poly sites and refactor may use some of the CR sites.
-
-
-..citations are in Chcago format
+.. citations are in Chcago format
 
 .. [1] Rahmani, Elior, Noah Zaitlen, Yael Baran, Celeste Eng, Donglei Hu, Joshua Galanter, Sam Oh et al. "Sparse PCA corrects for cell type heterogeneity in epigenome-wide association studies." Nature methods 13, no. 5 (2016): 443-445.
-
 .. [2] Jaffe, Andrew E., and Rafael A. Irizarry. "Accounting for cellular heterogeneity is critical in epigenome-wide association studies." Genome biology 15, no. 2 (2014): 1.
-
 .. [3] Rahmani, Elior, Liat Shenhav, Regev Schweiger, Paul Yousefi, Karen Huen, Brenda Eskenazi, Celeste Eng et al. "Genome-wide methylation data mirror ancestry information." bioRxiv (2016): 066340.
-
 .. [4] Chen, Yi-an, Mathieu Lemire, Sanaa Choufani, Darci T. Butcher, Daria Grafodatskaya, Brent W. Zanke, Steven Gallinger, Thomas J. Hudson, and Rosanna Weksberg. "Discovery of cross-reactive probes and polymorphic CpGs in the Illumina Infinium HumanMethylation450 microarray." Epigenetics 8, no. 2 (2013): 203-209.
 
+.. _here: blank
 
-.. [here] blank
-
-.. [GSE77716] https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE77716
+.. _GSE77716: https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE77716
