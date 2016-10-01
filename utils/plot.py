@@ -215,7 +215,7 @@ class ManhattanPlot(Plot):
         df['ind'] = range(len(df))
         df_grouped = df.groupby(('chromosome'))
         
-        colors = cycle(['darkblue','skyblue','darkred'])
+        colors = cycle(['darkblue','skyblue'])
         x_labels = []
         for (name, group) in df_grouped:
             clr = colors.next()
