@@ -2,15 +2,9 @@
 An easy and efficient command-line tool for the analysis of DNA methylation data and conducting EWAS.  
 Our software does not require any programming proficiency.
 
-Some of the abaliable features:
- - Data managment
- - Correction of cell type composition (ReFACTor)
- - Ancestry estimation
- - A novel method for methylation imputation 
- - EWAS tests: linear regressin, logistic regression, LMM, Wilcoxon
- - Generation of publication-quality plots
+The software provides options for data managment, novel methods for correction of cell type composition (ReFACTor), ancestry estimation and methylation imputation. Statistical tests such as linear regressin, logistic regression, LMM and Wilcoxon. Generation of publication-quality plots and more.
 
-For more details see "Documentation"
+For more details see "Documentation"  
 
 ### Download and Installation
 
@@ -21,7 +15,7 @@ For more details see "Documentation"
 
 3. Install todoPUTNAMEHERE by running the provided install.py file, run: ```python install.py```
 
-For more details see "Dependencies".
+For more details see "Dependencies".  
   
 ### Quick example
 This command will conduct EWAS on a metylation data and a phenotype (files 'data.txt' and 'phenotype.txt').
@@ -29,11 +23,11 @@ Fisrt it will remove sites low variance sites, then it will run association test
 ```
 python glinttodo.py --datafile data.txt --minstd 0.02 --ewas --linreg --phenofile phenotype.txt --pheno age --plot --qqplot --manhhattan
 ```
-*In order to quick learn more options, try this <a href="todo add link to tutorial" target="_blank">tutorial</a>*
+**In order to quick learn more options, try this <a href="todo add link to tutorial" target="_blank">tutorial</a>**  
 
 ### Documentation
 Detailed documentation explaining all the features can be found <a href="todo add link to docs" target="_blank">here</a>.  
-We also supply a quick  <a href="todo add link to tutorial" target="_blank">tutorial</a> that will walk you through the basic options avaliable
+We also supply a quick  <a href="todo add link to tutorial" target="_blank">tutorial</a> that will walk you through the basic options avaliable  
 
 ### Dependencies
 
@@ -53,7 +47,7 @@ If you already have Python installed and do not want to install Anaconda Python,
 ```
 python install.py
 ```
-The script automatically installs missing dependencies that are required for todoPUTNAMEHERE. Note that in some environments the script may fail to install some of the dependencies, in which case you will need to manually install them.
+The script automatically installs missing dependencies that are required for todoPUTNAMEHERE. Note that in some environments the script may fail to install some of the dependencies, in which case you will need to manually install them.  
 
 ### Citing todoPUTNAMEHERE
 elior..todo
