@@ -313,7 +313,7 @@ class MethylationData(Module):
 
     def get_phenotypes_indicis(self, names_list):
         if self.phenonames is None: # there are no phenotypes
-            common.terminate("there is no phenotype in the data. add phenotype files with --phenofiles")
+            common.terminate("there is no phenotype in the data. add phenotype files with --phenofile")
         indices = where(in1d(self.phenonames, names_list))[0]
         if len(indices) != len(names_list):
             common.terminate("some phenotypes names does not match the names in the data")
@@ -321,7 +321,7 @@ class MethylationData(Module):
 
     def get_covariates_indicis(self, covariates_names_list):
         if self.covarnames is None: # there are no covariates
-            common.terminate("there is no covariate in the data. add covariate files with --covarfiles")
+            common.terminate("there is no covariate in the data. add covariate files with --covarfile")
         indices = where(in1d(self.covarnames , covariates_names_list))[0]
         if len(indices) != len(covariates_names_list):
             common.terminate("some covariates names does not match the names in the data")
