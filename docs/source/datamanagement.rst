@@ -2,35 +2,13 @@
 Data management
 ===============
 
-Note that the data management commands are applied to tasks that are added to the command.. the data management commands are then not saved unless --gsave is used
+The following section describes arguments that allow to perform basic data management and quality control procedures on data files.
 
-glint files
-^^^^^^^^^^^
+.. note:: Data management commands applied to data do not change the input files. In order to save the changes use the `--gsave`_ or `--save`_ commands.
 
-**--gsave**
+.. _--gsave: input.html#glint-files
 
-Saves a glint binary format of the methylation data. If a phenotype file (--pheno) and covaraites file (--covar) are provided then their information is also contained in the glint file. In addition to the .glint file generated, this argument also generates two additional files:
-
-- datafile.samples.txt - contains the sample identifiers of the samples in the data and the phenotypes and covaraites for each sample.
-- datafile.sites.txt - contains the CpGs identifiers of the sites in the data and additional information for each CpG.
-
-For example::
-
-	glint.py --datafile datafile.txt --gsave tutorial_datafile
-
-will save a glint file named tutorial_datafile.glint.
-
-
-
-**--save**
-
-Saves the methylation data matrix into a text file.
-
-For example::
-
-	glint.py --datafile datafile.glint --save filename
-
-will save the methylation matrix in filename into a new text file named filename.
+.. _--save: input.html#glint-files
 
 
 Outliers detection
@@ -49,7 +27,7 @@ will remove all samples having extreme values of more than 3 standard deviations
 
 .. note:: Use the --plotpcs argument described under "plots" for plotting the first several PCs of the samples in order to determine whether outliers exist in your data.
 
-
+.. note:: You can remove outliers based on more than one PC at the same time. For example, for indicating 3 SDs as the maximum level allowed for both PC 1 and PC2 use: *--maxpcstd 1 3 --maxpcstd 2 3*.
 
 Data filtering
 ^^^^^^^^^^^^^^
@@ -124,5 +102,15 @@ For example::
 	glint.py --datafile datafile.glint --maxmean 0.8
 
 will remove all the sites with mean methylation level above 0.8.
+
+
+**--rmxy**
+
+
+**--rmns**
+
+
+**--rmpoly**
+
 
 

@@ -5,9 +5,9 @@
 
 
 Documentation and a simple tutorial: glint!
-=========================================
+===========================================
 
-glint is a user-friendly command line tool for the analysis of genome-wide DNA methylation data generated using the Illumina human methylation arrays.
+glint is a user-friendly command line tool for fast analysis of genome-wide DNA methylation data generated using the Illumina human methylation arrays. glint allows to run an EWAS pipeline under different models while accounting for known confounders in methylation data.
 
 
 Getting glint:
@@ -32,7 +32,6 @@ Using glint:
 .. toctree::
    :maxdepth: 2
 
-   introduction
    input
    datamanagement
    tissueheterogeneity
