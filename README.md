@@ -18,8 +18,7 @@ For more details see "Documentation"
 For more details see "Dependencies".  
   
 ### Quick example
-This command will conduct EWAS on a metylation data and a phenotype (files 'data.txt' and 'phenotype.txt').
-First it will remove low variance sites, then will run association test (linear regression) for each site on a phenotype. Finally it will plot the results and will generate a publication-quality qq-plot and a Manhattan plot.
+This command will conduct EWAS on metylation data and a phenotype. First it'll remove the low variance sites, then it'll run linear regression and finally it'll generate a publication-quality qq-plot and Manhattan plot.
 ```
 python glinttodo.py --datafile data.txt --minstd 0.02 --ewas --linreg --phenofile phenotype.txt --pheno age --plot --qqplot --manhhattan
 ```
