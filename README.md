@@ -1,9 +1,10 @@
 # glint
-An easy and efficient command-line tool for the analysis of DNA methylation data and conducting EWAS. Our software does not require any programming proficiency.
+An easy and efficient command-line tool for the analysis of DNA methylation data and conducting EWAS.
+Our software does not require any programming proficiency.
 
-Some of the features of the software include:
+Some of the abaliable features:
  - Data managment
- - Correction of cell type composition (ReDACTor)
+ - Correction of cell type composition (ReFACTor)
  - Ancestry estimation
  - A novel method for methylation imputation 
  - EWAS tests: linear regressin, logistic regression, LMM, Wilcoxon
