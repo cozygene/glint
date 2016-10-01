@@ -1,5 +1,5 @@
 # glint
-An easy and efficient command-line tool for the analysis of DNA methylation data and conducting EWAS.
+An easy and efficient command-line tool for the analysis of DNA methylation data and conducting EWAS.  
 Our software does not require any programming proficiency.
 
 Some of the abaliable features:
@@ -24,15 +24,15 @@ For more details see "Documentation"
 For more details see "Dependencies".
   
 ### Quick example
-The following command will conduct EWAS on a metylation data (found in file data.txt) and a phenotype (found in the file phenotype.txt).
-Fisrt it will remove sites with low std (lower than 0.02). Then it will run association test (linear regression) for each site on a phenotype. Finally it will plot the results and will generate a publication-quality qq-plot and a Manhattan plot.
+This command will conduct EWAS on a metylation data and a phenotype (files 'data.txt' and 'phenotype.txt').
+Fisrt it will remove sites low variance sites, then it will run association test (linear regression) for each site on a phenotype. Finally it will plot the results and will generate a publication-quality qq-plot and a Manhattan plot.
 ```
 python glinttodo.py --datafile data.txt --minstd 0.02 --ewas --linreg --phenofile phenotype.txt --pheno age --plot --qqplot --manhhattan
 ```
-In order to quick learn more options, try this <a href="todo add link to tutorial" target="_blank">tutorial</a>
+*In order to quick learn more options, try this <a href="todo add link to tutorial" target="_blank">tutorial</a>*
 
 ### Documentation
-Detailed documentation with all the features is <a href="todo add link to docs" target="_blank">here</a>
+Detailed documentation explaining all the features can be found <a href="todo add link to docs" target="_blank">here</a>.  
 We also supply a quick  <a href="todo add link to tutorial" target="_blank">tutorial</a> that will walk you through the basic options avaliable
 
 ### Dependencies
