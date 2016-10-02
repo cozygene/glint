@@ -62,7 +62,7 @@ Citing glint:
 Contact us:
 ^^^^^^^^^^^
 
-This software was developed by Reut Yedidim and Elior Rahmani.
+This software was developed by Reut Yedidim, Omer Weissbrod and Elior Rahmani.
 For any question and for reporting bugs please send an email to Elior Rahmani at: elior.rahmani@gmail.com
 
 

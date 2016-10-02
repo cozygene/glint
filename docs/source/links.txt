@@ -1,0 +1,76 @@
+
+
+.. ### input 
+
+.. _--datafile: input.html#covarfile
+
+.. _--covarfile: input.html#covarfile
+
+.. _--phenofile: input.html#phenofile
+
+.. _glint files: input.html#glint-files
+
+.. _--gsave: input.html#--gsave
+
+.. _--save: input.html#--gave
+
+
+
+.. ### data management
+
+
+.. _--rmxy: datamanagement.html#rmxy
+
+.. _--rmns: datamanagement.html#rmns
+
+.. _--rmpoly: datamanagement.html#rmpoly
+
+
+
+.. ### Tissue heterogeneity
+
+
+.. _--refator: tissueheterogeneity.html#refactor
+
+.. _--k: tissueheterogeneity.html#k
+
+.. # --covar: tissueheterogeneity.html#covar
+
+
+
+
+.. ### population structure
+
+.. _--epi: popstructure.html#epi
+
+
+
+
+.. ### EWAS
+
+.. _--stdth: ewas.html#stdth
+
+.. _--stdth: ewas.html#stdth
+
+.. _--stdth: ewas.html#stdth
+
+.. _--stdth: ewas.html#stdth
+
+
+
+
+
+
+
+.. ### plots
+
+.. _--plot: popstructure.html#plot
+
+.. _--plotpcs: popstructure.html#plotpcs
+
+.. _--qqplot: popstructure.html#qqplot
+
+.. _--manhattan: popstructure.html#manhattan
+
+
+

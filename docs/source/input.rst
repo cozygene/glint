@@ -1,11 +1,16 @@
 
+
+
 Input
 =====
 
-The following section describes arguments that allow to provide data files for glint, and the *--gsave* argument that allows to save and work with a binary version of the data (glint files) for gaining computation speed-up.
+The following section describes arguments that allow to provide data files for glint, and the `--gsave`_ argument that allows to save and work with a binary version of the data (`glint files`_) for gaining computation speed-up.
 Note that glint does not work on raw data, but rather assumes data are given after raw data preprocessing. 
 
 
+
+|
+|
 
 Input files
 ^^^^^^^^^^^
@@ -13,6 +18,9 @@ Input files
 The `tutorial files`_ can be used as example files.
 
 .. _tutorial files: blank
+
+
+.. _--datafile:
 
 **--datafile:**	
 
@@ -29,6 +37,7 @@ will load the methylation data matrix in the *datafile.txt* file. See the tutori
 .. note:: In order to speed-up glint, we recommend working with a binary version of the data. See `--gsave`_ for more details.
 
 
+.. _--covarfile: 
 
 **--covarfile**
 
@@ -42,6 +51,9 @@ will provide the covariates matrix in the *covariates.txt* file. See the tutoria
 
 .. note:: More than one covariates file can be provided, e.g. *--covarfile covariates1.txt covariates2.txt*.
 
+
+
+.. _--phenofile:
 
 **--phenofile**
 
@@ -57,13 +69,20 @@ will provide the phenotypes matrix in the *phenotypes.txt* file. See the tutoria
 .. note:: More than one phenotypes file can be provided, e.g. *--phenofile phenotypes1.txt phenotypes2.txt*.
 
 
+
+
+
+
 |
 |
 
-.. _--gsave:
+
+.. _glint files:
 
 glint files
 ^^^^^^^^^^^
+
+.. _--gsave:
 
 **--gsave**
 
@@ -71,7 +90,7 @@ Saves glint files, including a binary version of the methylation data (*.glint* 
 
 - *datafile.sites.txt* - contains the CpG identifiers of the sites in the data and additional information for each CpG: chromosome, position, nearest gene and genomic category.
 
-- *datafile.samples.txt* - contains the sample identifiers of the samples in the data. If *--covarfile* and *--phenofile* are used then this file also includes the phenotypes and covaraites for each sample.
+- *datafile.samples.txt* - contains the sample identifiers of the samples in the data. If `--covarfile`_ and `--phenofile`_ are used then this file also includes the phenotypes and covariates for each sample.
 
 For example::
 
@@ -86,10 +105,16 @@ will save a binary data file titled *datafile.glint* and two additional files ti
 will also include the covariates and phenotypes information found in the *covariates.txt* and *phenotypes.txt* files in the *datafile.samples.txt* file.
 
 
+.. note:: Never change the *datafile.samples.txt* and *datafile.site.txt* files manually. Changes can be made using the `data management`_ commands.
+
+.. _data management: datamanagement.html
+
+
+.. _--save:
 
 **--save**
 
-Allows to save a textual version of the data in a binary *.glint* file.
+Allows to save a textual version of the data contained in a binary *.glint* file.
 
 For example::
 
@@ -97,7 +122,7 @@ For example::
 
 will create a file titled *datafile.txt* with a textual version of the methylation matrix in *datafile.glint*.
 
-.. note:: *--save* can be also used to save a new version of textual format of previous textual files (i.e. *--save* is not restricted to get *.glint* file as an input).
+.. note:: `--save`_ can be also used to save a new version of textual format of previous textual files (i.e. `--save`_ is not restricted to get *.glint* file as an input).
 
 
 |
@@ -119,7 +144,7 @@ For example::
 
 	Rscript convertToGlintInput.R datafile.RData X
 
-will save a tab-delimited text file containing sites by samples methylation data matrix as appear in the variable X that is saved in the *datafile.RData* file. The resulted file can be then provided as an input to glint (using --datafile).
+will save a tab-delimited text file containing sites by samples methylation data matrix as appear in the variable X that is saved in the *datafile.RData* file. The resulted file can be then provided as an input to glint (using `--datafile`_).
 
 |
 

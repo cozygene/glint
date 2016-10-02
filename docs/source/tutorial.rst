@@ -1,6 +1,8 @@
 
+
 Quick start tutorial
 ====================
+
 
 This tutorial will quickly walk you through the basic functionality of glint.
 For this tutorial we use subset of a public dataset from GEO (accession ID GSE77716_; the  dataset is described in details in Rahmani et al. [1]_). In order to run this tutorial you will need to download the tutorial files from here_. The tutorial files include:
@@ -44,12 +46,12 @@ We remove these outlier samples by indicating 4 SDs as the maximum level allowed
 
 	python glint.py --datafile data.glint --maxpcstd 1 4 --gsave --out data_cleaned
 
-As before, we are using the *--gsave* argument for generating glint files, this time without outliers. This will result in the following files: *data_cleaned.glint*, *data_cleaned.samples.txt* and *data_cleaned.sites.txt* files.
+As before, we are using the `--gsave`_ argument for generating glint files, this time without outliers. This will result in the following files: *data_cleaned.glint*, *data_cleaned.samples.txt* and *data_cleaned.sites.txt* files.
 
 
 4. **Estimating cell type composition**
 
-Since our data were collected from heterogeneous source (blood tissue), we run ReFACTor for estimating the cell type composition in the data and generate new glint files with the results. The resulted ReFACTor components will be used later as covariates in our EWAS, as tissue heterogeneity is a potential confounder in EWAS [2]_ . For best performance, we run ReFACTor while adding potential genome-wide effectors as covariates. We do that by adding the *--covar* argument which allows us to add covariates by their names (as they appear in the covariates file):
+Since our data were collected from heterogeneous source (blood tissue), we run ReFACTor for estimating the cell type composition in the data and generate new glint files with the results. The resulted ReFACTor components will be used later as covariates in our EWAS, as tissue heterogeneity is a potential confounder in EWAS [2]_ . For best performance, we run ReFACTor while adding potential genome-wide effectors as covariates. We do that by adding the `--covar`_ argument which allows us to add covariates by their names (as they appear in the covariates file):
 
 ::
 
@@ -67,12 +69,12 @@ The resuled Epistructure PCs will be used later as covariates in our EWAS::
 	python glint.py --datafile data_cleaned_v2.glint --epi --covar rc1 rc2 rc3 rc4 rc5 rc6 --gsave --out data_final
 
 This command resulted in a file titled *data_final.epistructure.pcs.txt* (see "inferring population structure" for more details). In addition, we now have *data_final.glint*, *data_final.samples.txt* and *data_final.sites.txt* files.
-Note that *data_final.samples.txt* includes a new covariate named "epi1", which is the first Epistructure component (by default *--epi* outputs one PC).
+Note that *data_final.samples.txt* includes a new covariate named "epi1", which is the first Epistructure component (by default `--epi`_ outputs one PC).
 
 
 6. **Running EWAS**
 
-We are now ready to run association test for each site. In this tutorial we will run EWAS on a simulated phenotype (selected using the *--pheno* argument, according to the phenotype's name in the phenotypes file). Since the phenotype is continuous we will use a linear regression model, and we will include the ReFACTor components and the Epistructure components in the analysis in order to account for tissue heterogeneity and population structure. In addition, using the *--stdth* argument we can neglect nearly constant sites having very low variability, and using the arguments *--rmxy*, *--rmns* and *--rmpoly*, we can also neglect X and Y chromosome sites, cross-reactive sites and polymorphic sites [4]_.
+We are now ready to run association test for each site. In this tutorial we will run EWAS on a simulated phenotype (selected using the `--pheno`_ argument, according to the phenotype's name in the phenotypes file). Since the phenotype is continuous we will use a linear regression model, and we will include the ReFACTor components and the Epistructure components in the analysis in order to account for tissue heterogeneity and population structure. In addition, using the `--stdth`_ argument we can neglect nearly constant sites having very low variability, and using the arguments `--rmxy`_, `--rmns`_ and `--rmpoly`_, we can also neglect X and Y chromosome sites, cross-reactive sites and polymorphic sites [4]_.
 
 ::
 
@@ -83,7 +85,7 @@ This command outputs a file titled *results.glint.linreg.txt* with the results o
 
 7. **Plotting results**
 
-Lastly, we would like to plot the results in the results.glint.linreg.txt file. glint allows to visualize the data by plotting a qq-plot (*--qqplot*) and a Manahattan plot (*--manhattan*) as follows.::
+Lastly, we would like to plot the results in the results.glint.linreg.txt file. glint allows to visualize the data by plotting a qq-plot (`--qqplot`_) and a Manahattan plot (`--manhattan`_) as follows.::
 
 	python glint.py --plot --qqplot --manhattan --results results.glint.linreg.txt
 
@@ -118,6 +120,34 @@ Finally, in our example we found a single significant association in chromosome 
 |
 |
 
+
+.. _here: blank
+
+.. _GSE77716: https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE77716
+
+
+.. _--gsave: input.html#gsave
+
+.. _--covar: tissueheterogeneity.html#covar
+
+.. _--epi: popstructure.html#epi
+
+.. _--pheno: ewas.html#pheno
+
+.. _--stdth: datamanagement.html#stdth
+
+.. _--rmxy: datamanagement.html#rmxy
+
+.. _--rmns: datamanagement.html#rmns
+
+.. _--rmpoly: datamanagement.html#rmpoly
+
+.. _--qqplot: plots.html#qqplot
+
+.. _--manhattan: plots.html#manhattan
+
+
+
 .. citations are in Chcago format
 
 .. [1] Rahmani, Elior, Noah Zaitlen, Yael Baran, Celeste Eng, Donglei Hu, Joshua Galanter, Sam Oh et al. "Sparse PCA corrects for cell type heterogeneity in epigenome-wide association studies." Nature methods 13, no. 5 (2016): 443-445.
@@ -125,6 +155,4 @@ Finally, in our example we found a single significant association in chromosome 
 .. [3] Rahmani, Elior, Liat Shenhav, Regev Schweiger, Paul Yousefi, Karen Huen, Brenda Eskenazi, Celeste Eng et al. "Genome-wide methylation data mirror ancestry information." bioRxiv (2016): 066340.
 .. [4] Chen, Yi-an, Mathieu Lemire, Sanaa Choufani, Darci T. Butcher, Daria Grafodatskaya, Brent W. Zanke, Steven Gallinger, Thomas J. Hudson, and Rosanna Weksberg. "Discovery of cross-reactive probes and polymorphic CpGs in the Illumina Infinium HumanMethylation450 microarray." Epigenetics 8, no. 2 (2013): 203-209.
 
-.. _here: blank
 
-.. _GSE77716: https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE77716
