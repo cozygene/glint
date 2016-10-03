@@ -56,15 +56,23 @@ class ConfigureLogging(object):
         self.streamHandler.setFormatter(_ConsoleFormatter())
         self.logger.addHandler(self.streamHandler)
 
-
-        self.fileHandler = logging.FileHandler(os.path.join(os.path.dirname(LOG_FILE_PATH), prefix + os.path.basename(LOG_FILE_PATH)),
-                                          mode='w')
-        self.fileHandler.setFormatter(_FileFormatter())
-        self.logger.addHandler(self.fileHandler)
-
         self.setLoggerLevel(loglevel)
+        if prefix:
+            self.setLoggerFile(prefix)            
 
     def setLoggerLevel(self, loglevel):
+        self.loglevel = loglevel
         self.logger.setLevel(loglevel)
         self.streamHandler.setLevel(loglevel)
-        self.fileHandler.setLevel(loglevel)
+    
+    def setLoggerFile(self, prefix):
+        filename = LOG_FILE_PATH
+        if prefix:
+            dirname = os.path.dirname(filename)
+            basefilename = prefix + "." + os.path.basename(filename)
+            filename = os.path.join(dirname, basefilename)
+    
+        self.fileHandler = logging.FileHandler(filename, mode='w')
+        self.fileHandler.setFormatter(_FileFormatter())
+        self.logger.addHandler(self.fileHandler)
+        self.fileHandler.setLevel(self.loglevel)

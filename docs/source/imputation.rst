@@ -28,14 +28,14 @@ For example::
 
 will generate glint files with imputed methylation data for a group of methylation sites, based on the *.snp*, *.geno* and *.ind* EIGENSTRAT files of the genotype data.
 
-.. note:: --impute will automatically generate glint files with the imputed methylation levels, therefore there is no need to add the --save argument.
+.. note:: --impute will automatically generate glint files with the imputed methylation levels, therefore there is no need to add the --gsave argument.
 
 .. note:: Add *--out filename* in order to change the default output name.
 
 
 .. _--score:
 
-**score**
+**--score**
 
 Controls the number of methylation sites to impute. This argument specifies the minimal score required for a site in order to get imputed. The deafult value is 0.5.
 

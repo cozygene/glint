@@ -3,7 +3,7 @@ import sys
 import copy
 import logging
 from pickle import dump
-from numpy import delete, isnan, where, column_stack, std, array, savetxt, in1d, mean, hstack
+from numpy import delete, isnan, where, column_stack, std, array, savetxt, in1d, mean, hstack, vstack
 from module import Module
 from utils import common, pca, LinearRegression, sitesinfo
 from bisect import bisect_right
@@ -205,8 +205,14 @@ class MethylationData(Module):
 
         methylation_data_filename = prefix + "." + DATA_SUFFIX
 
+
+        data = column_stack((self.cpgnames, self.data))
+        header = ["ID"]+list(self.samples_ids)
+
+        data = vstack((header, data))
+
         logging.info("Saving methylation data to %s" % methylation_data_filename)
-        savetxt(methylation_data_filename, self.data, delimiter='\t')
+        savetxt(methylation_data_filename, data, delimiter='\t', fmt='%s')
 
 
     def save_serialized_data(self, prefix = DEFAULT_PREFIX):
@@ -424,11 +430,14 @@ class MethylationDataLoader(MethylationData):
   
         logging.info("loading file %s..." % datafile.name)
 
-        data = common.load_data_file(datafile.name, dim)
+        data, samples_ids, cpgnames = common.load_data_file(datafile.name, dim)
         if data is None:
             common.terminate("there is a problem with the format of the file '%s'" % datafile.name)
-
-        return data
+        if cpgnames is None:
+            common.terminate("there are no cpgnames for the sites in the datafile '%s'" % datafile.name)
+        if samples_ids is None:
+            common.terminate("there are no samples ids (header) in the datafile '%s'" % datafile.name)
+        return data, samples_ids, cpgnames
 
     def _load_and_validate_datafile(self, datafile):
         """

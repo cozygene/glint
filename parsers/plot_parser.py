@@ -92,7 +92,7 @@ class PCAScatterPlotParser(ModuleParser):
     - plot will have no title
 
     to run:
-          glint.py --plot --plotpcs --numcomp 3 --datafile ...
+          glint.py --plot --plotpcs --numpcs 3 --datafile ...
 
 
     output file saved in both .png and .eps formats
@@ -120,6 +120,7 @@ class PCAScatterPlotParser(ModuleParser):
       logging.info("running PCA...")
       pca_out = pca.PCA(meth_data.data.transpose()) # meth_data should be transposed before passing to pca
       
+      logging.info("plotting first %s PCs..." % args.numpcs)
       pca_scatter_plot = plot.PCAScatterPlot(pca_out, plots_number = args.numpcs, save_file = output_filename)
       pca_scatter_plot.draw()
 

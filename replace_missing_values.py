@@ -9,7 +9,7 @@ def _replace_missing_values_in_matrix(all_data, missing_value_indicator, data_ma
 
     data_indices_to_remove = []
     print "Replacing missing values by mean..."
-    for i, data_for_all_samples in enumerate(all_data):
+    for i, data_for_all_samples in enumerate(all_data): # iterate each time different site for all samples
         na_indices = where(data_for_all_samples == missing_value_indicator)[0]
         na_count_per_sample[na_indices] += 1 
         na_count = len(na_indices)
@@ -122,9 +122,9 @@ def parse_args(argv=None):
 
     parser.add_argument("--datafile", required=True, type=str, help="the matrix data filename")
     parser.add_argument("--ind", type=str, required=True, help="the missing value char (or any sign) in your data" )
-    parser.add_argument("--max_d",required=True, type = float, help="the maximum data missing values allowed  (percantage - values between 0 and 1)")
-    parser.add_argument("--max_s", required=True,type = float, help="the maximum sample missing values allowed  (percantage - values between 0 and 1)")
-    parser.add_argument("--sep", type=str, default=" ", help="the separator sign of the matrix in data_filename. Default is single whitespace. please write \"\t\" for tab")
+    parser.add_argument("--maxd",required=True, type = float, help="the maximum missing values allowed per site (percentage - values between 0 and 1). If a site has more than this amount of missing values (samples) it will be deleted otherwise the missing values will be replaced by the mean of the site")
+    parser.add_argument("--maxs", required=True,type = float, help="the maximum missing values allowed per sample (percentage - values between 0 and 1). If a sample has more than this amount of missing values (sites) it will be deleted.")
+    parser.add_argument("--sep", type=str, default="\t", help="the separator sign of the matrix in data_filename. Default is tab")
     parser.add_argument("--suffix", type=str, default=".non_missing_values", help="the suffix for the output filename")
     parser.add_argument("--dim", type=int, default=2, help="the dimensions of the matrix in the datafile. Default is 2")
     
@@ -133,4 +133,4 @@ def parse_args(argv=None):
 
 if __name__=="__main__":
     args = parse_args()
-    replace_missing(args.datafile, args.ind, args.max_d, args.max_s, args.sep , args.suffix, args.dim)
+    replace_missing(args.datafile, args.ind, args.maxd, args.maxs, args.sep , args.suffix, args.dim)

@@ -88,7 +88,7 @@ Allows to filter sampels. This argument gets a text file with a list of sample i
 
 For example::
 
-	glint.py --datafile datafile.glint --exclude list.txt
+	glint.py --datafile datafile.glint --remove list.txt
 
 will remove all the samples indicated in the *list.txt* file.
 

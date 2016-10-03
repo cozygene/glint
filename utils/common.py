@@ -78,7 +78,7 @@ def load_data_file(filepath, dim):
     if data.size == 1:
         logging.warning("only one value found in the file: %s" % data)
     elif data.ndim != dim:
-        return None
+        return None, None, None
 
     #headers are assumed to be in data of 2 dimensions (and not in a vector of 1D)    
     if dim == 2:

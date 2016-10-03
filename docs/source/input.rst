@@ -28,7 +28,7 @@ Path to a tab-delimited file of sites by samples matrix of methylation levels. T
 
 For example::
 
-	glint.py --datafile tutorial_datafile.txt
+	glint.py --datafile datafile.txt
 
 will load the methylation data matrix in the *datafile.txt* file. See the tutorial *datafile.txt* file as an example file.
 

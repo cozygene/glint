@@ -68,7 +68,7 @@ class GlintParser(ModuleParser):
 
 class ModulesArgumentParsers(object):
     FUNCTIONALITY_ARGS = ['--plot', '--refactor', '--ewas', '--impute'] # TODO find better way to hold arguments that cause some functionality. glint is not supposed to be aware of those args
-    DATA_FUNC_ARGS = ['--gsave'] 
+    DATA_FUNC_ARGS = ['--gsave', '--txtsave'] 
     DATA_PREPROCESSING_NOT_RELEVANT_FOR_REFACTOR = ['--include', '--exclude', '--minmean', '--maxmean']
     SOLE_ARGS = ['--epi'] # functilnality flags that cannot be specified with other functionaity flags
 
@@ -180,8 +180,10 @@ class ModulesArgumentParsers(object):
                     unrecognized_args.append(flag)
                 else:
                     redundent_args.append(flag)
-            common.terminate("unrecognized argument " + ", ".join(unrecognized_args))
-            common.terminate("selected redundent argument " + ", ".join(redundent_args))
+            if unrecognized_args:
+                common.terminate("unrecognized argument " + ", ".join(unrecognized_args))
+            if redundent_args:
+                common.terminate("selected redundent argument " + ", ".join(redundent_args))
 
         # warn if only refactor module is selected and  user selectes data management flags that are not relevant for refactor
         if self.args.refactor and len(func_args_chosen) == 1:
@@ -242,6 +244,7 @@ if __name__ == '__main__':
     parser.add_arguments()
     args = parser.parse_args()
     LOGGER.setLoggerLevel(args.loglevel)
+    LOGGER.setLoggerFile(args.out)
 
     logging.info("Starting glint...")
     parser.run()

@@ -52,13 +52,13 @@ Selects covariates to use in the association test.
 
 For example::
 
-	glint.py --datafile datafile.glint --refactor --k 6 --covar c1 c2 c3
+	glint.py --datafile datafile.glint --ewas --linreg --covar c1 c2 c3
 
 will run EWAS using linear regression model with the covariates c1, c2 and c3. The names of the covariates are defined by the headers in the *datafile.samples.txt* file associated with the *datafile.glint*. For more details see `glint files`_.
 
 Alternatively, run::
 
-	glint.py --datafile datafile.glint --refactor --k 6 --covar
+	glint.py --datafile datafile.glint --ewas --linreg --covar
 
 without specifying names of covariates in order to include into the model all of the covariates included in the glint file.
 
@@ -153,7 +153,7 @@ For example::
 
 	glint.py --datafile datafile.glint --ewas --lmm --pheno y1 --kinship kinship.txt
 
-will run EWAS using LMM with the kinship matrix specified in the *kinship.txt* file. Alternatively:
+will run EWAS using LMM with the kinship matrix specified in the *kinship.txt* file. Alternatively::
 
 	glint.py --datafile datafile.glint --ewas --lmm --pheno y1 --kinship refactor --k 6
 

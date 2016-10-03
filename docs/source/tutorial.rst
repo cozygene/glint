@@ -36,7 +36,7 @@ We begin the analysis by looking for outliers in the data. We first run:
 This command will generate a figure titled *pcs_plot.png*, showing scatter plots of the first two principal components (PCs) of the data. Note that an additional figure will be generated, *pcs_plot.eps*, a publication quality version of the same figure.
 
 .. image:: figs/pcs_plot.png
-    :width: 40%
+    :width: 60%
     :align: center
 
 3. **Removing outliers**
