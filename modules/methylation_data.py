@@ -2,17 +2,65 @@ import os
 import sys
 import copy
 import logging
-from cPickle import dump
-from numpy import delete, isnan, where, column_stack, std, array, savetxt, in1d, mean, hstack, vstack
+from time import time
+from numpy import delete, isnan, where, column_stack, std, array, ndarray, savetxt, in1d, mean, hstack, vstack, ascontiguousarray, frombuffer
 from module import Module
 from utils import common, pca, LinearRegression, sitesinfo
 from bisect import bisect_right
+from json import JSONEncoder
+from base64 import b64encode, b64decode
+
 
 DEFAULT_PREFIX = "methylation_data"
 GLINT_FILE_SUFFIX = "glint" #TODO move to a config file
 DATA_SUFFIX = "txt"
 DEAFULT_COVAR_NAME = "c"
 DEFAULT_PHENO_NAME = "p"
+
+
+def json_numpy_obj_hook(dct):
+    """
+    json decoder hook
+    Decodes a previously encoded numpy ndarray with proper shape and dtype.
+
+    :param dct: (dict) json encoded ndarray
+    :return: (ndarray) if input was an encoded ndarray
+    """
+    if isinstance(dct, dict) and '__ndarray__' in dct:
+        data = b64decode(dct['__ndarray__'])
+        return frombuffer(data, dct['dtype']).reshape(dct['shape'])#.copy()
+    return dct
+
+def default(obj):
+    """
+    json encoder hook
+    """
+    json_dict = dict()
+    if isinstance(obj, MethylationDataLoader) or isinstance(obj, MethylationData):
+        json_dict = { '__class__': obj.__class__.__name__,
+                      '__module__': obj.__class__.__module__,
+                      'data': obj.data,
+                      'samples_ids': obj.samples_ids,
+                      'cpgnames': obj.cpgnames,
+                      'phenotype': obj.phenotype,
+                      'covar': obj.covar,
+                      'covarnames': obj.covarnames,
+                      'phenonames': obj.phenonames}
+    elif isinstance(obj, ndarray):
+        if obj.flags['C_CONTIGUOUS']:
+            obj_data = obj.data
+        else:
+            cont_obj = ascontiguousarray(obj)
+            assert(cont_obj.flags['C_CONTIGUOUS'])
+            obj_data = cont_obj.data
+
+        data_b64 = b64encode(obj_data)
+        return dict(__ndarray__=data_b64,
+                    dtype=str(obj.dtype),
+                    shape=obj.shape)
+    return json_dict
+
+
 def validate_no_missing_values(data):
     """
     nan are not supported for version 1.0
@@ -226,9 +274,12 @@ class MethylationData(Module):
         self.save_sites_and_samples(prefix)
         
         filename = prefix + "." + GLINT_FILE_SUFFIX
+        logging.info("Saving methylation data as glint format at %s" % filename)
+        b = time()
         with open(filename, 'wb') as f:
-            logging.info("Saving methylation data as glint format at %s" % filename)
-            dump(self, f)
+            JSON_encoder = JSONEncoder(default = default)
+            f.write(JSON_encoder.encode(self))
+        logging.debug("gsave took (dump binary) %s seconds"%(time()-b))
         f.close()
 
 

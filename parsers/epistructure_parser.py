@@ -25,7 +25,14 @@ class EpistructureParser(ModuleParser):
     def run(self, args, meth_data, output_perfix = None):
         output_filename = epistructure.EPISTRUCTURE_FILE_SUFFIX if output_perfix is None else output_perfix + "." +  epistructure.EPISTRUCTURE_FILE_SUFFIX
         try:
+            import time
+            a = time.time()
             informative_sites = loadtxt(INFORMATIVE_ANCESTRY_CPG_LIST, dtype = str)
+            b = time.time()
+            print "took%s" %(b-a)
+            informative_sites = common.loadtxt(INFORMATIVE_ANCESTRY_CPG_LIST, dtype = str)
+            c = time.time()
+            print "mi took%s" %(c-b)
             self.module = epistructure.Epistructure(meth_data, informative_sites)
             self.module.capture_ancestry(args.savepcs, args.covar, output_filename)
             return self.module.components

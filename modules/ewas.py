@@ -1,6 +1,6 @@
 import os
 from utils import regression, tools#, plot
-from numpy import column_stack, ones, savetxt, array, insert, vstack, loadtxt, append, where
+from numpy import column_stack, ones, savetxt, array, insert, vstack, append, where
 from module import Module
 from utils import common, plot, sitesinfo
 import statsmodels.api as sm
@@ -326,7 +326,7 @@ class EWASResultsParser(EWASResults):
 
     def readfile(self, filename):
 
-        data = loadtxt(filename , dtype = str, delimiter=self.DELIMITER)
+        data = common.loadtxt(filename , dtype = str, delimiter=self.DELIMITER)
 
         if data.ndim != 2:
             common.terminate("Something wrong with the data in file %s. It is not 2D matrix" % filename)

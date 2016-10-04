@@ -1,11 +1,11 @@
 import logging
-from cPickle import load
+from time import time
 from modules import methylation_data
 from utils import common
 import argparse
 from module_parser import ModuleParser
-from numpy import loadtxt
 import os
+from json import JSONDecoder
 
 
 # cpgs on X and Y chromosomes, which increase the gender signal in refactor
@@ -14,6 +14,7 @@ HUMAN_X_Y = os.path.join(os.path.dirname(__file__),"assets/HumanMethylationSites
 NONSPECIFIC_PROBES = os.path.join(os.path.dirname(__file__),"assets/nonspecific_probes.txt")
 # list of methylation sites (cpgs) that are also SNPs. connecting between the genetics (and therfore ancestry) and the methylation
 POLYMORPHIC_CPGS = os.path.join(os.path.dirname(__file__),"assets/polymorphic_cpgs.txt")     
+
 
 class MethylationDataParser(ModuleParser): 
 
@@ -130,7 +131,7 @@ class MethylationDataParser(ModuleParser):
         
         logging.info("loading file %s..." % fileobj.name)
         try:
-            data = loadtxt(fileobj.name, dtype = str)
+            data = common.loadtxt(fileobj.name, dtype = str)
         except:
             common.terminate("There was error reading the file '%s', make sure you seperate the values with space, tab or comma" % (fileobj.name, dim))
         
@@ -174,13 +175,13 @@ class MethylationDataParser(ModuleParser):
 
         if self.args.rmxy:
             logging.info("excluding sites from X and Y chromosomes...")
-            self.module.exclude(loadtxt(HUMAN_X_Y, dtype = str))
+            self.module.exclude(common.loadtxt(HUMAN_X_Y, dtype = str))
         if self.args.rmns:
             logging.info("excluding non-specific sites...")
-            self.module.exclude(loadtxt(NONSPECIFIC_PROBES, dtype = str))
+            self.module.exclude(common.loadtxt(NONSPECIFIC_PROBES, dtype = str))
         if self.args.rmpoly:
             logging.info("excluding polymorphic sites...")
-            self.module.exclude(loadtxt(POLYMORPHIC_CPGS, dtype = str))
+            self.module.exclude(common.loadtxt(POLYMORPHIC_CPGS, dtype = str))
 
     # must  be called after run
     def preprocess_samples_data(self):
@@ -205,7 +206,19 @@ class MethylationDataParser(ModuleParser):
             self.module = None
             if args.datafile.name.endswith(methylation_data.GLINT_FILE_SUFFIX):
                 logging.info("Loading glint file: %s..." % args.datafile.name)
-                self.module = load(args.datafile) # datafile is fileType (status: open for read)
+                a = time()
+                dataf = args.datafile.read()
+                JSON_decoder = JSONDecoder(object_hook= methylation_data.json_numpy_obj_hook)
+                result = JSON_decoder.decode(dataf)
+                self.module = methylation_data.MethylationData(result['data'], 
+                                                               result['samples_ids'],
+                                                               result['cpgnames'],
+                                                               result['phenotype'],
+                                                               result['covar'],
+                                                               result['covarnames'],
+                                                               result['phenonames'])
+
+                logging.debug("load binary data took  %s seconds" %(time()-a))
                 logging.debug("Got methylation data with %s sites and %s samples id" % (self.module.sites_size, self.module.samples_size))
                 # if phenotype or covariates supplied with metylation data, replace module covar and pheno file with new ones
                 if args.phenofile is not None:

@@ -1,13 +1,18 @@
+from time import time
 import sys
 import logging
 import inspect
-from numpy import loadtxt
+from pandas import read_csv, DataFrame
 
-DELIMITERS = ['\t',',',' ',':']
 
 def terminate(error_msg):
     logging.error("ERROR: " + error_msg)
     sys.exit(2)
+
+
+def loadtxt(filepath, dtype = float, header = None, delimiter='\t'):
+    x = read_csv(filepath, dtype = dtype, header = header, sep=delimiter)
+    return DataFrame.as_matrix(x)
 
 def find_and_extract_headers_in_data(data, dim):
     """
@@ -52,6 +57,12 @@ def find_and_extract_headers_in_data(data, dim):
         data = data.astype(float) 
     except ValueError:
         terminate("file contains values which are not float") # todo change when missing values are supported
+    
+    if rows_title is not None:
+        rows_title = rows_title.astype(str)
+    
+    if cols_title is not None:
+        cols_title = cols_title.astype(str)
 
     return data, cols_title, rows_title
 
@@ -61,17 +72,13 @@ def load_data_file(filepath, dim):
     dim is the dimension of the matrix in the file
     """
     data = None
+    a = time()
     try:
-        data = loadtxt(filepath, dtype = str)
+
+        data = loadtxt(filepath, dtype = str, header = None, delimiter='\t')
     except:
-        sep_i = 0
-        success = False
-        while not success:
-            try:
-                data = loadtxt(filepath, dtype = str, delimiter=DELIMITERS[sep_i]) # try different line seperator
-                success = True
-            except:
-                sep_i += 1
+        terminate("some error with the data file format")
+    logging.debug("read with pandas took %s seconds" % (time()-a))
     
     if data is None:
         terminate("some error with the data file")

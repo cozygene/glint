@@ -1,5 +1,4 @@
 from numpy import array, delete, where, in1d
-from cPickle import dump
 
 """
 This script is not for glint users but for the SW developers.

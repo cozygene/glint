@@ -7,7 +7,7 @@ import argparse
 from module_parser import ModuleParser
 from refactor_parser import RefactorParser
 from modules import lmm, methylation_data, ewas
-from numpy import savetxt, column_stack, array, loadtxt
+from numpy import savetxt, column_stack, array
 
 LMM_OUT_SUFFIX = ".glint.lmm.txt"
 
@@ -87,7 +87,7 @@ class LMMParser(ModuleParser):
 
             if type(args.kinship) == file: #kinship is provided via file
                 logging.info("loading kinship from %s" % args.kinship.name)
-                kinship = loadtxt(args.kinship)
+                kinship = common.loadtxt(args.kinship)
 
             elif args.kinship == 'refactor': # kinship and data to test are the same
                 # todo if --lmm provided with --refactor there is no need to run refactor twice in order to find ranked sites.
