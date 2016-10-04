@@ -2,7 +2,7 @@ import os
 import sys
 import copy
 import logging
-from pickle import dump
+from cPickle import dump
 from numpy import delete, isnan, where, column_stack, std, array, savetxt, in1d, mean, hstack, vstack
 from module import Module
 from utils import common, pca, LinearRegression, sitesinfo

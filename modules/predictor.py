@@ -1,7 +1,6 @@
 from numpy import vstack, loadtxt, bincount, mean, where, delete, zeros, concatenate, dtype, fromstring, seterr
 import time
 import logging
-import pickle
 import re
 from module import Module
 from methylation_data import MethylationData

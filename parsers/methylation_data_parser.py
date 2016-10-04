@@ -1,5 +1,5 @@
 import logging
-from pickle import load
+from cPickle import load
 from modules import methylation_data
 from utils import common
 import argparse
@@ -46,6 +46,7 @@ class MethylationDataParser(ModuleParser):
                     the program validates that there is no sample in the list which doesn't appear in the datafile.
         --minmean:  will remove any site with mean < minmean (terminates if minmean is not a a standard methylation value  between 0 and 1)
         --maxmean:  will remove any site with mean > maxmean (terminates if maxmean is not a a standard methylation value: between 0 and 1)
+        --minstd',  threshold for excluding low variance sites (all sites with std lower than this threshold will be excluded
         --gsave:    save the data.
                     output 3 file:
                         1. a serialized file so next time it will be fater to load it. 

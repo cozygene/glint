@@ -4,7 +4,7 @@ from numpy import loadtxt, array_equal
 from utils import LinearRegression
 import logging
 from tests.test_tools import tools
-from pickle import load
+from cPickle import load
 
 class SenariosTester():
     DATA  = "tests/refactor/files/test_datafile.txt"
