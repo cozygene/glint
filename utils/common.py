@@ -10,8 +10,11 @@ def terminate(error_msg):
     sys.exit(2)
 
 
-def loadtxt(filepath, dtype = float, header = None, delimiter='\t'):
-    x = read_csv(filepath, dtype = dtype, header = header, sep=delimiter)
+def loadtxt(filepath, dtype = None, header = None, delimiter='\t'):
+    if dtype:
+        x = read_csv(filepath, dtype = dtype, header = header, sep=delimiter)
+    else:
+        x = read_csv(filepath, header = None, sep=delimiter)
     return DataFrame.as_matrix(x)
 
 def find_and_extract_headers_in_data(data, dim):
@@ -29,6 +32,7 @@ def find_and_extract_headers_in_data(data, dim):
     rows_title = None
 
     #search for an header (title for each column)
+    # if this fails - the first row is an header (since cannot be converted to float)
     try:
         data[0,:][1:].astype(float)
     except:
@@ -53,15 +57,18 @@ def find_and_extract_headers_in_data(data, dim):
     # else (both are None) dont change the data
 
     # try to convert data to float
-    try:
-        data = data.astype(float) 
-    except ValueError:
-        terminate("file contains values which are not float") # todo change when missing values are supported
-    
-    if rows_title is not None:
+    if data.dtype != float:
+        try:
+            data = data.astype(float) 
+        except ValueError:
+            terminate("file contains values which are not float") # todo change when missing values are supported
+    else:
+        print 111
+
+    if rows_title is not None and rows_title.dtype != str:
         rows_title = rows_title.astype(str)
     
-    if cols_title is not None:
+    if cols_title is not None and cols_title.dtype != str:
         cols_title = cols_title.astype(str)
 
     return data, cols_title, rows_title
@@ -74,8 +81,7 @@ def load_data_file(filepath, dim):
     data = None
     a = time()
     try:
-
-        data = loadtxt(filepath, dtype = str, header = None, delimiter='\t')
+        data = loadtxt(filepath, header = None, delimiter='\t')
     except:
         terminate("some error with the data file format")
     logging.debug("read with pandas took %s seconds" % (time()-a))

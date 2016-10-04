@@ -45,7 +45,9 @@ def default(obj):
                       'phenotype': obj.phenotype,
                       'covar': obj.covar,
                       'covarnames': obj.covarnames,
-                      'phenonames': obj.phenonames}
+                      'phenonames': obj.phenonames,
+                      'title_indexes' : obj.header_manager.title_indexes}
+
     elif isinstance(obj, ndarray):
         if obj.flags['C_CONTIGUOUS']:
             obj_data = obj.data
@@ -70,12 +72,36 @@ def validate_no_missing_values(data):
         common.terminate("missing values are not supported at this version")
 
 
+class TitleManager(object):
+    def __init__(self, title_indexes = dict()):
+        self.title_indexes = title_indexes
+
+    def get_next_index(self, title_base_name):
+        if title_base_name not in self.title_indexes:
+            self.title_indexes[title_base_name] = 1
+        return self.title_indexes[title_base_name]
+
+    def increase_next_index(self, title_base_name, count):
+        """
+        assumes title_base_name exists
+        """
+        self.title_indexes[title_base_name] = self.title_indexes[title_base_name] + count
+
+    def generate_title(self, title_base_name, count):
+        start_i = self.get_next_index(title_base_name)
+        titles_list = ["%s%d" % (title_base_name, i) for i in range(start_i, start_i + count)]
+        self.increase_next_index(title_base_name, count)
+        return titles_list
+
 class MethylationData(Module):
     """
     meth_data is an numpy matrix
     samples_list, sites_list are numpy arrays
+    title_indexes - dictionary that maps names to index . when a covariate or phenotype will need to be given a name x
+                    if x in titles_indexes than the name will be xI when I is titles_indexes[x]
+                    that is the title manager dictionary and this is a patch for json
     """
-    def __init__(self, meth_data, samples_list, sites_list, phenotype = None ,covar = None, covarnames = None, phenonames = None):
+    def __init__(self, meth_data, samples_list, sites_list, phenotype = None ,covar = None, covarnames = None, phenonames = None, title_indexes = None):
         self.data = meth_data
         self.samples_ids = samples_list
         self.cpgnames = sites_list  # the last index of covariate loaded without name, this index wil be added to the default name
@@ -417,27 +443,6 @@ class MethylationData(Module):
         residuals = residuals.transpose()
         self.data = residuals
         
-class TitleManager(object):
-    def __init__(self):
-        self.title_indexes = dict()
-
-    def get_next_index(self, title_base_name):
-        if title_base_name not in self.title_indexes:
-            self.title_indexes[title_base_name] = 1
-        return self.title_indexes[title_base_name]
-
-    def increase_next_index(self, title_base_name, count):
-        """
-        assumes title_base_name exists
-        """
-        self.title_indexes[title_base_name] = self.title_indexes[title_base_name] + count
-
-    def generate_title(self, title_base_name, count):
-        start_i = self.get_next_index(title_base_name)
-        titles_list = ["%s%d" % (title_base_name, i) for i in range(start_i, start_i + count)]
-        self.increase_next_index(title_base_name, count)
-        return titles_list
-
 
 class MethylationDataLoader(MethylationData):
     """
@@ -469,7 +474,7 @@ class MethylationDataLoader(MethylationData):
         sites_size, samples_size = data.shape
         phenotype, phenonames = self._load_and_validate_phenotype(phenofile, samples_size, samples_ids)
         covar, covarnames = self._load_and_validate_covar(covarfiles, samples_size, samples_ids)
-        super(MethylationDataLoader, self).__init__(data, array(samples_ids), array(cpgnames), phenotype, covar, covarnames, phenonames)
+        super(MethylationDataLoader, self).__init__(data, array(samples_ids), array(cpgnames), phenotype, covar, covarnames, phenonames, self.header_manager.title_indexes)
 
     def _load_and_validate_file_of_dimentions(self, datafile, dim):
         """
@@ -484,10 +489,6 @@ class MethylationDataLoader(MethylationData):
         data, samples_ids, cpgnames = common.load_data_file(datafile.name, dim)
         if data is None:
             common.terminate("there is a problem with the format of the file '%s'" % datafile.name)
-        if cpgnames is None:
-            common.terminate("there are no cpgnames for the sites in the datafile '%s'" % datafile.name)
-        if samples_ids is None:
-            common.terminate("there are no samples ids (header) in the datafile '%s'" % datafile.name)
         return data, samples_ids, cpgnames
 
     def _load_and_validate_datafile(self, datafile):
@@ -495,6 +496,11 @@ class MethylationDataLoader(MethylationData):
         returns data (type=float without samples ids and cpgnames) and sample_ids list and cpgnames list
         """
         data, samples_ids, cpgnames = self._load_and_validate_file_of_dimentions(datafile, 2)
+
+        if cpgnames is None:
+            common.terminate("there are no cpgnames for the sites in the datafile '%s'" % datafile.name)
+        if samples_ids is None:
+            common.terminate("there are no samples ids (header) in the datafile '%s'" % datafile.name)
         logging.info("checking for missing values in datafile file...")
         validate_no_missing_values(data) #TODO remove when missing values are supported
 

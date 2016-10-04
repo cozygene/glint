@@ -216,7 +216,8 @@ class MethylationDataParser(ModuleParser):
                                                                result['phenotype'],
                                                                result['covar'],
                                                                result['covarnames'],
-                                                               result['phenonames'])
+                                                               result['phenonames'],
+                                                               result['title_indexes'])
 
                 logging.debug("load binary data took  %s seconds" %(time()-a))
                 logging.debug("Got methylation data with %s sites and %s samples id" % (self.module.sites_size, self.module.samples_size))
