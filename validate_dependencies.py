@@ -14,7 +14,7 @@ this script:
 3 - if it fount anaconda, it tries to add it to the path and then import dependencies - if it fails it tells the user how to add it to the path by himself
 """
 
-GLINT_OBLIGATORY_DEPENDENCIES = ['numpy', 'scipy', 'sklearn', 'matplotlib', 'pandas', 'statsmodels'] # TODO move to configuration file
+GLINT_OBLIGATORY_DEPENDENCIES = ['numpy', 'scipy', 'sklearn', 'matplotlib', 'pandas', 'statsmodels', 'cvxopt'] # TODO move to configuration file
 
 PYTHONPATH_EXPLAIN = \
 """

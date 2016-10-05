@@ -6,3 +6,4 @@ from predictor_parser import PredictorParser
 from epistructure_parser import EpistructureParser
 from lmm_parser import LMMParser
 from plot_parser import PlotParser
+from houseman_parser import HousemanParser

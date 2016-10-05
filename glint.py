@@ -10,7 +10,7 @@ from numpy import loadtxt
 from utils import GlintArgumentParser
 from parsers import ModuleParser, RefactorParser, EWASParser, \
                     MethylationDataParser, PredictorParser, \
-                    EpistructureParser, LMMParser, PlotParser  #dont remove this is imported in,,,
+                    EpistructureParser, LMMParser, PlotParser, HousemanParser  #dont remove this is imported in,,,
 
 LOGGER = configurelogging.ConfigureLogging()
 
@@ -62,12 +62,13 @@ class GlintParser(ModuleParser):
         modules.add_argument('--impute',  action='store_true', help = "<TODO Elior, add help here methylation predictor>" )
         modules.add_argument('--epi',      action='store_true', help = "<TODO Elior, edit>" )
         modules.add_argument('--plot',     action='store_true', help = "<TODO Elior, edit>" )
+        modules.add_argument('--houseman', action='store_true', help = "<TODO Elior, edit>" )
 
         super(GlintParser, self).__init__(optional, modules)
     
 
 class ModulesArgumentParsers(object):
-    FUNCTIONALITY_ARGS = ['--plot', '--refactor', '--ewas', '--impute'] # TODO find better way to hold arguments that cause some functionality. glint is not supposed to be aware of those args
+    FUNCTIONALITY_ARGS = ['--plot', '--refactor', '--ewas', '--impute', '--houseman'] # TODO find better way to hold arguments that cause some functionality. glint is not supposed to be aware of those args
     DATA_FUNC_ARGS = ['--gsave', '--txtsave'] 
     DATA_PREPROCESSING_NOT_RELEVANT_FOR_REFACTOR = ['--include', '--exclude', '--minmean', '--maxmean']
     SOLE_ARGS = ['--epi'] # functilnality flags that cannot be specified with other functionaity flags
@@ -85,6 +86,7 @@ class ModulesArgumentParsers(object):
         self.ewas_parser = None
         self.epi_parser = None
         self.plot_parser = None
+        self.houseman_parser = None
         self.args = None
 
     def add_arguments(self):
@@ -99,6 +101,7 @@ class ModulesArgumentParsers(object):
         self.ewas_parser = EWASParser(self.parser)
         self.predictor_parser = PredictorParser(self.parser)
         self.epi_parser = EpistructureParser(self.parser)
+        self.houseman_parser = HousemanParser(self.parser)
         self.plot_parser = PlotParser(self.parser)
 
     def parse_args(self):
@@ -141,6 +144,10 @@ class ModulesArgumentParsers(object):
         if self.args.ewas:
             self.ewas_parser.validate_args(self.args)
             optional_args.extend(self.ewas_parser.all_args)
+
+        if self.args.houseman:
+            self.houseman_parser.validate_args(self.args)
+            optional_args.extend(self.houseman_parser.all_args)
 
         self.check_selected_args(optional_args)
         return self.args
@@ -212,6 +219,14 @@ class ModulesArgumentParsers(object):
             logging.info("adding refactor components to covariates, set --gsave to save new methData")
             self.meth_parser.module.add_covar_datas(self.refactor_parser.module.components, "rc") # add refactor components as covariate file
 
+        if self.args.houseman:
+            houseman_meth_data = self.meth_parser.module.copy()
+            self.houseman_parser.run(args = self.args,
+                                    meth_data = houseman_meth_data,
+                                    output_perfix = self.args.out)
+            logging.info("adding houseman components to covariates, set --gsave to save new methData")
+            self.meth_parser.module.add_covar_datas(self.houseman_parser.module.components,     \
+                                                    covarsnames = self.houseman_parser.module.names) # add houseman components as covariate file
         
         # ewas tests must be called after refactor
         ewas_results = None

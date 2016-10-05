@@ -62,8 +62,6 @@ def find_and_extract_headers_in_data(data, dim):
             data = data.astype(float) 
         except ValueError:
             terminate("file contains values which are not float") # todo change when missing values are supported
-    else:
-        print 111
 
     if rows_title is not None and rows_title.dtype != str:
         rows_title = rows_title.astype(str)
