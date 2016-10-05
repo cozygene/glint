@@ -13,7 +13,7 @@ class SenariosTester():
     RES1  =       "tests/refactor/files/test_datafile.refactor.no_covars.components.txt" 
     RES1_RANKED = "tests/refactor/files/test_datafile.refactor.no_covars.ranked_list.txt"
     RES2  =       "tests/refactor/files/test_datafile.refactor.covars.components.txt" 
-    RES2_RANKED   "tests/refactor/files/test_datafile.refactor.covars.ranked_list.txt"
+    RES2_RANKED = "tests/refactor/files/test_datafile.refactor.covars.ranked_list.txt"
     RES3  =       "tests/refactor/files/test_datafile.refactor.controls_covars.components.txt"
     RES3_RANKED = "tests/refactor/files/test_datafile.refactor.controls_covars.ranked_list.txt"
     RES4  =       "tests/refactor/files/test_datafile.refactor.pheno_covars.components.txt" 
@@ -37,7 +37,7 @@ class SenariosTester():
         refactor_meth_data = self.meth_data.copy()
 
         comp = loadtxt(self.RES1)
-        ranked = loadtxt(self.RES1_RANKED)
+        ranked = loadtxt(self.RES1_RANKED, dtype = str)
 
         module  = refactor.Refactor(methylation_data = refactor_meth_data, 
                                     k = 5, 
@@ -48,7 +48,7 @@ class SenariosTester():
                                     use_covars = None)
         
         module.run()
-        assert ranked == module.ranked_sites
+        assert all(ranked == module.ranked_sites)
         assert module.components.shape == comp.shape
         for i in range(module.components.shape[1]):
             assert tools.correlation(module.components[:,i], comp[:,i])
@@ -59,7 +59,7 @@ class SenariosTester():
         refactor_meth_data = self.meth_data.copy()
 
         comp = loadtxt(self.RES2)
-        ranked = loadtxt(self.RES2_RANKED)
+        ranked = loadtxt(self.RES2_RANKED, dtype = str)
 
         module  = refactor.Refactor(methylation_data = refactor_meth_data, 
                                     k = 5, 
@@ -70,7 +70,7 @@ class SenariosTester():
                                     use_covars = [])
         
         module.run()
-        assert ranked == module.ranked_sites
+        assert all(ranked == module.ranked_sites)
         assert module.components.shape == comp.shape
 
         for i in range(module.components.shape[1]):
@@ -82,7 +82,7 @@ class SenariosTester():
         refactor_meth_data = self.meth_data.copy()
 
         comp = loadtxt(self.RES3)
-        ranked = loadtxt(self.RES3_RANKED)
+        ranked = loadtxt(self.RES3_RANKED, dtype = str)
 
         module  = refactor.Refactor(methylation_data = refactor_meth_data, 
                                     k = 5, 
@@ -93,7 +93,7 @@ class SenariosTester():
                                     use_phenos = ['p2'],
                                     use_covars = [])
         module.run()
-        assert ranked == module.ranked_sites
+        assert all(ranked == module.ranked_sites)
         assert module.components.shape == comp.shape
 
         for i in range(module.components.shape[1]):
@@ -105,10 +105,10 @@ class SenariosTester():
         refactor_meth_data = self.meth_data.copy()
 
         comp = loadtxt(self.RES4)
-        ranked = loadtxt(self.RES4_RANKED)
+        ranked = loadtxt(self.RES4_RANKED, dtype = str)
 
         module  = refactor.Refactor(methylation_data = refactor_meth_data, 
-                                    k = 5, 
+                                    k=5, 
                                     t=500, 
                                     minstd = 0,
                                     bad_probes_list = self.bad_probes,
@@ -116,7 +116,7 @@ class SenariosTester():
                                     use_phenos = ['p1'],
                                     use_covars = [])
         module.run()
-        assert ranked == module.ranked_sites
+        assert all(ranked == module.ranked_sites)
         assert module.components.shape == comp.shape
 
         for i in range(module.components.shape[1]):

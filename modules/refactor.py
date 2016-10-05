@@ -169,6 +169,9 @@ class Refactor(Module):
         """
         logging.info("Running phenotype feature selection...")
         phenotype = meth_data.get_phenotype_subset(self.use_phenos)
+        if phenotype.ndim == 2 and phenotype.shape[1] > 1:
+            logging.warning("phenotype feature selection was used with more than one phenotype")
+        
         logging.info("regressing out phenotype...")
         meth_data.regress_out(phenotype)
         

@@ -4,6 +4,17 @@ import logging
 from tests.test_tools import tools, test_logger
 import unittest
 
+STDTH_RES =  "tests/methylation_data/files/test_datafile_stdth_0.02.txt"
+DATA_STDTH = "tests/refactor/files/test_datafile.txt"
+
+def test_remove_lowest_std_sites():
+    logging.info("Testing stdth again...")
+    data_after_std = methylation_data.MethylationDataLoader(datafile = DATA_STDTH)
+    data_after_std.remove_lowest_std_sites(0.02)
+    data = loadtxt(STDTH_RES)
+    assert array_equal(data, data_after_std.data)
+    logging.info("PASS")
+
 class DataTester(test_logger.LogTestCase, unittest.TestCase):
     FAKE_DATA = "tests/methylation_data/files/data.txt"
     FAKE_PHENO = "tests/methylation_data/files/pheno.txt"
@@ -78,6 +89,7 @@ class DataTester(test_logger.LogTestCase, unittest.TestCase):
         data_copy.remove_lowest_std_sites(self.STDTH)
         data_after_std = methylation_data.MethylationDataLoader(datafile = self.FAKE_DATA_STDTH)
         assert array_equal(data_copy.data, data_after_std.data)
+        test_remove_lowest_std_sites()
         logging.info("PASS")
 
     def test_fail_exclude(self):

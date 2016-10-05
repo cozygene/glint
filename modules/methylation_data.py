@@ -489,7 +489,6 @@ class MethylationData(Module):
             common.terminate("the provided std parameter excludes all sites (%s)" % lowest_std_th)
         if (include_from_index == 0):
             logging.warning("the provided std parameter excludes no sites (%s)" % lowest_std_th)
-        exclude_sites_indices = std_sorted_indices[:include_from_index]
 
         # exclude all sites with low std
         self.exclude_sites_indices(std_sorted_indices[:include_from_index])
