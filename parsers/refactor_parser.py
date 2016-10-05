@@ -13,7 +13,8 @@ from numpy import loadtxt
 # list of files containing bad sites ids
 BAD_PROBES_FILES = [
                     os.path.join(os.path.dirname(__file__),"assets/HumanMethylationSites_X_Y.txt"),
-                    os.path.join(os.path.dirname(__file__), "assets/epistructure_reference_sites.txt")
+                    os.path.join(os.path.dirname(__file__), "assets/nonspecific_probes.txt"), # those sites might have large variance , so should be removed
+                    os.path.join(os.path.dirname(__file__), "assets/polymorphic_cpgs.txt")
                    ]
 
 class RefactorParser( ModuleParser ):
@@ -49,7 +50,7 @@ class RefactorParser( ModuleParser ):
       refactor.add_argument('--t',       type = int, default = 500, help = "The number of sites to use for computing the ReFACtor components (DEFAULT=500)")
       refactor.add_argument('--numcomp', type = int, help = "The number of ReFACTor components to output (DEFAULT=K)")
       refactor.add_argument('--fs',      type = str, default = 'normal', help = "feature selection mode; options: normal, controls, phenotype (DEFAULT=normal)")
-      refactor.add_argument('--stdth',  type = float, default = 0.02, help = "threshold for excluding low variance sites (DEFAULT=0.02) (all sites with std lower than this threshold will be excluded)") 
+      refactor.add_argument('--stdth',  type = float, default = 0.01, help = "threshold for excluding low variance sites (DEFAULT=0.02) (all sites with std lower than this threshold will be excluded)") 
       refactor.add_argument('--covar', type = str, nargs='*', help = "list of covariates names to use. If no name is specified will use all the covariates. If flag is not set, will not use any covariate")
       refactor.add_argument('--pheno', type = str, nargs='*', help = "list of phenotypes names to use. If no name is specified will use all the phenotypes. If flag is not set, will not use any phenotype")
         

@@ -124,7 +124,7 @@ class Refactor(Module):
         """
         self._exclude_bad_probes()
         # self.meth_data.remove_missing_values_sites() # nan are not supported TODO uncomment when supported
-        # self.meth_data.remove_lowest_std_sites(self.minstd)
+        self.meth_data.remove_lowest_std_sites(self.minstd)
         # self.meth_data.replace_missing_values_by_mean() # nan are not supported TODO uncomment when supported
        
         # feature selection
