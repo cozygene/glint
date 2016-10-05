@@ -14,7 +14,7 @@ def loadtxt(filepath, dtype = None, header = None, delimiter='\t'):
     if dtype:
         x = read_csv(filepath, dtype = dtype, header = header, sep=delimiter)
     else:
-        x = read_csv(filepath, header = None, sep=delimiter)
+        x = read_csv(filepath, dtype = object, header = None, sep=delimiter)
     return DataFrame.as_matrix(x)
 
 def find_and_extract_headers_in_data(data, dim):
