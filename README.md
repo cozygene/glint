@@ -38,6 +38,7 @@ This release of todoPUTNAMEHERE was implemented for Python 2.7 and has the follo
     pandas
     matplotlib
     statsmodels
+    cvxopt
     
 
 We recommend installing <a href="https://www.continuum.io/downloads" target="_blank">Anaconda Python version 2.7</a>, which already includes all necessary dependencies.
