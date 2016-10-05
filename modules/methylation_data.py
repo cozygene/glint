@@ -120,6 +120,166 @@ class MethylationData(Module):
         self.covarnames = covarnames
         self.phenonames = phenonames
 
+        if title_indexes:
+            self.header_manager = TitleManager(title_indexes)
+        else:
+            self.header_manager = TitleManager()
+
+
+    def _load_and_validate_file_of_dimentions(self, datafile, dim):
+        """
+        validates that the file contains a matrix from dimentions dim
+        datafile is not None
+        """
+        if not isinstance(datafile, file):
+            datafile = open(datafile, 'r')
+  
+        logging.info("loading file %s..." % datafile.name)
+
+        data, samples_ids, cpgnames = common.load_data_file(datafile.name, dim)
+        if data is None:
+            common.terminate("there is a problem with the format of the file '%s'" % datafile.name)
+        return data, samples_ids, cpgnames
+
+
+    def _validate_samples_ids(self, matrix_sample_ids, samples_ids):
+        """
+        reads matrix from matrix_file_path
+        validates that the matrix has number of rows as the number of sample ids
+        checks that the sample ids in matrix (the first column) are the same ids as in sample_ids list
+        and in the same order
+        """
+        if not ((samples_ids.size == matrix_sample_ids.size) and ((samples_ids == matrix_sample_ids).all())):
+            if len(set(samples_ids)^set(matrix_sample_ids)) != 0:
+                common.terminate("sample ids are not identical to the sample ids in data file")
+            common.terminate("sample ids are not in the same order as in the datafile") 
+
+    def _load_and_validate_samples_info(self, data_with_samples_info, samples_size, samples_ids):
+        """
+        data_with_samples_info - path to file containing information about samples (matrix where first column is sample_id)
+        data_with_samples_info assumed to hold path (not None)
+        """
+        data, header, new_samples_ids = self._load_and_validate_file_of_dimentions(data_with_samples_info, 2)
+        self._validate_samples_ids(new_samples_ids, samples_ids)
+        validate_no_missing_values(data)
+
+        return data, header
+    
+    def _load_and_validate_samples_data(self, data_list, samples_size, samples_ids, defaule_header_name):
+        all_data = []
+        all_headers = []
+
+        for datafile in data_list:
+            data, header = self._load_and_validate_samples_info(datafile, samples_size, samples_ids)
+            if header is None:
+                header = self.header_manager.generate_title(defaule_header_name, data.shape[1])
+            all_data.append(data)
+            all_headers.append(header)
+
+        data = column_stack(tuple(all_data))
+        header = hstack(tuple(all_headers))
+        return data, header
+
+    def _load_and_validate_phenotype(self, phenofile_list, samples_size, samples_ids, default_pheno_name = DEFAULT_PHENO_NAME):
+        """
+        returns phenotype data (type=float) without samples ids
+        """
+        if not phenofile_list:
+            return None, None
+
+        logging.info("validating phenotype file...")
+        pheno, header = self._load_and_validate_samples_data(phenofile_list, samples_size, samples_ids, default_pheno_name)
+        logging.info("new phenotypes found: %s" % ", ".join(header))
+        return pheno, header
+ 
+    def _load_and_validate_covar(self, covarfiles_list, samples_size, samples_ids, default_covar_name = DEAFULT_COVAR_NAME):
+        """
+        concatenate the covariates into one matrix (type=float).
+        Make sure all have n rows and the ids of the samples are sorted the same order as the data file
+        """
+        if not covarfiles_list:
+            return None, None
+
+        logging.info("validating phenotype file...")
+        covar, header = self._load_and_validate_samples_data(covarfiles_list, samples_size, samples_ids, default_covar_name)
+        logging.info("new covariates found: %s" % ", ".join(header))
+        
+        return covar, header
+
+    def update_pheno_header(self, titles_to_add):
+        if self.phenonames is not None:
+            mutual_names = set(self.phenonames).intersection(set(titles_to_add))
+            if mutual_names:
+                common.terminate("more than one phenotype with the name %s" % ", ".join(list(mutual_names)))
+            self.phenonames = hstack((self.phenonames, titles_to_add))
+        else:
+            self.phenonames = titles_to_add
+
+    def update_covar_header(self, titles_to_add):
+        if self.covarnames is not None:
+            mutual_names = set(self.covarnames).intersection(set(titles_to_add))
+            if mutual_names:
+                common.terminate("more than one covariate with the name %s" % ", ".join(list(mutual_names)))
+            self.covarnames = hstack((self.covarnames, titles_to_add))
+        else:
+            self.covarnames = titles_to_add
+
+    def add_covar_files(self, covarfiles_list, default_covar_name = DEAFULT_COVAR_NAME):
+        """
+        adds covariates from a list of covariates files to the glint meth object
+        assumes self.covars is not None
+        """
+        covars, covarsnames = self._load_and_validate_covar(covarfiles_list, self.samples_size, self.samples_ids, default_covar_name)
+        self.update_covar_data(covars)
+        self.update_covar_header(covarsnames)
+
+    def add_pheno_files(self, phenofiles_list, default_pheno_name = DEFAULT_PHENO_NAME):
+        """
+        adds phenotypes from a list of phenotype files to the glint meth object
+        assumes self.phenotype is not None
+        """
+        phenos, names = self._load_and_validate_phenotype(phenofiles_list, self.samples_size, self.samples_ids, default_pheno_name)
+        self.update_pheno_data(phenos)
+        self.update_pheno_header(names)
+
+    def upload_new_covaritates_files(self, covarfiles_list, default_covar_name = DEAFULT_COVAR_NAME):
+        """
+        overloads self.covar with the covarfiles_list
+        """
+        self.covar, self.covarnames = self._load_and_validate_covar(covarfiles_list, self.samples_size, self.samples_ids, default_covar_name)
+
+    def upload_new_phenotype_file(self, phenofile):
+        self.phenotype, self.phenonames = self._load_and_validate_phenotype(phenofile, self.samples_size, self.samples_ids)
+    
+    def update_covar_data(self, new_data):
+        if self.covar is not None:
+            self.covar = column_stack((self.covar, new_data))
+        else:
+            self.covar = new_data
+
+    def update_pheno_data(self, new_data):
+        if self.phenotype is not None:
+            self.phenotype = column_stack((self.phenotype, new_data))
+        else:
+            self.phenotype = new_data
+
+    def add_covar_datas(self, covardata, default_covar_name = DEAFULT_COVAR_NAME, covarsnames = None):
+        """
+        adds new covariates to the existing covariates 
+        covardata - matrix with the covariates data (without the colums of the sample_ids and the title of the covarnames)
+        covarsnames - the names of the covariates in the data. if not supplied a default name will be set
+        default_covar_name - a default name for the covariates (in case covarsnames is None)
+
+        assumes covardata is in the right format and the sample_ids order is as in the datafile 
+        """
+        if covarsnames is None:
+            covarsnames = self.header_manager.generate_title(default_covar_name, covardata.shape[1])
+        
+        self.update_covar_data(covardata)
+        self.update_covar_header(covarsnames)
+        logging.info("added covariates %s" % ", ".join(covarsnames))
+
+
     def exclude_sites_indices(self, sites_indicies_list):
         """
         sites_indicies_list - a list of sites indices to remove from data
@@ -476,21 +636,6 @@ class MethylationDataLoader(MethylationData):
         covar, covarnames = self._load_and_validate_covar(covarfiles, samples_size, samples_ids)
         super(MethylationDataLoader, self).__init__(data, array(samples_ids), array(cpgnames), phenotype, covar, covarnames, phenonames, self.header_manager.title_indexes)
 
-    def _load_and_validate_file_of_dimentions(self, datafile, dim):
-        """
-        validates that the file contains a matrix from dimentions dim
-        datafile is not None
-        """
-        if not isinstance(datafile, file):
-            datafile = open(datafile, 'r')
-  
-        logging.info("loading file %s..." % datafile.name)
-
-        data, samples_ids, cpgnames = common.load_data_file(datafile.name, dim)
-        if data is None:
-            common.terminate("there is a problem with the format of the file '%s'" % datafile.name)
-        return data, samples_ids, cpgnames
-
     def _load_and_validate_datafile(self, datafile):
         """
         returns data (type=float without samples ids and cpgnames) and sample_ids list and cpgnames list
@@ -505,144 +650,3 @@ class MethylationDataLoader(MethylationData):
         validate_no_missing_values(data) #TODO remove when missing values are supported
 
         return data, samples_ids, cpgnames
-
-
-    def _validate_samples_ids(self, matrix_sample_ids, samples_ids):
-        """
-        reads matrix from matrix_file_path
-        validates that the matrix has number of rows as the number of sample ids
-        checks that the sample ids in matrix (the first column) are the same ids as in sample_ids list
-        and in the same order
-        """
-        if not ((samples_ids.size == matrix_sample_ids.size) and ((samples_ids == matrix_sample_ids).all())):
-            if len(set(samples_ids)^set(matrix_sample_ids)) != 0:
-                common.terminate("sample ids are not identical to the sample ids in data file")
-            common.terminate("sample ids are not in the same order as in the datafile") 
-
-    def _load_and_validate_samples_info(self, data_with_samples_info, samples_size, samples_ids):
-        """
-        data_with_samples_info - path to file containing information about samples (matrix where first column is sample_id)
-        data_with_samples_info assumed to hold path (not None)
-        """
-        data, header, new_samples_ids = self._load_and_validate_file_of_dimentions(data_with_samples_info, 2)
-        self._validate_samples_ids(new_samples_ids, samples_ids)
-        validate_no_missing_values(data)
-
-        return data, header
-    
-    def _load_and_validate_samples_data(self, data_list, samples_size, samples_ids, defaule_header_name):
-        all_data = []
-        all_headers = []
-
-        for datafile in data_list:
-            data, header = self._load_and_validate_samples_info(datafile, samples_size, samples_ids)
-            if header is None:
-                header = self.header_manager.generate_title(defaule_header_name, data.shape[1])
-            all_data.append(data)
-            all_headers.append(header)
-
-        data = column_stack(tuple(all_data))
-        header = hstack(tuple(all_headers))
-        return data, header
-
-    def _load_and_validate_phenotype(self, phenofile_list, samples_size, samples_ids, default_pheno_name = DEFAULT_PHENO_NAME):
-        """
-        returns phenotype data (type=float) without samples ids
-        """
-        if not phenofile_list:
-            return None, None
-
-        logging.info("validating phenotype file...")
-        pheno, header = self._load_and_validate_samples_data(phenofile_list, samples_size, samples_ids, default_pheno_name)
-        logging.info("new phenotypes found: %s" % ", ".join(header))
-        return pheno, header
- 
-
-    def _load_and_validate_covar(self, covarfiles_list, samples_size, samples_ids, default_covar_name = DEAFULT_COVAR_NAME):
-        """
-        concatenate the covariates into one matrix (type=float).
-        Make sure all have n rows and the ids of the samples are sorted the same order as the data file
-        """
-        if not covarfiles_list:
-            return None, None
-
-        logging.info("validating phenotype file...")
-        covar, header = self._load_and_validate_samples_data(covarfiles_list, samples_size, samples_ids, default_covar_name)
-        logging.info("new covariates found: %s" % ", ".join(header))
-        
-        return covar, header
-
-    def update_covar_header(self, titles_to_add):
-        if self.covarnames is not None:
-            mutual_names = set(self.covarnames).intersection(set(titles_to_add))
-            if mutual_names:
-                common.terminate("more than one covariate with the name %s" % str (mutual_names))
-            self.covarnames = hstack((self.covarnames, titles_to_add))
-        else:
-            self.covarnames = titles_to_add
-    
-    def update_covar_data(self, new_data):
-        if self.covar is not None:
-            self.covar = column_stack((self.covar, new_data))
-        else:
-            self.covar = new_data
-
-    def update_pheno_header(self, titles_to_add):
-        if self.phenonames is not None:
-            mutual_names = set(self.phenonames).intersection(set(titles_to_add))
-            if mutual_names:
-                common.terminate("more than one phenotype with the name %s" % str (mutual_names))
-            self.phenonames = hstack((self.phenonames, titles_to_add))
-        else:
-            self.phenonames = titles_to_add
-
-    def update_pheno_data(self, new_data):
-        if self.phenotype is not None:
-            self.phenotype = column_stack((self.phenotype, new_data))
-        else:
-            self.phenotype = new_data
-
-    def add_covar_datas(self, covardata, default_covar_name = DEAFULT_COVAR_NAME, covarsnames = None):
-        """
-        adds new covariates to the existing covariates 
-        covardata - matrix with the covariates data (without the colums of the sample_ids and the title of the covarnames)
-        covarsnames - the names of the covariates in the data. if not supplied a default name will be set
-        default_covar_name - a default name for the covariates (in case covarsnames is None)
-
-        assumes covardata is in the right format and the sample_ids order is as in the datafile 
-        """
-        if covarsnames is None:
-            covarsnames = self.header_manager.generate_title(default_covar_name, covardata.shape[1])
-        
-        self.update_covar_data(covardata)
-        self.update_covar_header(covarsnames)
-        logging.info("added covariates %s" % ", ".join(covarsnames))
-
-    def add_covar_files(self, covarfiles_list, default_covar_name = DEAFULT_COVAR_NAME):
-        """
-        adds covariates from a list of covariates files to the glint meth object
-        assumes self.covars is not None
-        """
-        covars, covarsnames = self._load_and_validate_covar(covarfiles_list, self.samples_size, self.samples_ids, default_covar_name)
-        self.update_covar_data(covars)
-        self.update_covar_header(covarsnames)
-
-    def add_pheno_files(self, phenofiles_list, default_pheno_name = DEFAULT_PHENO_NAME):
-        """
-        adds phenotypes from a list of phenotype files to the glint meth object
-        assumes self.phenotype is not None
-        """
-        phenos, names = self._load_and_validate_phenotype(phenofiles_list, self.samples_size, self.samples_ids, default_pheno_name)
-        self.update_pheno_data(phenos)
-        self.update_pheno_header(names)
-
-    def upload_new_covaritates_files(self, covarfiles_list, default_covar_name = DEAFULT_COVAR_NAME):
-        """
-        overloads self.covar with the covarfiles_list
-        """
-        self.covar, self.covarnames = self._load_and_validate_covar(covarfiles_list, self.samples_size, self.samples_ids, default_covar_name)
-
-    def upload_new_phenotype_file(self, phenofile):
-        self.phenotype, self.phenonames = self._load_and_validate_phenotype(phenofile, self.samples_size, self.samples_ids)
-
-
