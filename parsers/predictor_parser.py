@@ -6,8 +6,6 @@ import argparse
 from module_parser import ModuleParser
 from modules import predictor
 
-                
-
 SITES_SCORES_FILE = os.path.join(os.path.dirname(__file__), 'assets/sites_scores_list')
 SITES_SNPS_FILE = os.path.join(os.path.dirname(__file__), 'assets/site_snps_list')
 SITES_IDS_FILE = os.path.join(os.path.dirname(__file__), 'assets/sites_ids_list')

@@ -10,11 +10,16 @@ class SenariosTester():
     DATA  = "tests/refactor/files/test_datafile.txt"
     COVAR  = "tests/refactor/files/test_datafile_covars.txt"
     PHENO  = "tests/refactor/files/test_datafile_phenos.txt" #two phenotypes (the second one is binary)
-    RES1  = "tests/refactor/files/test_datafile.refactor.no_covars.components.txt" 
-    RES2  = "tests/refactor/files/test_datafile.refactor.covars.components.txt" 
-    RES3  = "tests/refactor/files/test_datafile.refactor.controls_covars.components.txt"
-    RES4  = "tests/refactor/files/test_datafile.refactor.pheno_covars.components.txt" 
-        
+    RES1  =       "tests/refactor/files/test_datafile.refactor.no_covars.components.txt" 
+    RES1_RANKED = "tests/refactor/files/test_datafile.refactor.no_covars.ranked_list.txt"
+    RES2  =       "tests/refactor/files/test_datafile.refactor.covars.components.txt" 
+    RES2_RANKED   "tests/refactor/files/test_datafile.refactor.covars.ranked_list.txt"
+    RES3  =       "tests/refactor/files/test_datafile.refactor.controls_covars.components.txt"
+    RES3_RANKED = "tests/refactor/files/test_datafile.refactor.controls_covars.ranked_list.txt"
+    RES4  =       "tests/refactor/files/test_datafile.refactor.pheno_covars.components.txt" 
+    RES4_RANKED = "tests/refactor/files/test_datafile.refactor.pheno_covars.ranked_list.txt"
+    
+
     def __init__(self):
         logging.info("Testing Started on SenariosTester")
         bad_probes = set()
@@ -32,6 +37,7 @@ class SenariosTester():
         refactor_meth_data = self.meth_data.copy()
 
         comp = loadtxt(self.RES1)
+        ranked = loadtxt(self.RES1_RANKED)
 
         module  = refactor.Refactor(methylation_data = refactor_meth_data, 
                                     k = 5, 
@@ -42,6 +48,7 @@ class SenariosTester():
                                     use_covars = None)
         
         module.run()
+        assert ranked == module.ranked_sites
         assert module.components.shape == comp.shape
         for i in range(module.components.shape[1]):
             assert tools.correlation(module.components[:,i], comp[:,i])
@@ -52,6 +59,7 @@ class SenariosTester():
         refactor_meth_data = self.meth_data.copy()
 
         comp = loadtxt(self.RES2)
+        ranked = loadtxt(self.RES2_RANKED)
 
         module  = refactor.Refactor(methylation_data = refactor_meth_data, 
                                     k = 5, 
@@ -62,6 +70,7 @@ class SenariosTester():
                                     use_covars = [])
         
         module.run()
+        assert ranked == module.ranked_sites
         assert module.components.shape == comp.shape
 
         for i in range(module.components.shape[1]):
@@ -73,6 +82,7 @@ class SenariosTester():
         refactor_meth_data = self.meth_data.copy()
 
         comp = loadtxt(self.RES3)
+        ranked = loadtxt(self.RES3_RANKED)
 
         module  = refactor.Refactor(methylation_data = refactor_meth_data, 
                                     k = 5, 
@@ -83,6 +93,7 @@ class SenariosTester():
                                     use_phenos = ['p2'],
                                     use_covars = [])
         module.run()
+        assert ranked == module.ranked_sites
         assert module.components.shape == comp.shape
 
         for i in range(module.components.shape[1]):
@@ -94,6 +105,7 @@ class SenariosTester():
         refactor_meth_data = self.meth_data.copy()
 
         comp = loadtxt(self.RES4)
+        ranked = loadtxt(self.RES4_RANKED)
 
         module  = refactor.Refactor(methylation_data = refactor_meth_data, 
                                     k = 5, 
@@ -104,6 +116,7 @@ class SenariosTester():
                                     use_phenos = ['p1'],
                                     use_covars = [])
         module.run()
+        assert ranked == module.ranked_sites
         assert module.components.shape == comp.shape
 
         for i in range(module.components.shape[1]):
@@ -118,22 +131,6 @@ class RefactorTester():
     DEMO_PHENO = "tests/refactor/files/demofiles/phenotype"
     DEMO_CELLPRO = "tests/refactor/files/demofiles/cellproportions"
     BAD_PROBES = "tests/refactor/files/demofiles/bad_probes"
-
-    # senarios output
-    COMP_K5_T400 = "tests/refactor/files/senarios_out/k5t400.out.components.txt"
-    RANK_K5_T400 = "tests/refactor/files/senarios_out/k5t400.out.rankedlist.txt"
-    
-    COMP_K5_T400_stdth01numcomp7 = "tests/refactor/files/senarios_out/k5t400stdth0.1numcomp7.out.components.txt"
-    RANK_K5_T400_stdth01numcomp7 = "tests/refactor/files/senarios_out/k5t400stdth0.1numcomp7.out.rankedlist.txt"
-    
-    COMP_K5_T400_stdth013 = "tests/refactor/files/senarios_out/k5t400stdth0.13.out.components.txt"
-    RANK_K5_T400_stdth013 = "tests/refactor/files/senarios_out/k5t400stdth0.13.out.rankedlist.txt"
-    
-    COMP_K5_T400_covar = "tests/refactor/files/senarios_out/k5t400covar.out.components.txt"
-    RANK_K5_T400_covar = "tests/refactor/files/senarios_out/k5t400covar.out.rankedlist.txt"
-  
-    COMP_K5_T400_stdth008covar = "tests/refactor/files/senarios_out/k5t400stdth0.08covar.out.components.txt"
-    RANK_K5_T400_stdth008covar = "tests/refactor/files/senarios_out/k5t400stdth0.08covar.out.rankedlist.txt"
 
     def __init__(self):
         logging.info("Testing Started on RefactorTester")
