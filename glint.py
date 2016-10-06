@@ -252,7 +252,7 @@ class ModulesArgumentParsers(object):
         if self.args.out:
             prefix = self.args.out
         else:
-            prefix = os.path.basename(self.args.datafile.name).split()[0]
+            prefix = os.path.basename(self.args.datafile.name).split(".")[0]
 
         self.meth_parser.save(output_perfix = prefix) #save after all preprocessing  add epi and refactor covars 
         
