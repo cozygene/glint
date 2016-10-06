@@ -1,7 +1,7 @@
 import logging
 import cvxopt
 from utils import common
-from numpy import loadtxt, zeros, matrix, array, savetxt, column_stack
+from numpy import loadtxt, zeros, matrix, array, savetxt, column_stack, vstack
 from module import  Module
 
 
@@ -15,6 +15,7 @@ class Houseman(Module):
         self.meth_data = methylation_data
 
         # Load and extract the reference - cell-type specific methylation levels of a group of reference sites
+        logging.info("loading houseman refernece file %s..." % reference_file.name)
         ref_data, self.names, ref_ids = common.load_data_file(reference_file.name, 2)
         if ref_data is None or ref_ids is None:
             common.terminate("there is a problem with the format of the reference file '%s'" % reference_file.name)
@@ -69,7 +70,9 @@ class Houseman(Module):
         if outputfile:
             logging.info("saving houseman components to %s" % outputfile)
             components_output = column_stack((self.meth_data.samples_ids, self.components))
-            savetxt(outputfile, components_output, fmt='%s')
+            header = ["ID"] + list(self.names)
+            components_output = vstack((header, components_output))
+            savetxt(outputfile+"S", components_output, fmt='%s') #output looks betther with space delimiter and not tab
             
 
 

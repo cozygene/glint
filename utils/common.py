@@ -9,6 +9,11 @@ def terminate(error_msg):
     logging.error("ERROR: " + error_msg)
     sys.exit(2)
 
+def get_dim(vector):
+    if vector.ndim == 1 or (vector.ndim == 2 and vector.shape[1] == 1):
+        return 1
+    return 2
+
 
 def loadtxt(filepath, dtype = None, header = None, delimiter='\t'):
     if dtype:
@@ -80,8 +85,13 @@ def load_data_file(filepath, dim):
     a = time()
     try:
         data = loadtxt(filepath, header = None, delimiter='\t')
+        if get_dim(data) != dim:
+            data = loadtxt(filepath, header = None, delimiter=' ')
+
+        if get_dim(data) != dim:
+            terminate("some problem with the file format, please check the delimiter")
     except:
-        terminate("some error with the data file format")
+        terminate("some error with the data file format, please check the delimiter")
     logging.debug("read with pandas took %s seconds" % (time()-a))
     
     if data is None:

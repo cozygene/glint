@@ -59,7 +59,7 @@ class RefactorParser( ModuleParser ):
 
     def run(self, args, meth_data, output_perfix = None):
       try:
-        if output_perfix is None:
+        if not output_perfix:
           output_perfix = "output"
         bad_probes_list = set()
         [bad_probes_list.update(loadtxt(probes_file, dtype=str)) for probes_file in BAD_PROBES_FILES]
