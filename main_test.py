@@ -7,6 +7,7 @@ from tests.utils import test_lin_reg, test_pca, test_tools
 from tests.methylation_data import test_methylation_data
 from tests.predictor import test_predictor
 from tests.missing_values import replace_missing_values_test
+from tests.houseman import test_houseman
 
 test_refactor.RefactorTester()
 test_refactor.SenariosTester()
@@ -21,3 +22,4 @@ test_tools.FDRTester()
 test_predictor.PredictorTester()
 replace_missing_values_test.MissingValuesTester()
 test_ewas.LMMTester()
+test_houseman.HousemanTester()
