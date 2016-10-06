@@ -71,6 +71,7 @@ will provide the phenotypes matrix in the *phenotypes.txt* file. See the tutoria
 .. note:: More than one phenotypes file can be provided, e.g. *--phenofile phenotypes1.txt phenotypes2.txt*.
 
 
+.. _--out:
 
 **--out**
 
