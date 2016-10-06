@@ -5,7 +5,7 @@ Quick start tutorial
 
 
 This tutorial will quickly walk you through the basic functionality of glint.
-For this tutorial we use subset of a public dataset from GEO (accession ID GSE77716_; the  dataset is described in details in Rahmani et al. [1]_). In order to run this tutorial you will need to download the tutorial files from here_. The tutorial files include:
+For this tutorial we use subset of a public dataset from GEO (accession ID GSE77716_; the  dataset is described in details in Rahmani et al. [1]_). In order to run this tutorial you will need to `download glint`_ and to get the tutorial files from here_. The tutorial files include:
 
 - *datafile.txt* - 50,000 sites by 100 samples matrix of methylation levels
 - *covariates.txt* - covariates matrix for the samples, each column corresponds to one covaraite.
@@ -122,6 +122,8 @@ Finally, in our example we found a single significant association in chromosome 
 
 
 .. _here: blank
+
+.. _download glint: download.html
 
 .. _GSE77716: https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE77716
 
