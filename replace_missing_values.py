@@ -41,7 +41,7 @@ def get_data_type(data_type_str):
         return int
     return None
 
-def replace_missing(data_filename, missing_value_indicator, data_max_missing_values, samples_max_missing_values, sep = " ", suffix = ".non_missing_values", dim=2):
+def replace_missing(data_filename, missing_value_indicator, data_max_missing_values, samples_max_missing_values, sep = " ", suffix = ".no_missing_values"):
     """
     replaces missing values by mean (mean of non-missing data/samples) and saves the output to the file named data_filename + suffix
     if there are too many missing samples (more than samples_max_missing_values) - they are removed
@@ -67,6 +67,9 @@ def replace_missing(data_filename, missing_value_indicator, data_max_missing_val
 
     returns array of non-missing data/samples
     """
+
+    dim = 2
+
     #convert data_type from string to type ('float' --> float)
     data_type = DATA_TYPE
     original_data_type = DATA_TYPE
@@ -121,16 +124,16 @@ def parse_args(argv=None):
     
 
     parser.add_argument("--datafile", required=True, type=str, help="the matrix data filename")
-    parser.add_argument("--ind", type=str, required=True, help="the missing value char (or any sign) in your data" )
-    parser.add_argument("--maxd",required=True, type = float, help="the maximum missing values allowed per site (percentage - values between 0 and 1). If a site has more than this amount of missing values (samples) it will be deleted otherwise the missing values will be replaced by the mean of the site")
-    parser.add_argument("--maxs", required=True,type = float, help="the maximum missing values allowed per sample (percentage - values between 0 and 1). If a sample has more than this amount of missing values (sites) it will be deleted.")
+    parser.add_argument("--chr", type=str, required=True, help="the missing value char (or any sign) in your data" )
+    parser.add_argument("--maxs",required=True, type = float, help="the maximum missing values allowed per site (percentage - values between 0 and 1). If a site has more than this amount of missing values (samples) it will be deleted otherwise the missing values will be replaced by the mean of the site")
+    parser.add_argument("--maxi", required=True,type = float, help="the maximum missing values allowed per sample (percentage - values between 0 and 1). If a sample has more than this amount of missing values (sites) it will be deleted.")
     parser.add_argument("--sep", type=str, default="\t", help="the separator sign of the matrix in data_filename. Default is tab")
-    parser.add_argument("--suffix", type=str, default=".non_missing_values", help="the suffix for the output filename")
-    parser.add_argument("--dim", type=int, default=2, help="the dimensions of the matrix in the datafile. Default is 2")
+    parser.add_argument("--suffix", type=str, default=".no_missing_values", help="the suffix for the output filename")
+    #parser.add_argument("--dim", type=int, default=2, help="the dimensions of the matrix in the datafile. Default is 2")
     
 
     return parser.parse_args(args=argv)
 
 if __name__=="__main__":
     args = parse_args()
-    replace_missing(args.datafile, args.ind, args.maxd, args.maxs, args.sep , args.suffix, args.dim)
+    replace_missing(args.datafile, args.chr, args.maxs, args.maxi, args.sep , args.suffix)

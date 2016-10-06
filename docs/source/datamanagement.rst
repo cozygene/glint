@@ -8,7 +8,7 @@ The following section describes arguments that allow to perform basic data manag
 
 .. note:: The example commands described bellow assume that the user generated `glint files`_ with covariates file and phenotypes file.
 
-.. note:: Data management commands applied to data do not change the input files. In order to save the changes use the `--gsave`_ or `--save`_ commands.
+.. note:: Data management commands applied to data do not change the input files. In order to save the changes use the `--gsave`_ or `--txtsave`_ commands.
 
 
 |
@@ -176,7 +176,7 @@ will remove all polymorphic sites from the data.
 
 .. _--gsave: input.html#gsave
 
-.. _--save: input.html#save
+.. _--txtsave: input.html#save
 
 .. _--plotpcs: plots.html#plotpcs
 
