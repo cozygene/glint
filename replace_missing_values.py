@@ -1,12 +1,11 @@
-from numpy import loadtxt, savetxt, where, zeros, delete, mean
+from numpy import savetxt, where, zeros, delete, mean, vstack, column_stack
 import argparse
-
+from utils import common
 DATA_TYPE = float
 STR_DATA_TYPE = '|S16'
-def _replace_missing_values_in_matrix(all_data, missing_value_indicator, data_max_missing_values, samples_max_missing_values, replace = False):
+def _replace_missing_values_in_matrix(all_data, missing_value_indicator, data_max_missing_values, samples_max_missing_values, replace = False, col_names=None, row_names=None):
     number_of_data, number_of_samples = all_data.shape
     na_count_per_sample  = zeros(number_of_samples)
-
     data_indices_to_remove = []
     print "Replacing missing values by mean..."
     for i, data_for_all_samples in enumerate(all_data): # iterate each time different site for all samples
@@ -21,18 +20,23 @@ def _replace_missing_values_in_matrix(all_data, missing_value_indicator, data_ma
                 # "predict" using mean of non-missing samples in this snp
                 non_na_indices = delete(range(number_of_samples), na_indices)
                 if replace:
-                    all_data[i][na_indices] = mean(data_for_all_samples[non_na_indices].astype(DATA_TYPE))
+                     all_data[i][na_indices] = mean(data_for_all_samples[non_na_indices].astype(DATA_TYPE))
                 else:
                     all_data[i][na_indices] = mean(data_for_all_samples[non_na_indices])
-
+    
     samples_indices_to_keep = where(na_count_per_sample < number_of_samples * samples_max_missing_values)[0]
+    if col_names is not None:
+        col_names = col_names[samples_indices_to_keep]
     print "Removed %s samples with more than %s missing values" % (number_of_samples - len(samples_indices_to_keep), samples_max_missing_values)
+
     data_indices_to_keep = delete(range(number_of_data), data_indices_to_remove)
-    print "Removed %s data with more than %s missing values" % (len(data_indices_to_remove), data_max_missing_values)
+    if row_names is not None:
+        row_names = row_names[data_indices_to_keep]
+    print "Removed %s site with more than %s missing values" % (len(data_indices_to_remove), data_max_missing_values)
 
     if replace:
-        return all_data[data_indices_to_keep,:][:,samples_indices_to_keep].astype(DATA_TYPE)
-    return all_data[data_indices_to_keep,:][:,samples_indices_to_keep]
+        return all_data[data_indices_to_keep,:][:,samples_indices_to_keep].astype(DATA_TYPE), col_names, row_names
+    return all_data[data_indices_to_keep,:][:,samples_indices_to_keep], col_names, row_names
 
 def get_data_type(data_type_str):
     if data_type_str in ['float', 'double', float]:
@@ -101,7 +105,8 @@ def replace_missing(data_filename, missing_value_indicator, data_max_missing_val
         replace = True
 
     try:
-        all_data = loadtxt(data_filename, dtype=data_type, delimiter=sep)
+        all_data, col_names, row_names = common.load_data_file(data_filename, 2, str)
+
         if all_data.ndim != dim:
             raw_input("Error: got data from dimensions %d while excepted to %d. Please check all paramenters are OK (data type and separator)." %(all_data.ndim, dim))
             return None
@@ -110,8 +115,18 @@ def replace_missing(data_filename, missing_value_indicator, data_max_missing_val
         # if replace:
         #     data_type = original_data_type
 
-        output_data = _replace_missing_values_in_matrix(all_data, missing_value_indicator, data_max_missing_values, samples_max_missing_values, replace)
+        output_data, col_names, row_names = _replace_missing_values_in_matrix(all_data, missing_value_indicator, data_max_missing_values, samples_max_missing_values, replace, col_names, row_names)
         print "Output is saved to " + output_filename
+
+        if row_names is not None:
+            output_data = column_stack((row_names, output_data))
+        if col_names is not None:
+            if row_names is not None:
+                header = ["ID"] + list(col_names)
+            else:
+                header = col_names
+            output_data = vstack((header, output_data))
+            
         savetxt(output_filename, output_data, fmt='%s')
         return output_data
 

@@ -21,7 +21,7 @@ def loadtxt(filepath, dtype = None, header = None, delimiter='\t'):
         x = read_csv(filepath, dtype = object, header = None, sep=delimiter)
     return DataFrame.as_matrix(x)
 
-def load_float_data_and_headers(filepath, delimiter='\t'):
+def load_float_data_and_headers(filepath, delimiter='\t', dtype = float32):
     """
     assumes data is 2 dimension matrix
     gets data matrix (from type str)
@@ -77,19 +77,20 @@ def load_float_data_and_headers(filepath, delimiter='\t'):
     try:
         if row_names is not None:
             if col_names is not None:
-                data = read_csv(filepath, dtype=float32, delimiter=delimiter, header=header, usecols=col_names)
+                data = read_csv(filepath, dtype=dtype, delimiter=delimiter, header=header, usecols=col_names)
             else:
-                data = read_csv(filepath, dtype=float32, delimiter=delimiter, header=header, usecols=range(1,num_of_cols))
+                data = read_csv(filepath, dtype=dtype, delimiter=delimiter, header=header, usecols=range(1,num_of_cols))
         else:
-            data = read_csv(filepath, dtype=float32, delimiter=delimiter, header=header)
+            data = read_csv(filepath, dtype=dtype, delimiter=delimiter, header=header)
     except:
         terminate("file contains values which are not float") 
 
     data = DataFrame.as_matrix(data)
-    return data, array(col_names), row_names
 
+    return data, array(col_names), row_names.reshape(-1,)
+    # return data, col_names, row_names.tolist()
 
-def load_data_file(filepath, dim):
+def load_data_file(filepath, dim, dtype = float32):
     """
     filepath is the path to the file to load
     dim is the minimal dimension of the matrix in the file
@@ -97,9 +98,9 @@ def load_data_file(filepath, dim):
     data = None
     a = time()
     try:
-        data, col_names, row_names = load_float_data_and_headers(filepath, delimiter='\t')
+        data, col_names, row_names = load_float_data_and_headers(filepath, delimiter='\t', dtype = dtype)
     except Exception as e:
-        logging.exception("while loading data")
+        logging.exception("while loading data !!%s!!")#todo remove this
         terminate("some error with the data file format, please check the delimiter")
     
     logging.debug("read with pandas took %s seconds" % (time()-a))

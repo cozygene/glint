@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-import validate_dependencies
+# import validate_dependencies
 import argparse
 import os
 import sys
@@ -258,6 +258,8 @@ class ModulesArgumentParsers(object):
         
 
 if __name__ == '__main__':
+    import time
+    a = time.time()
     selected_args = [arg for arg in sys.argv if arg.startswith("--")] 
     parser = ModulesArgumentParsers(selected_args)
 
@@ -268,6 +270,8 @@ if __name__ == '__main__':
 
     logging.info("Starting glint...")
     parser.run()
+    b = time.time()
+    logging.debug("TOTAL RUN TIME %s SECONDS"%(b-a))
 
 
 
