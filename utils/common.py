@@ -3,7 +3,7 @@ import sys
 import logging
 import inspect
 from pandas import read_csv, DataFrame
-
+from numpy import float32, array
 
 def terminate(error_msg):
     logging.error("ERROR: " + error_msg)
@@ -14,7 +14,6 @@ def get_dim(vector):
         return 1
     return 2
 
-
 def loadtxt(filepath, dtype = None, header = None, delimiter='\t'):
     if dtype:
         x = read_csv(filepath, dtype = dtype, header = header, sep=delimiter)
@@ -22,7 +21,7 @@ def loadtxt(filepath, dtype = None, header = None, delimiter='\t'):
         x = read_csv(filepath, dtype = object, header = None, sep=delimiter)
     return DataFrame.as_matrix(x)
 
-def find_and_extract_headers_in_data(data, dim):
+def load_float_data_and_headers(filepath, delimiter='\t'):
     """
     assumes data is 2 dimension matrix
     gets data matrix (from type str)
@@ -33,82 +32,81 @@ def find_and_extract_headers_in_data(data, dim):
             cols_title - list of the cols header (first line) (None if no header was found)
             rows_title - list of the rows header (first column) (None if no header was found)
     """
-    cols_title = None
-    rows_title = None
+    #check if the first line is an header
+    col_names = None
+    with open(filepath, 'r') as f:
+        first_row = f.readline()
+    f.close()
 
-    #search for an header (title for each column)
-    # if this fails - the first row is an header (since cannot be converted to float)
+    #find right delimiter
+    space_sep = first_row.split(' ')
+    tab_sep = first_row.split('\t')
+    if space_sep != tab_sep:
+        if len(space_sep) > len(tab_sep) and delimiter == '\t':
+            logging.info("switching to space delimited matrix")
+            delimiter = ' '
+        elif len(tab_sep) > len(space_sep) and delimiter == ' ':
+            logging.info("switching to tab delimited matrix")
+            delimiter = '\t'
+
+    first_row = first_row.split()
+    num_of_cols = len(first_row)
+
+
     try:
-        data[0,:][1:].astype(float)
-    except:
-        cols_title = data[0,:] # header (e.g samples ID)
+        float(first_row[-1])
+    except: # this is a header and not part of the data
+        col_names = first_row[1:]
 
-    # search for title for each row
+    # check if the first column is a row titles
+    row_names = None
+    first_col = DataFrame.as_matrix(read_csv(filepath, dtype=str, delimiter=delimiter, usecols=[0], header=None))
     try:
-        data[:,0][1:].astype(float)
+        float(first_col[-1])
+    except: # this is a row's title and not part of the data
+        if col_names:
+            row_names = first_col[1:]
+        else:
+            row_names = first_col
+    # read the data - if there are row names, ignore first column. otherwise read the whole data    
+    if col_names:   # there is an header in the data
+        header = 0      # pandas will infer it
+    else:           # there is no header in the data
+        header = None
+
+    try:
+        if row_names is not None:
+            if col_names is not None:
+                data = read_csv(filepath, dtype=float32, delimiter=delimiter, header=header, usecols=col_names)
+            else:
+                data = read_csv(filepath, dtype=float32, delimiter=delimiter, header=header, usecols=range(1,num_of_cols))
+        else:
+            data = read_csv(filepath, dtype=float32, delimiter=delimiter, header=header)
     except:
-        rows_title = data[:,0] # first column (e.g sites)
+        terminate("file contains values which are not float") 
 
-    # remove the header from data
-    if cols_title is not None and rows_title is not None:
-        data = data[1:,1:]
-        # remove the cell at (0,0) (the "title of the entire matrix")
-        cols_title = cols_title[1:]
-        rows_title = rows_title[1:]
-    elif cols_title is not None and rows_title is None:
-        data = data[1:,:]
-    elif cols_title is None and rows_title is not None:
-        data = data[:,1:]
-    # else (both are None) dont change the data
+    data = DataFrame.as_matrix(data)
+    return data, array(col_names), row_names
 
-    # try to convert data to float
-    if data.dtype != float:
-        try:
-            data = data.astype(float) 
-        except ValueError:
-            terminate("file contains values which are not float") # todo change when missing values are supported
-
-    if rows_title is not None and rows_title.dtype != str:
-        rows_title = rows_title.astype(str)
-    
-    if cols_title is not None and cols_title.dtype != str:
-        cols_title = cols_title.astype(str)
-
-    return data, cols_title, rows_title
 
 def load_data_file(filepath, dim):
     """
     filepath is the path to the file to load
-    dim is the dimension of the matrix in the file
+    dim is the minimal dimension of the matrix in the file
     """
     data = None
     a = time()
     try:
-        data = loadtxt(filepath, header = None, delimiter='\t')
-        if get_dim(data) != dim:
-            data = loadtxt(filepath, header = None, delimiter=' ')
-
-        if get_dim(data) != dim:
-            terminate("some problem with the file format, please check the delimiter")
-    except:
+        data, col_names, row_names = load_float_data_and_headers(filepath, delimiter='\t')
+    except Exception as e:
+        logging.exception("while loading data")
         terminate("some error with the data file format, please check the delimiter")
+    
     logging.debug("read with pandas took %s seconds" % (time()-a))
     
     if data is None:
-        terminate("some error with the data file")
+        terminate("could not read data file")
     if data.size == 1:
         logging.warning("only one value found in the file: %s" % data)
-    elif data.ndim != dim:
-        return None, None, None
 
-    #headers are assumed to be in data of 2 dimensions (and not in a vector of 1D)    
-    if dim == 2:
-        return find_and_extract_headers_in_data(data, dim)
-    # just change data type
-    else:
-        try:
-            data = data.astype(float)
-        except ValueError:
-            terminate("file contains values which are not float") # todo change when missing values are supported
-
-    return data, None, None
+    return data, col_names, row_names

@@ -150,7 +150,7 @@ class MethylationData(Module):
         and in the same order
         """
         if not ((samples_ids.size == matrix_sample_ids.size) and ((samples_ids == matrix_sample_ids).all())):
-            if len(set(samples_ids)^set(matrix_sample_ids)) != 0:
+            if (set(list(samples_ids))).symmetric_difference(set(list(matrix_sample_ids))):
                 common.terminate("sample ids are not identical to the sample ids in data file")
             common.terminate("sample ids are not in the same order as in the datafile") 
 
