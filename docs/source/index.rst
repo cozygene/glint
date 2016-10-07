@@ -7,7 +7,7 @@
 Documentation and a simple tutorial: glint!
 ===========================================
 
-glint is a user-friendly command line tool for fast analysis of genome-wide DNA methylation data generated using the Illumina human methylation arrays. glint allows to run an EWAS pipeline under different models while accounting for known confounders in methylation data.
+glint is a user-friendly command line tool for fast analysis of genome-wide DNA methylation data generated using the Illumina human methylation arrays. glint allows to easily run a pipeline of Epigenome-Wide Association Study (EWAS) under different models while accounting for known confounders in methylation data.
 
 
 Getting glint:
@@ -51,6 +51,8 @@ Methylation imputation:
 Versions:
 ^^^^^^^^^
 
+glint 1.0.0
+
 Citing glint:
 ^^^^^^^^^^^^^
 
@@ -62,8 +64,8 @@ Citing glint:
 Contact us:
 ^^^^^^^^^^^
 
-This software was developed by Reut Yedidim, Omer Weissbrod and Elior Rahmani.
-For any question and for reporting bugs please send an email to Elior Rahmani at: elior.rahmani@gmail.com
+This software was developed by Reut Yedidim and Elior Rahmani. Code contributions were made by Omer Weissbrod and Dan coster.
+For any question and for reporting bugs or suggesting new features please send an email to Elior Rahmani at: elior.rahmani@gmail.com
 
 
 .. Indices and tables

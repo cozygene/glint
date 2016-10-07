@@ -24,13 +24,13 @@ You can find here_ details about the EIGENSTRAT format.
 
 For example::
 
-	glint.py --impute --snp genotypes.snp --geno genotypes.geno --ind genotypes.ind
+	python glint.py --impute --snp genotypes.snp --geno genotypes.geno --ind genotypes.ind
 
 will generate glint files with imputed methylation data for a group of methylation sites, based on the *.snp*, *.geno* and *.ind* EIGENSTRAT files of the genotype data.
 
 .. note:: --impute will automatically generate glint files with the imputed methylation levels, therefore there is no need to add the --gsave argument.
 
-.. note:: Add *--out filename* in order to change the default output name.
+.. note:: Use `--out`_ in order to change the default output name.
 
 
 .. _--score:
@@ -42,12 +42,28 @@ Controls the number of methylation sites to impute. This argument specifies the 
 
 For example::
 
-	glint.py --impute --snp genotypes.snp --geno genotypes.geno --ind genotypes.ind --score 0.4
+	python glint.py --impute --snp genotypes.snp --geno genotypes.geno --ind genotypes.ind --score 0.4
 
 will impute methylation levels for every site with a score greater than 0.4.
 
 
+.. _--maxmiss”:
 
+**--maxmiss**
+
+
+
+Controls the fraction of missing values allowed for samples and SNPs in the EIGENSTRAT input files. Samples with fraction of missing values above the specified value will be ignored as well as SNPs with higher than specified missing values (such SNPs will not be used in the imputation). The deafult value is 0.03.
+
+For example::
+
+	python glint.py --impute --snp genotypes.snp --geno genotypes.geno --ind genotypes.ind --maxmiss 0.01
+
+will impute methylation levels for samples with no more than 1% of missing SNPs using SNPs with no more than 1% of missing values.
+
+
+
+.. _--out: input.html#out
 
 .. _glint files: input.html#glint-files
 

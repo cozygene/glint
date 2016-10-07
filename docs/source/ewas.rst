@@ -25,7 +25,7 @@ Runs an association test on each site in the data and outputs a results file.
 
 .. note:: glint can produce plots based on the results file. For more details read about the `--plot`_ argument.
 
-.. note:: Add *--out filename* in order to change the default output name.
+.. note:: Use `--out`_ in order to change the default output name.
 
 
 .. _--pheno:
@@ -36,7 +36,7 @@ Selects a phenotype to use in the association test.
 
 For example::
 
-	glint.py --datafile datafile.glint --ewas --linreg --pheno y1
+	python glint.py --datafile datafile.glint --ewas --linreg --pheno y1
 
 
 will run EWAS using linear regression model with the phenotype y1. The names of the phenotypes are defined by the headers in the *datafile.samples.txt* file associated with the *datafile.glint*. For more details see `glint files`_.
@@ -52,17 +52,31 @@ Selects covariates to use in the association test.
 
 For example::
 
-	glint.py --datafile datafile.glint --ewas --linreg --covar c1 c2 c3
+	python glint.py --datafile datafile.glint --ewas --linreg --covar c1 c2 c3
 
 will run EWAS using linear regression model with the covariates c1, c2 and c3. The names of the covariates are defined by the headers in the *datafile.samples.txt* file associated with the *datafile.glint*. For more details see `glint files`_.
 
 Alternatively, run::
 
-	glint.py --datafile datafile.glint --ewas --linreg --covar
+	python glint.py --datafile datafile.glint --ewas --linreg --covar
 
 without specifying names of covariates in order to include into the model all of the covariates included in the glint file.
 
 .. note:: Use the argument `--covarfile`_ in order to provide covariates that were not included in the *datafile.glint* file or in case where a textual version of the data is used rather than a *.glint* file.
+
+
+
+.. _--stdth:
+
+**--stdth**
+
+Excludes sites with standard deviation lower than a specified value for the EWAS analysis. This argument can be used in order to reduce the number of hypotheses by excluding near-constant sites that are not expected to be associated with phenotypes.
+
+For example::
+
+	python glint.py --datafile datafile.glint --ewas --linreg --pheno y1 --stdth 0.01
+
+will consider only sites with standard deviation greater than 0.01 in the EWAS analysis.
 
 
 |
@@ -81,7 +95,7 @@ The output file titled *results.glint.linreg.txt* includes a list of the sites, 
 
 For example::
 
-	glint.py --datafile datafile.glint --ewas --linreg --pheno y1
+	python glint.py --datafile datafile.glint --ewas --linreg --pheno y1
 
 will run EWAS using linear regression model.
 
@@ -100,7 +114,7 @@ The output file titled *results.glint.logreg.txt* includes a list of the sites, 
 
 For example::
 
-	glint.py --datafile datafile.glint --ewas --logreg --pheno y1
+	python glint.py --datafile datafile.glint --ewas --logreg --pheno y1
 
 will run EWAS using logistic regression model.
 
@@ -121,7 +135,7 @@ The output file titled *results.wilc.logreg.txt* includes a list of the sites, s
 
 For example::
 
-	glint.py --datafile datafile.glint --ewas --wilc --pheno y1
+	python glint.py --datafile datafile.glint --ewas --wilc --pheno y1
 
 will run EWAS using the Wilcoxon rank-sum test.
 
@@ -151,11 +165,11 @@ The kinship matrix for modelling the inter-individual similarity in the data tha
 
 For example::
 
-	glint.py --datafile datafile.glint --ewas --lmm --pheno y1 --kinship kinship.txt
+	python glint.py --datafile datafile.glint --ewas --lmm --pheno y1 --kinship kinship.txt
 
 will run EWAS using LMM with the kinship matrix specified in the *kinship.txt* file. Alternatively::
 
-	glint.py --datafile datafile.glint --ewas --lmm --pheno y1 --kinship refactor --k 6
+	python glint.py --datafile datafile.glint --ewas --lmm --pheno y1 --kinship refactor --k 6
 
 will use the ReFACTor algorithm for constructing the kinship matrix (where 6 is the number of assumed cell types, see the argument `--k`_ for more details).
 
@@ -170,7 +184,7 @@ Allows to indicate whether rstricted maximum likelihood estimation (REML) or max
 
 For example::
 
-	glint.py --datafile datafile.glint --ewas --lmm --pheno y1 --kinship kinship.txt --reml 0
+	python glint.py --datafile datafile.glint --ewas --lmm --pheno y1 --kinship kinship.txt --reml 0
 
 will perform EWAS on the data using LMM with ML estimation.
 
@@ -181,7 +195,7 @@ This argument normalizes the covariates (if supplied) before fitting the LMM.
 
 For example::
 
-	glint.py --datafile datafile.glint --ewas --lmm --pheno y1 --covar c1 c2 c3 --norm
+	python glint.py --datafile datafile.glint --ewas --lmm --pheno y1 --covar c1 c2 c3 --norm
 
 will perform EWAS on the data using LMM after normalizing the covariates c1, c2 and c3.
 
@@ -193,13 +207,14 @@ This argument allows to fit the log delta parameter in the Fast-LMM model only o
 
 For example::
 
-	glint.py --datafile datafile.glint --ewas --lmm --pheno y1 --oneld
+	python glint.py --datafile datafile.glint --ewas --lmm --pheno y1 --oneld
 
 will perform EWAS on the data using LMM with a single value of log detla.
 
 
-
 .. _--phenofile: input.html#phenofile
+
+.. _--out: input.html#out
 
 .. _--covarfile: input.html#covarfile
 

@@ -8,7 +8,7 @@ The following section describes arguments that allow to perform basic data manag
 
 .. note:: The example commands described bellow assume that the user generated `glint files`_ with covariates file and phenotypes file.
 
-.. note:: Data management commands applied to data do not change the input files. In order to save the changes use the `--gsave`_ or `--txtsave`_ commands.
+.. note:: Data management commands applied to data do not change the input files. In order to save the changes into a new file use the `--gsave`_ or `--txtsave`_ commands.
 
 
 |
@@ -26,7 +26,7 @@ Filters outlier samples using PCA. This argument removes samples with principal 
 
 For example::
 
-	glint.py --datafile datafile.glint --maxpcstd 1 3
+	python glint.py --datafile datafile.glint --maxpcstd 1 3
 
 will remove all samples having extreme values of PC 1 (more than 3 standard deviations).
 
@@ -49,7 +49,7 @@ Allows to filter sites. This argument gets a text file with a list of CpG identi
 
 For example::
 
-	glint.py --datafile datafile.glint --include list.txt
+	python glint.py --datafile datafile.glint --include list.txt
 
 will exclude all the sites not indicated in the *list.txt* file.
 
@@ -62,7 +62,7 @@ Allows to filter sites. This argument gets a text file with a list of CpG identi
 
 For example::
 
-	glint.py --datafile datafile.glint --exclude list.txt
+	python glint.py --datafile datafile.glint --exclude list.txt
 
 will exclude all the sites indicated in the *list.txt* file.
 
@@ -75,7 +75,7 @@ Allows to filter sampels. This argument gets a text file with a list of sample i
 
 For example::
 
-	glint.py --datafile datafile.glint --keep list.txt
+	python glint.py --datafile datafile.glint --keep list.txt
 
 will remove all the samples not indicated in the *list.txt* file.
 
@@ -88,20 +88,20 @@ Allows to filter sampels. This argument gets a text file with a list of sample i
 
 For example::
 
-	glint.py --datafile datafile.glint --remove list.txt
+	python glint.py --datafile datafile.glint --remove list.txt
 
 will remove all the samples indicated in the *list.txt* file.
 
 
-.. _--stdth:
+.. _--minstd:
 
-**--stdth**
+**--minstd**
 
 Filters sites by their variance. This argument removes all sites with standard deviation below the specified value. This command can be used to remove nearly-constant sites that are less likely to result in significant associations in EWAS.
 
 For example::
 
-	glint.py --datafile datafile.glint --stdth 0.01
+	python glint.py --datafile datafile.glint --minstd 0.01
 
 will remove all sites with standard deviation bellow 0.01.
 
@@ -114,7 +114,7 @@ Filters sites by their mean methylation levels. This argument removes all sites 
 
 For example::
 
-	glint.py --datafile datafile.glint --minmean 0.2
+	python glint.py --datafile datafile.glint --minmean 0.2
 
 will remove all sites with mean methylation level bellow 0.2.
 
@@ -128,7 +128,7 @@ Filters sites by their mean methylation levels. This argument removes all sites 
 
 For example::
 
-	glint.py --datafile datafile.glint --maxmean 0.8
+	python glint.py --datafile datafile.glint --maxmean 0.8
 
 will remove all sites with mean methylation level above 0.8.
 
@@ -142,7 +142,7 @@ Filters out non-autosomal sites (sites in chromsomes X and Y). This argument ass
 
 For example::
 
-	glint.py --datafile datafile.glint --rmxy
+	python glint.py --datafile datafile.glint --rmxy
 
 will remove all non-autosomal sites from the data.
 
@@ -155,7 +155,7 @@ Filters out cross-reactive (non specific) sites according to Chen et al. [1]_. T
 
 For example::
 
-	glint.py --datafile datafile.glint --rmns
+	python glint.py --datafile datafile.glint --rmns
 
 will remove all non specific sites from the data.
 
@@ -168,7 +168,7 @@ Filters out polymorphic sites according to Chen et al. [1]_. This argument assum
 
 For example::
 
-	glint.py --datafile datafile.glint --rmpoly
+	python glint.py --datafile datafile.glint --rmpoly
 
 will remove all polymorphic sites from the data.
 

@@ -13,7 +13,7 @@ For more details see "Documentation"
 
   If you already have Python installed and do not want to install Anaconda Python, skip to step 3.
 
-3. Install todoPUTNAMEHERE by running the provided install.py file, run: ```python install.py```
+3. Install glint by running the provided install.py file: ```python install.py``` (requires Python version 2.7)
 
 For more details see "Dependencies".  
   

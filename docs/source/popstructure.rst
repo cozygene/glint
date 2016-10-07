@@ -24,7 +24,7 @@ Computes the Epistructure components and generates a file titled *epistructure.p
 
 For example::
 
-	glint.py --datafile datafile.glint --epi
+	python glint.py --datafile datafile.glint --epi
 
 will compute the Epistructure components of the data.
 
@@ -33,18 +33,18 @@ will compute the Epistructure components of the data.
 
 .. note:: Use `--epi`_ together with `--gsave`_ in order to generate a new version of glint files with the computed Epistructure components (these will be included in the *datafile.samples.txt* file).
 
-.. note:: Add *--out filename* in order to change the default output name.
+.. note:: Use `--out`_ in order to change the default output name.
 
 
 .. _--covar:
 
 **--covar:**
 
-Selects covariates to use in the calculation of the Epistructure components. Considering dominant genome-wide effectors such as batch information and cell type composition (in case of heterogeneous tissue) is expected to improve the correlation of the Epistructure components with the cell type composition.
+Selects covariates to use in the calculation of the Epistructure components. Considering highly dominant genome-wide effectors such as cell type composition (in case of heterogeneous tissue) is expected to improve the correlation of the Epistructure components with the cell type composition.
 
 For example::
 
-	glint.py --datafile datafile.glint --epi --covar c1 c2 c3
+	python glint.py --datafile datafile.glint --epi --covar c1 c2 c3
 
 will compute the Epistructure components while accounting for the covariates c1, c2 and c3. The names of the covariates are defined by the headers in the *datafile.samples.txt* file associated with the *datafile.glint*. For more details see `glint files`_.
 
@@ -61,15 +61,17 @@ Selectes the number of Epistructure components to output (default is 1).
 
 For example::
 
-	glint.py --datafile datafile.glint --epi --savepcs 2
+	python glint.py --datafile datafile.glint --epi --savepcs 2
 
-will compute and output the first two Epistructure components.
+will compute the first two Epistructure components of the data.
 
 
 
 .. _--covarfile: input.html#covarfile
 
 .. _--gsave: input.html#gsave
+
+.. _--out: out.html#out
 
 .. _--rmpoly: datamanagement.html#rmpoly
 
