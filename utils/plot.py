@@ -6,6 +6,7 @@ from pandas import DataFrame
 from scipy.stats import uniform
 from scipy.stats import randint
 from itertools import cycle
+from math import ceil
 
 def draw_setup(function):
     """
@@ -99,12 +100,14 @@ class QQPlot(Plot):
         plot.plot(x, y, style)
 
         # add y=x trend
-        xlim = int(y.max()) + 2
-        plot.plot(range(xlim), range(xlim), 'r-') 
+        xlim = int(ceil(x.max()) + 2)
+        ylim = int(ceil(y.max()) + 2)
+        xy = max(ylim, xlim)
+        plot.plot(range(xy+1) , range(xy+1), 'r-') 
 
         # axis limit
         plot.xlim(0, xlim)
-        plot.ylim(0, round(y.max()))
+        plot.ylim(0, ylim)
 
         if ytitle is None:
             ytitle = self.Y_LABEL
@@ -239,5 +242,5 @@ class ManhattanPlot(Plot):
         ax.set_xticks([space_for_each_chr*i+space_for_each_chr/2 for i in range(number_of_chr)])
         ax.set_xticklabels(x_labels,  rotation='vertical')
         ax.set_xlim([0, len(df)])
-        ax.set_ylim([0, max(df.minuslog10pvalue) + 0.2])
+        ax.set_ylim([0, max(df.minuslog10pvalue) + 1.5])
 
