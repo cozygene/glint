@@ -64,7 +64,8 @@ class Predictor(Module):
         """
         samples = loadtxt(plink_ind_file, dtype=str, usecols=(0,))
         number_of_samples = samples.shape[0]
-        logging.info("found %s samples in the file '%s'" %(number_of_samples, plink_ind_file.name))
+        filename = plink_ind_file.name if type(plink_ind_file) == file else plink_ind_file
+        logging.info("found %s samples in the file '%s'" %(number_of_samples, filename))
 
         if type(plink_ind_file) == file:
             plink_ind_file.close()
@@ -99,7 +100,6 @@ class Predictor(Module):
         # find sites with score bigger than min_score
         seterr(invalid='ignore') # to ignore the following line warning (These warnings are an intentional aspect of numpy)
         relevant_sites_indices = where(self.sites_scores > min_score)[0]
-        logging.info("remove %s sites with score lower than %s..." % (len(relevant_sites_indices), min_score))
 
         # this code removes the sites in the list bad_sites_list (list of cpgs) from our data. it wast tested.
         # logging.info("remove bad sites..." )
@@ -111,7 +111,8 @@ class Predictor(Module):
         site_prediction, predicted_sites_ids =  self.predict_sites(number_of_samples, relevant_snps_names, relevant_snp_occurrences, relevant_sites_indices)
         if site_prediction == []: # no sites predicted
             common.terminate("All sites removed. There is nothing to predict.")
-        
+        logging.info("%s sites were imputed for %s samples" % (len(predicted_sites_ids), number_of_samples))
+        logging.info("%s sites with score > %s were not imputed because of missing SNPs" % (len(relevant_sites_indices) - len(predicted_sites_ids), min_score))
         self.predicted_sites_names = self.sites_name_per_id[predicted_sites_ids]
         self.site_prediction = site_prediction
         
