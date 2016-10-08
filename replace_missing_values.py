@@ -1,7 +1,8 @@
 from numpy import savetxt, where, zeros, delete, mean, vstack, column_stack
 import argparse
 from utils import common
-from numpy import float32
+from numpy import float32, isnan, nanmean
+from numpy import sum as npsum
 DATA_TYPE = float32
 STR_DATA_TYPE = '|S16'
 def _replace_missing_values_in_matrix(all_data, missing_value_indicator, data_max_missing_values, samples_max_missing_values, replace = False, col_names=None, row_names=None):
@@ -9,35 +10,30 @@ def _replace_missing_values_in_matrix(all_data, missing_value_indicator, data_ma
     na_count_per_sample  = zeros(number_of_samples)
     data_indices_to_remove = []
     print "Replacing missing values by mean..."
-    for i, data_for_all_samples in enumerate(all_data): # iterate each time different site for all samples
-        na_indices = where(data_for_all_samples == missing_value_indicator)[0]
-        na_count_per_sample[na_indices] += 1 
-        na_count = len(na_indices)
-        na_percentage = float(na_count) / number_of_samples
-        if na_percentage > data_max_missing_values:
-            data_indices_to_remove.append(i)
-        else:
-            if na_count != 0 :
-                # "predict" using mean of non-missing samples in this snp
-                non_na_indices = delete(range(number_of_samples), na_indices)
-                if replace:
-                     all_data[i][na_indices] = mean(data_for_all_samples[non_na_indices].astype(DATA_TYPE))
-                else:
-                    all_data[i][na_indices] = mean(data_for_all_samples[non_na_indices])
     
-    samples_indices_to_keep = where(na_count_per_sample < number_of_samples * samples_max_missing_values)[0]
+    na_count_per_sample = npsum(isnan(all_data), axis=0)
+    samples_indices_to_keep = where(na_count_per_sample <= samples_max_missing_values*number_of_samples)[0]
+    print("%s samples were not replaced because they have more than %s missing values" % (number_of_samples - len(samples_indices_to_keep), samples_max_missing_values))
+
+    na_count_per_site = npsum(isnan(all_data), axis=1)
+    sites_indices_to_keep = where(na_count_per_site <= data_max_missing_values*number_of_data)[0]
+    print("%s sites were not replaced because they have more than %s missing values" % (number_of_data - len(sites_indices_to_keep), data_max_missing_values))
+
+    print("replacing each missing value by it's site mean...")
+    all_data =  all_data[sites_indices_to_keep, :][:,samples_indices_to_keep]
+    sites_mean = nanmean(all_data, axis=1)
+    for i, data_for_all_samples in enumerate(all_data):
+        na_indices = where(isnan(all_data[i,:]))[0]
+        all_data[i][na_indices] = sites_mean[i]
+   
+    # return the relevant samples ids and sites ids
     if col_names is not None:
         col_names = col_names[samples_indices_to_keep]
-    print "Removed %s samples with more than %s missing values" % (number_of_samples - len(samples_indices_to_keep), samples_max_missing_values)
 
-    data_indices_to_keep = delete(range(number_of_data), data_indices_to_remove)
     if row_names is not None:
-        row_names = row_names[data_indices_to_keep]
-    print "Removed %s site with more than %s missing values" % (len(data_indices_to_remove), data_max_missing_values)
+        row_names = row_names[sites_indices_to_keep]
 
-    if replace:
-        return all_data[data_indices_to_keep,:][:,samples_indices_to_keep].astype(DATA_TYPE), col_names, row_names
-    return all_data[data_indices_to_keep,:][:,samples_indices_to_keep], col_names, row_names
+    return all_data, col_names, row_names
 
 def get_data_type(data_type_str):
     if data_type_str in ['float', 'double', float]:
@@ -106,7 +102,7 @@ def replace_missing(data_filename, missing_value_indicator, data_max_missing_val
         replace = True
 
     try:
-        all_data, col_names, row_names = common.load_data_file(data_filename, 2, str)
+        all_data, col_names, row_names = common.load_data_file(data_filename, 2, na_values= missing_value_indicator)
 
         if all_data.ndim != dim:
             raw_input("Error: got data from dimensions %d while excepted to %d. Please check all paramenters are OK (data type and separator)." %(all_data.ndim, dim))
@@ -119,16 +115,17 @@ def replace_missing(data_filename, missing_value_indicator, data_max_missing_val
         output_data, col_names, row_names = _replace_missing_values_in_matrix(all_data, missing_value_indicator, data_max_missing_values, samples_max_missing_values, replace, col_names, row_names)
         print "Output is saved to " + output_filename
 
+        data_to_save = output_data
         if row_names is not None:
-            output_data = column_stack((row_names, output_data))
+            data_to_save = column_stack((row_names, data_to_save))
         if col_names is not None:
             if row_names is not None:
                 header = ["ID"] + list(col_names)
             else:
                 header = col_names
-            output_data = vstack((header, output_data))
+            data_to_save = vstack((header, data_to_save))
             
-        savetxt(output_filename, output_data, fmt='%s')
+        savetxt(output_filename, data_to_save, fmt='%s')
         return output_data
 
     except Exception as e:

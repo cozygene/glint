@@ -21,7 +21,7 @@ def loadtxt(filepath, dtype = None, header = None, delimiter='\t'):
         x = read_csv(filepath, dtype = object, header = None, sep=delimiter)
     return DataFrame.as_matrix(x)
 
-def load_float_data_and_headers(filepath, delimiter='\t', dtype = float32):
+def load_float_data_and_headers(filepath, delimiter='\t', dtype = float32, na_values = None):
     """
     assumes data is 2 dimension matrix
     gets data matrix (from type str)
@@ -55,15 +55,16 @@ def load_float_data_and_headers(filepath, delimiter='\t', dtype = float32):
 
     try:
         float(first_row[-1])
-    except: # this is a header and not part of the data
+    except ValueError: # this is a header and not part of the data
         col_names = first_row[1:]
 
     # check if the first column is a row titles
     row_names = None
     first_col = DataFrame.as_matrix(read_csv(filepath, dtype=str, delimiter=delimiter, usecols=[0], header=None))
+    first_col = first_col.reshape(-1,)
     try:
         float(first_col[-1])
-    except: # this is a row's title and not part of the data
+    except ValueError: # this is a row's title and not part of the data
         if col_names:
             row_names = first_col[1:]
         else:
@@ -77,20 +78,28 @@ def load_float_data_and_headers(filepath, delimiter='\t', dtype = float32):
     try:
         if row_names is not None:
             if col_names is not None:
-                data = read_csv(filepath, dtype=dtype, delimiter=delimiter, header=header, usecols=col_names)
+                data = read_csv(filepath, dtype=dtype, delimiter=delimiter, header=header, usecols=col_names, na_values=na_values)
             else:
-                data = read_csv(filepath, dtype=dtype, delimiter=delimiter, header=header, usecols=range(1,num_of_cols))
+                data = read_csv(filepath, dtype=dtype, delimiter=delimiter, header=header, usecols=range(1,num_of_cols), na_values=na_values)
         else:
-            data = read_csv(filepath, dtype=dtype, delimiter=delimiter, header=header)
-    except:
+            data = read_csv(filepath, dtype=dtype, delimiter=delimiter, header=header, na_values=na_values)
+        
+        
+    except Exception as e:
+        logging.exception("while loading data")
         terminate("file contains values which are not float") 
 
-    data = DataFrame.as_matrix(data)
+    # convert to array
+    if col_names is not None:
+        col_names = array(col_names) # by default will be 1d
+    if data is not None:
+        data = DataFrame.as_matrix(data)
+    else:
+        common.terminate("no data found in the file %s" % filepath)
 
-    return data, array(col_names), row_names.reshape(-1,)
-    # return data, col_names, row_names.tolist()
+    return data, col_names, row_names
 
-def load_data_file(filepath, dim, dtype = float32):
+def load_data_file(filepath, dim, dtype = float32, na_values = None):
     """
     filepath is the path to the file to load
     dim is the minimal dimension of the matrix in the file
@@ -98,7 +107,7 @@ def load_data_file(filepath, dim, dtype = float32):
     data = None
     a = time()
     try:
-        data, col_names, row_names = load_float_data_and_headers(filepath, delimiter='\t', dtype = dtype)
+        data, col_names, row_names = load_float_data_and_headers(filepath, delimiter='\t', dtype = dtype, na_values = na_values)
     except Exception as e:
         logging.exception("while loading data !!%s!!")#todo remove this
         terminate("some error with the data file format, please check the delimiter")

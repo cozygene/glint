@@ -12,7 +12,8 @@ def test_remove_lowest_std_sites():
     data_after_std = methylation_data.MethylationDataLoader(datafile = DATA_STDTH)
     data_after_std.remove_lowest_std_sites(0.02)
     data = loadtxt(STDTH_RES)
-    assert array_equal(data, data_after_std.data)
+    for i in range(data.shape[0]):
+        assert tools.correlation(data[i,:], data_after_std.data[i,:], 1e-12)
     logging.info("PASS")
 
 class DataTester(test_logger.LogTestCase, unittest.TestCase):
@@ -158,7 +159,9 @@ class DataTester(test_logger.LogTestCase, unittest.TestCase):
         data = self.meth_data.copy()
         data.exclude_sites_with_low_mean(self.MIN_MEAN_TH)
         res = loadtxt(self.FAKE_DATA_MIN_MEANS)
-        assert array_equal(res, data.data)
+
+        for i in range(res.shape[0]):
+            assert tools.correlation(res[i,:], data.data[i,:], 1e-14)
         logging.info("PASS")
 
     def test_exclude_sites_with_high_mean(self):
@@ -166,7 +169,10 @@ class DataTester(test_logger.LogTestCase, unittest.TestCase):
         data = self.meth_data.copy()
         data.exclude_sites_with_high_mean(self.MAX_MEAN_TH)
         res = loadtxt(self.FAKE_DATA_MAX_MEANS)
-        assert array_equal(res, data.data)
+
+        for i in range(res.shape[0]):
+            assert tools.correlation(res[i,:], data.data[i,:], 1e-14)
+
         logging.info("PASS")
 
     def test_upload_new_files(self):
