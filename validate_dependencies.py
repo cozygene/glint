@@ -35,7 +35,7 @@ All you need to do is add the Anaconda path to your environment variables. Follo
         change it to "C:\Users\me\Anaconda\Lib\site-packages;C:\Python27\Lib;C:\Python27\DLLs;"
 4. try to run glint again
 """
-DEPENDENCIES_EXPLANATION = "please check you have all dependencies installed.\ndependencies are %s\nyou can run install.py script to check and install dependencies or you can install anaconda. please contact us on failure."
+DEPENDENCIES_EXPLANATION = "\nsome dependencies are missing.\nto install either run\n\tpython install.py\nor install anaconda from https://www.continuum.io/downloads.\ndependencies are: %s\nplease contact us on failure"
 RUN_INSTALL_SCRIPT = "please run install.py"
 
 def import_dependencies():
@@ -85,5 +85,5 @@ except:
     if sys.platform.startswith("win") or "nt" in os.name: # you run windows
         add_anaconda_to_path()
     else:
-        print  DEPENDENCIES_EXPLANATION % ", ".join(GLINT_OBLIGATORY_DEPENDENCIES)
+        print  DEPENDENCIES_EXPLANATION % "\n\t".join(GLINT_OBLIGATORY_DEPENDENCIES)
     sys.exit()

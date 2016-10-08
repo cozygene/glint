@@ -225,7 +225,7 @@ def check_dependencies(dependencies_list):
     if len(dependencies_to_install) > 0:
         if user_installation_confirmation(dependencies_to_install):
             if not load_pip():
-                print("pip (installation package) wasn't found. Can't install dependencies.")
+                print("pip wasn't found, can't install dependencies.\nPlease install Anaconda from https://www.continuum.io/downloads")
             else:
                 dependencies_to_install = [module for module in dependencies_to_install if install(module) == False]
 
@@ -254,11 +254,10 @@ def install_glint():
                 obligatory_dependencies.append(module)
             else:
                 optional_dependencied.append(module)
-        
         if obligatory_dependencies:
-            color_print("To run Glint you must install anaconda or the following packages: %s" % str(obligatory_dependencies), BACKGROUND.BLACK + FOREGROUND.YELLOW)
+            color_print("To run Glint you must install dependencies:\nplease install Anaconda from https://www.continuum.io/downloads.anaconda" , BACKGROUND.BLACK + FOREGROUND.YELLOW)
             if 'linux' in sys.platform:
-                color_print("try running sudo apt-get install " + " ".join(['python-%s' % str(package) for package in obligatory_dependencies]), BACKGROUND.BLACK + FOREGROUND.YELLOW)
+                color_print("or try running: 'sudo apt-get install " + " ".join(['python-%s' % str(package) for package in obligatory_dependencies]) + "'", BACKGROUND.BLACK + FOREGROUND.YELLOW)
         if optional_dependencied:
             color_print("To run optional scripts you must install: %s " % str(optional_dependencied), BACKGROUND.BLACK + FOREGROUND.YELLOW)
 

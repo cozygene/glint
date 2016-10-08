@@ -1,6 +1,6 @@
 import os
 from utils import regression, tools#, plot
-from numpy import column_stack, ones, savetxt, array, insert, vstack, append, where
+from numpy import column_stack, ones, savetxt, array, insert, vstack, append, where, float32
 from module import Module
 from utils import common, plot, sitesinfo
 import statsmodels.api as sm
@@ -64,14 +64,14 @@ class Regression(Module):
         output.sort(key = lambda x: x[1]) # sort output by p-value (1 is p-value index)
         output = array(output)
         sorted_cpgnames = output[:,0]
-        sorted_pvalues  = output[:,1].astype(float)
-        sorted_fstats   = output[:,2].astype(float)
-        sorted_intercept_beta = output[:,3].astype(float)
-        sorted_site_beta      = output[:,-1].astype(float)
+        sorted_pvalues  = output[:,1].astype(float32)
+        sorted_fstats   = output[:,2].astype(float32)
+        sorted_intercept_beta = output[:,3].astype(float32)
+        sorted_site_beta      = output[:,-1].astype(float32)
         if  output.shape[1] == 5: # there is no covariates coefficient
             sorted_covars_betas = None
         else:
-            sorted_covars_betas   = output[:,4:-1].astype(float)
+            sorted_covars_betas   = output[:,4:-1].astype(float32)
         return sorted_cpgnames , sorted_pvalues, sorted_fstats, sorted_intercept_beta, sorted_covars_betas, sorted_site_beta
 
 
@@ -152,8 +152,8 @@ class Wilcoxon(Module):
         output = array(output)
         
         sorted_cpgnames = output[:,0]
-        sorted_pvalues  = output[:,1].astype(float)
-        sorted_fstats   = output[:,2].astype(float)
+        sorted_pvalues  = output[:,1].astype(float32)
+        sorted_fstats   = output[:,2].astype(float32)
 
         logging.info('EWAS wilcoxon test is Done!')
         return sorted_cpgnames, sorted_pvalues, sorted_fstats
@@ -364,18 +364,18 @@ class EWASResultsParser(EWASResults):
         cpgnames = data[:, self.CPGNAMES_INDEX]
         chromosomes = data[:, self.CHR_INDEX]
         positions = data[:, self.POSITION_INDEX]
-        pvalues = data[:, self.PVALUE_INDEX].astype(float)
-        qvalues = data[:, self.QVALUE_INDEX].astype(float)
+        pvalues = data[:, self.PVALUE_INDEX].astype(float32)
+        qvalues = data[:, self.QVALUE_INDEX].astype(float32)
         genes = data[:, self.GENE_INDEX]
         categories = data[:, self.CATEGORY_INDEX]
 
         # optional values
-        intercept =        self.get_value_by_title(data, titles, self.INTERCEPT_TITLE, float)
-        covariates_betas = self.get_value_by_title(data, titles, self.get_covars_titles(values_number), float) #number of covariates is maximun the number of values (fields) in the data  file
-        beta =             self.get_value_by_title(data, titles, self.BETA_TITLE, float)
-        stats =            self.get_value_by_title(data, titles, self.STATS_TITLE, float)
-        sigma_e =          self.get_value_by_title(data, titles, self.SIGMA_E_TITLE, float)
-        sigma_g =          self.get_value_by_title(data, titles, self.SIGMA_G_TITLE, float)
+        intercept =        self.get_value_by_title(data, titles, self.INTERCEPT_TITLE, float32)
+        covariates_betas = self.get_value_by_title(data, titles, self.get_covars_titles(values_number), float32) #number of covariates is maximun the number of values (fields) in the data  file
+        beta =             self.get_value_by_title(data, titles, self.BETA_TITLE, float32)
+        stats =            self.get_value_by_title(data, titles, self.STATS_TITLE, float32)
+        sigma_e =          self.get_value_by_title(data, titles, self.SIGMA_E_TITLE, float32)
+        sigma_g =          self.get_value_by_title(data, titles, self.SIGMA_G_TITLE, float32)
 
 
         return test_name, cpgnames, pvalues, \

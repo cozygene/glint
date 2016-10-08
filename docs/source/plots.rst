@@ -8,6 +8,9 @@ Plots
 
 **--plot**
 
+.. image:: figs/all.jpg
+    :align: center
+
 This argument allows to plot several types of plots, as desribed bellow.
 
 

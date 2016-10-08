@@ -26,7 +26,11 @@ def json_numpy_obj_hook(dct):
     :param dct: (dict) json encoded ndarray
     :return: (ndarray) if input was an encoded ndarray
     """
-    if isinstance(dct, dict) and '__ndarray__' in dct:
+    
+    if isinstance(dct, dict) and '__onedarray__' in dct:
+        return array(dct['__onedarray__'])
+
+    elif isinstance(dct, dict) and '__ndarray__' in dct:
         data = b64decode(dct['__ndarray__'])
         return frombuffer(data, dct['dtype']).reshape(dct['shape'])#.copy()
     return dct
@@ -49,17 +53,23 @@ def default(obj):
                       'title_indexes' : obj.header_manager.title_indexes}
 
     elif isinstance(obj, ndarray):
-        if obj.flags['C_CONTIGUOUS']:
-            obj_data = obj.data
-        else:
-            cont_obj = ascontiguousarray(obj)
-            assert(cont_obj.flags['C_CONTIGUOUS'])
-            obj_data = cont_obj.data
+        if obj.ndim == 1:
+            return dict(__onedarray__=obj.tolist())
 
-        data_b64 = b64encode(obj_data)
-        return dict(__ndarray__=data_b64,
-                    dtype=str(obj.dtype),
-                    shape=obj.shape)
+        elif obj.ndim == 2:
+            if obj.flags['C_CONTIGUOUS']:
+                obj_data = obj.data
+            else:
+                cont_obj = ascontiguousarray(obj)
+                assert(cont_obj.flags['C_CONTIGUOUS'])
+                obj_data = cont_obj.data
+
+            data_b64 = b64encode(obj_data)
+            return dict(__ndarray__=data_b64,
+                        dtype=str(obj.dtype),
+                        shape=obj.shape)
+        else:
+            common.terminate("array with dimentions bigger than 2")
     return json_dict
 
 
@@ -150,7 +160,9 @@ class MethylationData(Module):
         and in the same order
         """
         if not ((samples_ids.size == matrix_sample_ids.size) and ((samples_ids == matrix_sample_ids).all())):
-            if (set(list(samples_ids))).symmetric_difference(set(list(matrix_sample_ids))):
+            samples1_set = set(matrix_sample_ids)
+            samples2_set = set(samples_ids)
+            if samples1_set.symmetric_difference(samples2_set):
                 common.terminate("sample ids are not identical to the sample ids in data file")
             common.terminate("sample ids are not in the same order as in the datafile") 
 

@@ -1,7 +1,8 @@
 from numpy import savetxt, where, zeros, delete, mean, vstack, column_stack
 import argparse
 from utils import common
-DATA_TYPE = float
+from numpy import float32
+DATA_TYPE = float32
 STR_DATA_TYPE = '|S16'
 def _replace_missing_values_in_matrix(all_data, missing_value_indicator, data_max_missing_values, samples_max_missing_values, replace = False, col_names=None, row_names=None):
     number_of_data, number_of_samples = all_data.shape
