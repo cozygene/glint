@@ -218,10 +218,9 @@ class Refactor(Module):
         logging.info('Computing low rank approximation of the input data and ranking sites...')
 
         x = tools.low_rank_approximation(meth_data.data.transpose(), self.k)
-        x = x.transpose()
 
         An = preprocessing.StandardScaler( with_mean = True, with_std = False ).fit(meth_data.data.transpose()).transform(meth_data.data.transpose())
-        Bn = preprocessing.StandardScaler( with_mean = True, with_std = False ).fit(x.transpose()).transform(x.transpose())
+        Bn = preprocessing.StandardScaler( with_mean = True, with_std = False ).fit(x).transform(x)
 
         # normalization
         An = An * ( 1 / sqrt((An**2).sum(axis=0)) ) 
