@@ -27,9 +27,9 @@ class PredictorTester():
         logging.info("Testing Started on PredictorTester")
         self.module  = predictor.Predictor(self.SITES_SCORES_FILE, self.SITES_SNPS_FILE, self.SITES_IDS_FILE, self.SNPS_IDS_FILE, self.SITES_SNPS_COEFF_FILE)
         self.test_predict()
-        self.test_predict_missing_samples()
+        # self.test_predict_missing_samples() #missing samples handling
         self.test_predict_missing_snps()
-        self.test_predict_missing_samples_and_snps()
+        # self.test_predict_missing_samples_and_snps() #missing samples handling
         logging.info("Testing Finished on PredictorTester")
 
     def test_predict(self):
@@ -46,18 +46,18 @@ class PredictorTester():
             assert(tools.correlation(predicted[i,:], self.module.site_prediction[i,:]))
         logging.info("PASS")
 
-    def test_predict_missing_samples(self):
-        logging.info("Testing test_predict_missing_samples...")
-        predicted = loadtxt(self.MISSING_SAMPLES_MANUALLY_PREDICTED_FILE)
-        self.module.predict(self.MIN_SCORE, self.SNPS_FILE, self.MISSING_SAMPLES_GENO_FILE, self.IND_FILE, self.MIN_MISSING_VALUES)
-        assert(predicted.shape[0] == self.module.site_prediction.shape[0])
-        assert(predicted.shape[1] == self.module.site_prediction.shape[1])
-        for i in range(predicted.shape[1]):
-            assert(tools.correlation(predicted[:,i], self.module.site_prediction[:,i]))
+    # def test_predict_missing_samples(self):  #missing samples handling
+    #     logging.info("Testing test_predict_missing_samples...")
+    #     predicted = loadtxt(self.MISSING_SAMPLES_MANUALLY_PREDICTED_FILE)
+    #     self.module.predict(self.MIN_SCORE, self.SNPS_FILE, self.MISSING_SAMPLES_GENO_FILE, self.IND_FILE, self.MIN_MISSING_VALUES)
+    #     assert(predicted.shape[0] == self.module.site_prediction.shape[0])
+    #     assert(predicted.shape[1] == self.module.site_prediction.shape[1])
+    #     for i in range(predicted.shape[1]):
+    #         assert(tools.correlation(predicted[:,i], self.module.site_prediction[:,i]))
         
-        for i in range(predicted.shape[0]):
-            assert(tools.correlation(predicted[i,:], self.module.site_prediction[i,:]))
-        logging.info("PASS")
+    #     for i in range(predicted.shape[0]):
+    #         assert(tools.correlation(predicted[i,:], self.module.site_prediction[i,:]))
+    #     logging.info("PASS")
 
 
     def test_predict_missing_snps(self):
@@ -78,17 +78,17 @@ class PredictorTester():
 
 
 
-    def test_predict_missing_samples_and_snps(self):
-        logging.info("Testing test_predict_missing_samples_and_snps...")
-        predicted = loadtxt(self.MISSING_SAMPLES_AND_SNPS_MANUALLY_PREDICTED_FILE)
-        self.module.predict(self.MIN_SCORE, self.SNPS_FILE, self.MISSING_SAMPLES_AND_SNPS_GENO_FILE, self.IND_FILE, self.MIN_MISSING_VALUES)
+    # def test_predict_missing_samples_and_snps(self):
+    #     logging.info("Testing test_predict_missing_samples_and_snps...")
+    #     predicted = loadtxt(self.MISSING_SAMPLES_AND_SNPS_MANUALLY_PREDICTED_FILE)
+    #     self.module.predict(self.MIN_SCORE, self.SNPS_FILE, self.MISSING_SAMPLES_AND_SNPS_GENO_FILE, self.IND_FILE, self.MIN_MISSING_VALUES)
         
-        assert(predicted.shape[0] == self.module.site_prediction.shape[0])
-        assert(predicted.shape[1] == self.module.site_prediction.shape[1])
+    #     assert(predicted.shape[0] == self.module.site_prediction.shape[0])
+    #     assert(predicted.shape[1] == self.module.site_prediction.shape[1])
 
-        for i in range(predicted.shape[1]):
-            assert(tools.correlation(predicted[:,i], self.module.site_prediction[:,i]))
+    #     for i in range(predicted.shape[1]):
+    #         assert(tools.correlation(predicted[:,i], self.module.site_prediction[:,i]))
         
-        for i in range(predicted.shape[0]):
-            assert(tools.correlation(predicted[i,:], self.module.site_prediction[i,:]))
-        logging.info("PASS")
+    #     for i in range(predicted.shape[0]):
+    #         assert(tools.correlation(predicted[i,:], self.module.site_prediction[i,:]))
+    #     logging.info("PASS")
