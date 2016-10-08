@@ -1,11 +1,21 @@
 import logging
-from numpy import dot, sqrt, diag, argsort, where
+from numpy import dot, sqrt, diag, argsort, where, log10, inf
 from numpy import min as npnim
 import pca
 from scipy.linalg import eigh
 from scipy.stats import ranksums
 import common
 from statsmodels.sandbox.stats.multicomp import fdrcorrection0
+
+def minusLog10(values):
+    """
+    if the p-value is 0 then don't apply -log on it and assign a high number (say 50).
+    changes values in place and returns it
+    """
+    values = -log10(values)
+    zeros_pvalues_indices = where(values == inf)[0]
+    values[zeros_pvalues_indices] = 50
+    return values
 
 def low_rank_approximation(O, k):
     """

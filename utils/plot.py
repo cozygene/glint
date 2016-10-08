@@ -1,4 +1,4 @@
-from numpy import std, log10, linspace, sqrt, ceil
+from numpy import std, linspace, sqrt, ceil, log10
 import matplotlib.pyplot as plot
 # import matplotlib
 import logging
@@ -7,6 +7,7 @@ from scipy.stats import uniform
 from scipy.stats import randint
 from itertools import cycle
 from math import ceil
+from utils import tools
 
 def draw_setup(function):
     """
@@ -88,12 +89,12 @@ class QQPlot(Plot):
     @draw_setup
     def draw(self, y, title = None, xtitle = None, ytitle = None, style = 'b.'):
         #x
-        x = -log10(linspace(0.001,1.001,len(y)+1)) # 0.001 and 1.001 instead of 0 and 1 in order to avoid dividing by zero warning
+        x = tools.minusLog10(linspace(0.001,1.001,len(y)+1)) # 0.001 and 1.001 instead of 0 and 1 in order to avoid dividing by zero warning
         x = x[1:]
         x.sort()
 
         # y
-        y = -log10(y)
+        y = tools.minusLog10(y) #changes y in place
         y.sort()
 
         # qqplot
@@ -206,9 +207,9 @@ class ManhattanPlot(Plot):
         number_of_sites = len(sites)
         number_of_chr = len(all_chromosomes)
         space_for_each_chr = float(number_of_sites/number_of_chr)
-        
+
         df = DataFrame({'sites' : sites,
-                        'minuslog10pvalue' : -log10(pvalues),
+                        'minuslog10pvalue' : tools.minusLog10(pvalues),
                         'positions' : positions,
                         'chromosome' : chromosomes})
         
