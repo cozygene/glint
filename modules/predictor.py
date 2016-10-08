@@ -64,6 +64,8 @@ class Predictor(Module):
         """
         samples = loadtxt(plink_ind_file, dtype=str, usecols=(0,))
         number_of_samples = samples.shape[0]
+        logging.info("found %s samples in the file '%s'" %(number_of_samples, plink_ind_file.name))
+
         if type(plink_ind_file) == file:
             plink_ind_file.close()
 
@@ -75,8 +77,10 @@ class Predictor(Module):
 
         logging.info("get number of snp occurences...")
         # extract find occurences per sample for each snp from .geno file
-        snp_occurrences, relevant_snps_indices, missing_sampels_indices, non_missing_sampels_indices = self.get_snps_occurences(plink_geno_file, relevant_snps_indices, number_of_samples, min_missing_values) 
-        
+        # snp_occurrences, relevant_snps_indices, missing_sampels_indices, non_missing_sampels_indices = self.get_snps_occurences(plink_geno_file, relevant_snps_indices, number_of_samples, min_missing_values)  #missing samples handling
+        snp_occurrences, relevant_snps_indices = self.get_snps_occurences(plink_geno_file, relevant_snps_indices, number_of_samples, min_missing_values) 
+        # logging.debug("samples removed %s" % ", ".join(samples[missing_sampels_indices])) #missing samples handling
+
         # indices = [i  for i,name in enumerate(plink_snps_data[relevant_snps_indices,0]) if name in self.snps_id_per_name]
         relevant_snps_names = []
         relevant_snp_occurrences = []
@@ -86,7 +90,7 @@ class Predictor(Module):
                 relevant_snp_occurrences.append(snp_occurrences[i])
 
         # remove snps that we dont have information on
-        self.predicted_samples = samples[non_missing_sampels_indices]
+        self.predicted_samples = samples#[non_missing_sampels_indices] #missing samples handling
         number_of_samples = self.predicted_samples.size
 
         if (number_of_samples == 0):
@@ -149,9 +153,10 @@ class Predictor(Module):
             (number of occurences of snp i in sample j is the value in line i in the j'th index)
 
         if there are too many missing values in snp X: ignore this snp for all samples, and dont use it to predict site methylation level
-        otherwise, predict it's missing values by average over all other samples number of occurences 
+        otherwise, replace it's missing values with the mean of the snp (predict it's missing values by average over all other samples number of occurences)
 
-        if there are too  many missing values is sample X: don't predict this sample methylation levels at all
+        Note that we dont handle sample with too many missing values - it's the user responsibility to do quality control and remove samples with many missing values 
+        (to enable this feature bring back all the comments saying "missing samples handling")
 
         input:
         plink_geno_file - path to the .geno plink file
@@ -165,7 +170,7 @@ class Predictor(Module):
 
         """
         relevant_snp_occurrences = [] # will hold ndarray of occurences per sample for each snp
-        na_count_per_sample  = zeros(number_of_samples)
+        # na_count_per_sample  = zeros(number_of_samples) #missing samples handling
 
         if type(plink_geno_file) != file:
             samples_snps_f = open(plink_geno_file, 'r')
@@ -181,7 +186,7 @@ class Predictor(Module):
 
                 snp_occurrences = self.convert_012_string_to_ndarray(samples_snp[:-1])
                 na_indices = snp_occurrences[where(snp_occurrences == self.NA_VALUE)[0]] #samples indices where this snp is missing
-                na_count_per_sample[na_indices] += 1 
+                # na_count_per_sample[na_indices] += 1 #missing samples handling
 
                 na_count = len(na_indices)
                 na_percentage = float(na_count) / number_of_samples
@@ -204,18 +209,18 @@ class Predictor(Module):
         logging.info("removing %d snps with more than %f missing values..." %(snps_missing_values_counter, min_missing_values))
         relevant_snps_indices = snp_indices[where(snp_indices != -1)[0]]
         
-        # find samples with too many missing values
-        missing_sampels_indices = where(na_count_per_sample > number_of_samples * min_missing_values)[0]
-        non_missing_sampels_indices = delete(range(number_of_samples), missing_sampels_indices)
+        # # find samples with too many missing values #missing samples handling
+        # missing_sampels_indices = where(na_count_per_sample > number_of_samples * min_missing_values)[0] #missing samples handling
+        # non_missing_sampels_indices = delete(range(number_of_samples), missing_sampels_indices) #missing samples handling
 
         # remove missing samples from snp occurences
         relevant_snp_occurrences = vstack(tuple(relevant_snp_occurrences))
-        relevant_snp_occurrences = relevant_snp_occurrences[:, non_missing_sampels_indices]
 
-        #missing_sampels_indices = where(na_count_per_sample >= number_of_samples * 0)[0]
-        logging.info("removing %d samples with more than %f missing values..." %(len(missing_sampels_indices), min_missing_values))
-        
-        return relevant_snp_occurrences, relevant_snps_indices, missing_sampels_indices, non_missing_sampels_indices
+        # relevant_snp_occurrences = relevant_snp_occurrences[:, non_missing_sampels_indices] #missing samples handling
+        # missing_sampels_indices = where(na_count_per_sample >= number_of_samples * 0)[0] #missing samples handling
+        # logging.info("removing %d samples with more than %f missing values..." %(len(missing_sampels_indices), min_missing_values)) #missing samples handling
+
+        return relevant_snp_occurrences, relevant_snps_indices#, missing_sampels_indices, non_missing_sampels_indices #missing samples handling
 
 
     def predict_site(self, number_of_samples, site_snps_ids, snps_coeffs, relevant_snps_ids, relevant_snp_occurrences):

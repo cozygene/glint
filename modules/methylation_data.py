@@ -160,10 +160,12 @@ class MethylationData(Module):
         and in the same order
         """
         if not ((samples_ids.size == matrix_sample_ids.size) and ((samples_ids == matrix_sample_ids).all())):
-            samples1_set = set(matrix_sample_ids)
-            samples2_set = set(samples_ids)
-            if samples1_set.symmetric_difference(samples2_set):
-                common.terminate("sample ids are not identical to the sample ids in data file")
+            differ = (set(samples_ids)).symmetric_difference(set(matrix_sample_ids))
+            if differ:
+                if len(differ) > 10:
+                    common.terminate("sample ids are not identical to the sample ids in data file: %s and more" % ", ".join(list(differ)[:10]))
+                else:
+                    common.terminate("sample ids are not identical to the sample ids in data file: %s" % ", ".join(list(differ)))
             common.terminate("sample ids are not in the same order as in the datafile") 
 
     def _load_and_validate_samples_info(self, data_with_samples_info, samples_size, samples_ids):
