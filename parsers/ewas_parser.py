@@ -160,6 +160,9 @@ class EWASParser(ModuleParser):
                 meth_data.remove_lowest_std_sites(args.stdth)
 
             pheno = meth_data.get_phenotype_subset(args.pheno)
+            if pheno is None:
+                common.terminate("EWAS couldn't find phenotype, make use you provided phenotype with the flag --phenofile")
+
             if (pheno.shape[1] != 1): # check if selected more than one phenotype
                 common.terminate("must supply only one phenotype for EWAS")
 
