@@ -174,13 +174,13 @@ class MethylationDataParser(ModuleParser):
             self.module.remove_lowest_std_sites(self.args.minstd)
 
         if self.args.rmxy:
-            logging.info("excluding sites from X and Y chromosomes...")
+            logging.info("searching for sites from X and Y chromosomes to exclude...")
             self.module.exclude(common.loadtxt(HUMAN_X_Y, dtype = str))
         if self.args.rmns:
-            logging.info("excluding non-specific sites...")
+            logging.info("searching for non-specific sites to exclude...")
             self.module.exclude(common.loadtxt(NONSPECIFIC_PROBES, dtype = str))
         if self.args.rmpoly:
-            logging.info("excluding polymorphic sites...")
+            logging.info("searching for polymorphic sites to exclude...")
             self.module.exclude(common.loadtxt(POLYMORPHIC_CPGS, dtype = str))
 
     # must  be called after run

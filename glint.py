@@ -273,6 +273,7 @@ if __name__ == '__main__':
     LOGGER.setLoggerLevel(args.loglevel)
     LOGGER.setLoggerFile(args.out)
 
+    logging.info("Executing command 'python %s'" % " ".join(sys.argv))
     logging.info("Starting glint...")
     parser.run()
     b = time.time()

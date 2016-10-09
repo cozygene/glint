@@ -123,7 +123,7 @@ class MethylationData(Module):
         if (len(self.cpgnames) != self.sites_size):
             common.terminate("got data with %s sites but %s cpgnames" % (self.sites_size, len(self.cpgnames)))
 
-        logging.debug("got methylation data with %s sites and %s samples id" % (self.sites_size, self.samples_size))
+        logging.debug("got methylation data with %s sites and %s samples" % (self.sites_size, self.samples_size))
 
         self.phenotype = phenotype
         self.covar = covar
@@ -304,7 +304,7 @@ class MethylationData(Module):
         it updates the sites_size, the cpgnames list
         """
         if len(sites_indicies_list) == 0:
-            logging.warning("found no sites to remove")
+            logging.warning("found no sites to exclude")
         else:
             if len(set(range(self.sites_size)).difference(set(sites_indicies_list))) == 0:
                 common.terminate("all sites are about to be remove") 
@@ -313,7 +313,7 @@ class MethylationData(Module):
             self.cpgnames = delete(self.cpgnames, sites_indicies_list)
             size_before = self.sites_size
             self.sites_size = len(self.cpgnames)
-            logging.debug("%s sites out of %s were excluded (left %s sites)" % (len(sites_indicies_list), size_before, self.sites_size))
+            logging.info("%s sites out of %s were excluded (left %s sites)" % (len(sites_indicies_list), size_before, self.sites_size))
 
     def remove_samples_indices(self, indices_list):
         """
@@ -367,7 +367,6 @@ class MethylationData(Module):
         this function removes the cpg sites found in self.exclude list from the data
         it updates the sites_size, the cpgnames list and the list holds the average value per site
         """
-        logging.info("excluding sites...")
         indices_list = where(in1d(self.cpgnames , exclude_list))[0]
         self.exclude_sites_indices(indices_list)
         logging.debug("methylation data new size is %s sites by %s samples" % self.data.shape)
