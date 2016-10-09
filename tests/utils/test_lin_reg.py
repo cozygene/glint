@@ -56,22 +56,21 @@ class LinearRegressionTester():
         results = loadtxt(self.LIN_REG_FIT_MODEL)
 
         # test 1 dim
-        coefs, fstats, pvals = LinearRegression.fit_model(meth_data.phenotype, meth_data.data[0,:], covars = meth_data.covar)
+        coefs, tstats, pvals = LinearRegression.fit_model(meth_data.phenotype, meth_data.data[0,:], covars = meth_data.covar)
         coefs_inter = coefs[0]
         coefs_site = coefs[-1]
         coefs_covar1 = coefs[1]
         coefs_covar2 = coefs[2]
-        fstats = fstats[-1]
+        tstats = tstats[-1]
         pvals = pvals[-1]
 
         assert abs(coefs_inter - results[0]) < 1e-3
         assert abs(coefs_site - results[1]) < 1e-3
         assert abs(coefs_covar1 - results[2]) < 1e-3
         assert abs(coefs_covar2 - results[3]) < 1e-3
-        assert abs(fstats - results[4]) < 1e-2
+        assert abs(tstats - results[4]) < 1e-2
         assert abs(pvals - results[5]) < 1e-3
         # Note - there is no option to test 2 dim 
-
         logging.info("PASS")
 
 class LogisticRegressionTester():
@@ -93,20 +92,19 @@ class LogisticRegressionTester():
         results = loadtxt(self.LOG_REG_FIT_MODEL)
 
 
-        coefs, fstats, pvals = LogisticRegression.fit_model(meth_data.phenotype, meth_data.data[0,:], covars = meth_data.covar)
+        coefs, tstats, pvals = LogisticRegression.fit_model(meth_data.phenotype, meth_data.data[0,:], covars = meth_data.covar)
         coefs_inter = coefs[0] 
         coefs_site = coefs[-1]
         coefs_covar1 = coefs[1]
         coefs_covar2 = coefs[2]
-        fstats = fstats[-1] #fstat of site under test
+        tstats = tstats[-1] #fstat of site under test
         pvals = pvals[-1]
         assert abs(coefs_inter - results[0]) < 1e-3
         assert abs(coefs_site - results[1]) < 1e-3
         assert abs(coefs_covar1 - results[2]) < 1e-3
         assert abs(coefs_covar2 - results[3]) < 1e-3
-        assert abs(fstats - results[4]) < 1e-2
+        assert abs(tstats - results[4]) < 1e-2
         assert abs(pvals - results[5]) < 1e-3
-
         # Note - there is no option to test 2 dim 
         logging.info("PASS")
 

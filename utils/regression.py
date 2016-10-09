@@ -191,9 +191,7 @@ class LinearRegression(object):
 
         t = mdl.coef_ / se
         p = 2 * (1 - stats.t.cdf(np.abs(t), y.shape[0] - X.shape[1]))
-        return mdl.coef_.reshape(-1),t.reshape(-1), p.reshape(-1)  #coefficients, t-statistic and p-values
-
-
+        return mdl.coef_.reshape(-1), t.reshape(-1), p.reshape(-1)  #coefficients, t-statistic and p-values
 
         # if x.ndim == 1:
         #     x = x.reshape(-1,1) # make sure dim is (n,1) and not(n,)
@@ -211,12 +209,7 @@ class LinearRegression(object):
         # mdl = regr.fit(X,y)
         # beta = mdl.coef_.reshape(-1)# Beta contains the coefficients of the intercept (beta[0]) and the other features
 
-        # C = (np.sum([(y[i]-np.dot(X[i,:],beta))**2 for i in range(n)]) / (n-5)) * inv(np.dot(X.T,X))
-        # # C = (
-        # #         np.sum(
-        # #             [(y[i]-np.dot(X[i,:],beta))**2 for i in range(n)]
-        # #         ) / (n-5)
-        # #     ) * inv(np.dot(X.T,X))
+        # C = (np.sum([(y[i]-np.dot(X[i,:],beta))**2 for i in range(n)]) / (n-5)) * inv(np.dot(X.T,X)) #why is there a (n-5)??
         # pvals = np.empty((p,1)).reshape((p,))
         # Ts = np.empty((p,1)).reshape((p,))
 
@@ -224,6 +217,5 @@ class LinearRegression(object):
         #     Ts[i] = beta[i]/((C[i,i])**0.5) # The t-statistic
            
         #     pvals[i] = t.sf(abs(Ts[i]), df=n-p)*2
-        # # import pdb
-        # # pdb.set_trace()
+        
         # return beta, Ts, pvals #coefficients, t-statistic and p-values

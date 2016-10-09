@@ -236,8 +236,7 @@ class ModulesArgumentParsers(object):
                                                meth_data = ewas_meth_data)
 
         if self.args.plot: # if not selected should we plot by default?
-            plot_meth_data = self.meth_parser.module.copy()
-            self.plot_parser.run(args, meth_data = plot_meth_data, ewas_result_obj = ewas_results)
+            self.plot_parser.run(args, meth_data = self.meth_parser.module, ewas_result_obj = ewas_results)
 
 
 
