@@ -106,13 +106,50 @@ class LinearRegression(Regression):
         pheno - the phenotypes vector (1D) to use (samples in the same order as in data) 
         covars - the covariates matrix (can be more then 1 covariates) to use, if None- no covariates will be used (samples in the same order as in data) 
         """
+        # reg = regression.LinearRegression2()
+
+        # output = []           
+
+        # for i, site in enumerate(self.data):
+        #     import pdb
+        #     pdb.set_trace()
+        #     coefs, fstats, p_value = reg.fit(self.pheno, site, covars = self.covars)
+            
+        #     # Note: if you add more info to site info note to:
+        #     #       -   keep p_value at index 1 since the data is sorted by index 1
+        #     #       -   increase / decrease number of values in the line if  output.shape[1] = X
+        #     site_info = [self.cpgnames[i], p_value[-1], fstats[-1]]
+        #     site_info.extend([coefs[i] for i in range(coefs.size)]) 
+        #     output.append(site_info) 
+            
+
+        
+        # output.sort(key = lambda x: x[1]) # sort output by p-value (1 is p-value index)
+        # output = array(output)
+        # sorted_cpgnames = output[:,0]
+        # sorted_pvalues  = output[:,1].astype(float32)
+        # sorted_fstats   = output[:,2].astype(float32)
+        # sorted_intercept_beta = output[:,3].astype(float32)
+        # sorted_site_beta      = output[:,-1].astype(float32)
+        # if  output.shape[1] == 5: # there is no covariates coefficient
+        #     sorted_covars_betas = None
+        # else:
+        #     sorted_covars_betas   = output[:,4:-1].astype(float32)
+        # return sorted_cpgnames , sorted_pvalues, sorted_fstats, sorted_intercept_beta, sorted_covars_betas, sorted_site_beta
+
+
+
         super(LinearRegression, self).__init__(data, "LinReg", regression.LinearRegression.fit_model, cpgnames, pheno, covars)
     
     def run(self):
+        import time
+        a = time.time()
         logging.info('running linear regression test...');
         #running association tests
         results =  self.regression()
+        b = time.time()
         logging.info('EWAS linear regression  is Done!')
+        logging.debug('LINEAR REGRESSION TOOK %s SECONDS' %(b-a))
         return results
 
 

@@ -206,8 +206,11 @@ class Refactor(Module):
         else:
             logging.info("ignoring covariates")
 
-
+        import time
+        a = time.time()
         ranked_list = self._calc_low_rank_approx_distances(fs_meth_data) # returns array of the indexes in a sorted order
+        b = time.time()
+        logging.debug("low rank approximation RUN TIME %s SECONDS" %(b-a))
         del fs_meth_data # no need for the copy of the data after found the ranked list
         return ranked_list
 

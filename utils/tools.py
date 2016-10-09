@@ -21,8 +21,14 @@ def low_rank_approximation(O, k):
     """
     O dimensions are n X m
     """
+    import time
+    a = time.time()
     pca_out = pca.PCA(O)
-    return dot(pca_out.P[:,0:k], pca_out.U[:,0:k].transpose())
+    b = time.time()
+    res = dot(pca_out.P[:,0:k], pca_out.U[:,0:k].transpose())
+    c = time.time()
+    logging.debug("PCA TOOK %s SECONDS AND DOT(MULTI) TOOK %s SECONDS" % (b-a,c-b))
+    return res
 
 def euclidean_distance(A, B):
     """

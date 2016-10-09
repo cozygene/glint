@@ -181,17 +181,49 @@ class LinearRegression(object):
         regr = linear_model.LinearRegression(False)
         n = X.shape[0] # number of sites
         X = np.concatenate((np.ones((n,1)), X), axis=1)
-        p = X.shape[1] # number of covars
+
         mdl = regr.fit(X,y)
-        beta = mdl.coef_.reshape(-1)# Beta contains the coefficients of the intercept (beta[0]) and the other features
+        sse = np.sum((mdl.predict(X) - y) ** 2, axis=0) / float(X.shape[0] - X.shape[1])
+        se = np.array([
+            np.sqrt(np.diagonal(sse[i] * np.linalg.inv(np.dot(X.T, X))))
+                                                    for i in range(sse.shape[0])
+                    ])
 
-        C = (np.sum([(y[i]-np.dot(X[i,:],beta))**2 for i in range(n)]) / (n-5)) * inv(np.dot(X.T,X))
-        pvals = np.empty((p,1)).reshape((p,))
-        Ts = np.empty((p,1)).reshape((p,))
+        t = mdl.coef_ / se
+        p = 2 * (1 - stats.t.cdf(np.abs(t), y.shape[0] - X.shape[1]))
+        return mdl.coef_.reshape(-1),t.reshape(-1), p.reshape(-1)  #coefficients, t-statistic and p-values
 
-        for i in range(p):
-            Ts[i] = beta[i]/((C[i,i])**0.5) # The t-statistic
+
+
+        # if x.ndim == 1:
+        #     x = x.reshape(-1,1) # make sure dim is (n,1) and not(n,)
+        # if y.ndim == 1:
+        #     y = y.reshape(-1, 1)
+
+        # X = x
+        # if covars is not None:
+        #     X = column_stack((covars, X))
+        
+        # regr = linear_model.LinearRegression(False)
+        # n = X.shape[0] # number of sites
+        # X = np.concatenate((np.ones((n,1)), X), axis=1)
+        # p = X.shape[1] # number of covars
+        # mdl = regr.fit(X,y)
+        # beta = mdl.coef_.reshape(-1)# Beta contains the coefficients of the intercept (beta[0]) and the other features
+
+        # C = (np.sum([(y[i]-np.dot(X[i,:],beta))**2 for i in range(n)]) / (n-5)) * inv(np.dot(X.T,X))
+        # # C = (
+        # #         np.sum(
+        # #             [(y[i]-np.dot(X[i,:],beta))**2 for i in range(n)]
+        # #         ) / (n-5)
+        # #     ) * inv(np.dot(X.T,X))
+        # pvals = np.empty((p,1)).reshape((p,))
+        # Ts = np.empty((p,1)).reshape((p,))
+
+        # for i in range(p):
+        #     Ts[i] = beta[i]/((C[i,i])**0.5) # The t-statistic
            
-            pvals[i] = t.sf(abs(Ts[i]), df=n-p)*2
-
-        return beta, Ts, pvals #coefficients, t-statistic and p-values
+        #     pvals[i] = t.sf(abs(Ts[i]), df=n-p)*2
+        # # import pdb
+        # # pdb.set_trace()
+        # return beta, Ts, pvals #coefficients, t-statistic and p-values
