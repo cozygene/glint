@@ -217,7 +217,13 @@ class ModulesArgumentParsers(object):
                                     meth_data = refactor_meth_data,
                                     output_perfix = self.args.out)
             logging.info("adding refactor components to covariates, set --gsave to save new methData")
-            self.meth_parser.module.add_covar_datas(self.refactor_parser.module.components, "rc") # add refactor components as covariate file
+            refactor_comp_names = self.meth_parser.module.add_covar_datas(self.refactor_parser.module.components, "rc") # add refactor components as covariate file
+            
+            # add refactor components to the list of covariates to use:
+            if self.args.covar is not None:
+                self.args.covar.append(refactor_comp_names)
+            else:
+                self.args.covar = refactor_comp_names
 
         if self.args.houseman:
             houseman_meth_data = self.meth_parser.module.copy()

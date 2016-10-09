@@ -246,6 +246,7 @@ class MethylationData(Module):
         covars, covarsnames = self._load_and_validate_covar(covarfiles_list, self.samples_size, self.samples_ids, default_covar_name)
         self.update_covar_data(covars)
         self.update_covar_header(covarsnames)
+        return covarsnames
 
     def add_pheno_files(self, phenofiles_list, default_pheno_name = DEFAULT_PHENO_NAME):
         """
@@ -255,6 +256,7 @@ class MethylationData(Module):
         phenos, names = self._load_and_validate_phenotype(phenofiles_list, self.samples_size, self.samples_ids, default_pheno_name)
         self.update_pheno_data(phenos)
         self.update_pheno_header(names)
+        return names
 
     def upload_new_covaritates_files(self, covarfiles_list, default_covar_name = DEAFULT_COVAR_NAME):
         """
@@ -292,6 +294,7 @@ class MethylationData(Module):
         self.update_covar_data(covardata)
         self.update_covar_header(covarsnames)
         logging.info("added covariates %s" % ", ".join(covarsnames))
+        return covarsnames
 
 
     def exclude_sites_indices(self, sites_indicies_list):

@@ -6,7 +6,8 @@ import numpy as np
 from numpy.linalg import inv
 from scipy.stats import t
 import statsmodels.api as sm
-
+import warnings
+warnings.filterwarnings(action="ignore", module="scipy", message="^internal gelsd")
 # TODO make sure the functions here don't change the values of the data: http://scikit-learn.org/stable/modules/generated/sklearn.linear_model.LinearRegression.html#sklearn.linear_model.LinearRegression.fit (see the "copy_X" param)
 
 def get_dim(vector):
@@ -189,9 +190,9 @@ class LinearRegression(object):
                                                     for i in range(sse.shape[0])
                     ])
 
-        t = mdl.coef_ / se
-        p = 2 * (1 - stats.t.cdf(np.abs(t), y.shape[0] - X.shape[1]))
-        return mdl.coef_.reshape(-1), t.reshape(-1), p.reshape(-1)  #coefficients, t-statistic and p-values
+        Ts = mdl.coef_ / se
+        p = 2 * (1 - t.cdf(np.abs(Ts), y.shape[0] - X.shape[1]))
+        return mdl.coef_.reshape(-1), Ts.reshape(-1), p.reshape(-1)  #coefficients, t-statistic and p-values
 
         # if x.ndim == 1:
         #     x = x.reshape(-1,1) # make sure dim is (n,1) and not(n,)
