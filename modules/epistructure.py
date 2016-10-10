@@ -16,18 +16,18 @@ class Epistructure(Module):
         self.meth_data = meth_data
 
     def capture_ancestry(self, num_of_pcs = 2, covars_to_regress = None, save_file = None):
-        logging.info("Running epistructure...")
+        logging.info("Running EPISTRUCTURE...")
         logging.info("Removing non-informative sites...")
         self.meth_data.include(self.informative_sites)
 
         covars = self.meth_data.get_covariates_subset(covars_to_regress)
         if covars is not None:
-            logging.info("regressing out covariates...")
+            logging.info("Regressing out covariates...")
             self.meth_data.regress_out(covars)
         else:
-            logging.info("ignoring covariates")
+            logging.info("Ignoring covariates...")
 
-        logging.info("running PCA...")
+        logging.info("Running PCA...")
         pca_out = pca.PCA(self.meth_data.data.transpose()) # meth_data should be transposed before passing to pca
 
         if save_file:
@@ -36,6 +36,6 @@ class Epistructure(Module):
             data_to_save = column_stack((self.meth_data.samples_ids, pcs))
             fmt = '%-12s' + '\t%-12s' * num_of_pcs
             savetxt(output_filename, data_to_save, fmt = fmt) # saves it as samples X PCs
-            logging.info("first %s PCs are saved to %s" % (num_of_pcs, output_filename))
+            logging.info("The first %s PCs were saved to %s." % (num_of_pcs, output_filename))
         
         self.components = pcs

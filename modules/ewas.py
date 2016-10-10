@@ -90,9 +90,9 @@ class LogisticRegression(Regression):
         super(LogisticRegression, self).__init__(data, "LogReg", regression.LogisticRegression.fit_model, cpgnames, pheno, covars)
 
     def run(self):
-        logging.info("running logistic regression test...")
+        logging.info("Running logistic regression test...")
         results = self.regression()
-        logging.info('EWAS logistic regressio is Done!')
+        logging.info('EWAS logistic regression is done!')
         return results
 
 
@@ -109,11 +109,11 @@ class LinearRegression(Regression):
     def run(self):
         import time
         a = time.time()
-        logging.info('running linear regression test...');
+        logging.info('Running linear regression test...');
         #running association tests
         results =  self.regression()
         b = time.time()
-        logging.info('EWAS linear regression  is Done!')
+        logging.info('EWAS linear regression is one!')
         logging.debug('LINEAR REGRESSION TOOK %s SECONDS' %(b-a))
         return results
 
@@ -133,17 +133,17 @@ class Wilcoxon(Module):
         pheno - the phenotypes vector (1D) to use (samples in the same order as in data) 
         """
         if not tools.is_binary_vector(pheno):
-            common.terminate("wilcoxon test -phenotype must be binary")
+            common.terminate("For Wilcoxon test the phenotype must be binary.")
 
         if data.shape[1] < 20:
-            logging.warning("wilcoxon test is for large data and should have at least 20 samples (here there are %s)" % methylation_data.samples_size)
+            logging.warning("Wilcoxon test is reliable with at least 20 samples (the data provided contain %s samples)." % methylation_data.samples_size)
        
         self.data = data
         self.pheno = pheno
         self.cpgnames = cpgnames
 
     def run(self):
-        logging.info('running wilcoxon test...');    
+        logging.info('Running Wilcoxon test...');    
         pheno = self.pheno.reshape((-1,))
         output = []
         for i, site in enumerate(self.data):
@@ -157,7 +157,7 @@ class Wilcoxon(Module):
         sorted_pvalues  = output[:,1].astype(float32)
         sorted_tstats   = output[:,2].astype(float32)
 
-        logging.info('EWAS wilcoxon test is Done!')
+        logging.info('EWAS wilcoxon test is done!')
         return sorted_cpgnames, sorted_pvalues, sorted_tstats
 
 
@@ -307,7 +307,7 @@ class EWASResultsCreator(EWASResults):
         
     def save(self, output_filename):
         output = vstack((self.title, self.data))
-        logging.info("%s results are saved to file %s" % (self.test_name, output_filename))
+        logging.info("%s results are saved to file %s." % (self.test_name, output_filename))
         savetxt(output_filename, output, fmt = "%s", delimiter=self.DELIMITER)
 
         
@@ -318,10 +318,10 @@ class EWASResultsParser(EWASResults):
             filename = results_filemame.name
         else:
             if not os.path.exists(filename):
-                common.terminate("No such file %s" % filename)
+                common.terminate("No such file %s." % filename)
             filename = results_filemame
 
-        logging.info("Reading results from file %s" % filename)
+        logging.info("Reading results from file %s." % filename)
         data = self.readfile(results_filemame)
         test_name, cpgnames, pvalues, qvalues, stats, intercept, covariates_betas, beta, sigma_g , sigma_e, sitesinfo = self.parsedata(data)
         super(EWASResultsParser, self).__init__(test_name, cpgnames, pvalues, qvalues, stats, intercept, covariates_betas, beta, sigma_g , sigma_e, sitesinfo)   
@@ -331,7 +331,7 @@ class EWASResultsParser(EWASResults):
         data = common.loadtxt(filename , dtype = str, delimiter=self.DELIMITER)
 
         if data.ndim != 2:
-            common.terminate("Something wrong with the data in file %s. It is not 2D matrix" % filename)
+            common.terminate("Something wrong with the data in file %s. It is not 2D matrix." % filename)
 
         return data
 

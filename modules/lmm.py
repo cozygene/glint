@@ -56,7 +56,7 @@ def findLogDelta(U, s, phe, covars, numIntervals=100, ldeltamin=-5, ldeltamax=5,
                     ldeltaopt_glob=ldeltaopt
             except: pass
     
-    logging.debug("log delta is %s", ldeltaopt_glob)
+    logging.debug("Log delta is %s.", ldeltaopt_glob)
     return ldeltaopt_glob
     
 
@@ -167,7 +167,7 @@ class LMM(Module):
         beta_est = np.array(beta_est)
         number_of_betas =  beta_est.shape[1]
         if number_of_betas < 2:
-            common.terminate("some coefficient is missing")
+            common.terminate("Some coefficient is missing.")
         intercept_beta = beta_est[:,-1]     # interception coeff
         site_beta = beta_est[:,0]           # site coeff
         covariates_betas = beta_est[:,1:-1] # coeff for each covariate
@@ -203,13 +203,13 @@ class LMM(Module):
 
         num_of_non_zero_eigenvalues = len(Sd)
         num_of_zero_eigenvalues = number_of_samples - num_of_non_zero_eigenvalues
-        logging.debug("found %d zero eigenvalue" % num_of_zero_eigenvalues)
+        logging.debug("Found %d zero eigenvalues." % num_of_zero_eigenvalues)
         #Compute null LL
         XX = covars.T.dot(covars)       
         [Sxx,Uxx]= la.eigh(XX)
         logdetXX  = np.log(Sxx).sum()
         null_ll, beta_0, null_F = lleval(Uy, UX, Sd, yKy, logdetK, logdetXX, reml=reml)
-        logging.debug('null LL: %s' %null_ll)
+        logging.debug('null LL: %s.' %null_ll)
 
         #Add an extra column to UX, that will hold UX for the tested site
         UX = np.concatenate((np.zeros((UX.shape[0], 1)), UX), axis=1)

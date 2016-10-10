@@ -55,15 +55,13 @@ class Refactor(Module):
 
     def _validate_fs(self, feature_selection):
         if feature_selection not in self.FEATURE_SELECTION:
-            common.terminate("choose feature selection from the options: %s (selected fs: %s)" % ( self.FEATURE_SELECTION, feature_selection ))
+            common.terminate("Choose feature selection from the options: %s (selected fs: %s)." % ( self.FEATURE_SELECTION, feature_selection ))
         
         if self.use_phenos is None:
             if feature_selection == 'phenotype':
-                common.terminate("must provide a phenotype (--pheno) when selected feature 'phenotype'")
+                common.terminate("Must provide a phenotype (--pheno) when selecting feature selection of type 'phenotype'.")
             elif feature_selection == 'controls':
-                common.terminate("must provide one phenotype (--pheno) in a binary format when selected feature 'controls'")
-        elif feature_selection != 'phenotype' and feature_selection != 'controls':
-            logging.warning("you selected phenotypes but not a phenotype feature, change selection with the flag --fs (selected fs: %s)" % feature_selection)
+                common.terminate("Must provide one phenotype (--pheno) in a binary format when selection feature selection of type 'controls'.")
             
         return getattr(self, self.FEATURE_FUNC_NAME_FORMAT.format(feature_option_name=feature_selection))
 
@@ -72,7 +70,7 @@ class Refactor(Module):
     """
     def _validate_k(self,k):
         if not (k >= 2 and k <= self.meth_data.samples_size):
-            common.terminate("k must be at least 2 and smaller than the number of samples size. k = %s, samples = %s" % (k, self.meth_data.samples_size))
+            common.terminate("k must be at least 2 and lower than the number of samples. k = %s, samples = %s." % (k, self.meth_data.samples_size))
 
         return k
 
@@ -82,7 +80,7 @@ class Refactor(Module):
     """
     def _validate_t(self,t):
         if t > self.meth_data.sites_size or t < self.k : 
-            common.terminate("t cannot be greater than the number of sites or smaller than k . t = %s, sites = %s, k = %s" % (t, self.meth_data.sites_size, self.k))
+            common.terminate("t cannot be greater than the number of sites or lower than k . t = %s, sites = %s, k = %s." % (t, self.meth_data.sites_size, self.k))
 
         return t
 
@@ -91,7 +89,7 @@ class Refactor(Module):
     """
     def _validate_stdth(self, stdth):
         if stdth > 1 or stdth < 0:
-            common.terminate("minstd cannot be greater than 1 and smaller than 0. stdth = %s" % stdth)
+            common.terminate("minstd cannot be greater than 1 and lower than 0. stdth = %s." % stdth)
         return stdth
 
     """
@@ -100,7 +98,7 @@ class Refactor(Module):
     """
     def _validate_num_comp(self,num_comp):
         if num_comp and not (num_comp >= self.k and num_comp <= self.meth_data.samples_size):
-            common.terminate("number of components must be at least k and smaller than the number of samples size. num_comp = %s, samples = %s, k = %s" % (num_comp, self.meth_data.samples_size, self.k))
+            common.terminate("The number of components must be at least k and lower than the number of samples. num_comp = %s, samples = %s, k = %s." % (num_comp, self.meth_data.samples_size, self.k))
 
         return num_comp if num_comp else self.k
 
@@ -109,7 +107,7 @@ class Refactor(Module):
         logging.info('Starting ReFACTor v%s...' % self.VERSION); 
         self.components, self.ranked_sites_indices = self._refactor()
         self.ranked_sites = self.meth_data.cpgnames[self.ranked_sites_indices]
-        logging.info('ReFACTor is Done!')
+        logging.info('ReFACTor is done!')
 
    
 
@@ -152,7 +150,7 @@ class Refactor(Module):
         excludes bad sites from data
         """
         if len(self.bad_probes):
-            logging.info("refactor is searching for badly designed sites to exclude...")
+            logging.info("ReFACTor is searching for badly designed sites to exclude...")
             self.meth_data.exclude(self.bad_probes)
 
     
@@ -169,12 +167,12 @@ class Refactor(Module):
         regress out the phenotype
         Note: function name must be of the format FEATURE_FUNC_NAME_FORMAT
         """
-        logging.info("Running phenotype feature selection...")
+        logging.info("Running 'phenotype' feature selection...")
         phenotype = meth_data.get_phenotype_subset(self.use_phenos)
         if phenotype.ndim == 2 and phenotype.shape[1] > 1:
-            logging.warning("phenotype feature selection was used with more than one phenotype")
+            logging.warning("'phenotype' feature selection was used with more than one phenotype.")
         
-        logging.info("regressing out phenotype...")
+        logging.info("Regressing out phenotype...")
         meth_data.regress_out(phenotype)
         
 
@@ -183,16 +181,16 @@ class Refactor(Module):
         keep only the controls samples in the data
         Note: function name must be of the format FEATURE_FUNC_NAME_FORMAT
         """
-        logging.info("Running controls feature selection...")
+        logging.info("Running 'controls' feature selection...")
         
         phenotype = meth_data.get_phenotype_subset(self.use_phenos)
 
         if not tools.is_binary_vector(phenotype):
-            common.terminate("phenotype in not a binary vector (must be a 1D binary vector with 'controls' feature selection)")
+            common.terminate("Phenotype in not a binary vector (must be a 1D binary vector when using 'controls' feature selection).")
             
         controls_samples_indices = where(phenotype == 0)[0] # assumes its a 1D binary vector
         if (self.k > len(controls_samples_indices)):
-            common.terminate("k cannot be greater than amount of control samples")
+            common.terminate("k cannot be greater than the number of control samples.")
 
         remove_indices = delete(range(meth_data.samples_size), controls_samples_indices)
         meth_data.remove_samples_indices(remove_indices)
@@ -203,15 +201,15 @@ class Refactor(Module):
         
         covars = fs_meth_data.get_covariates_subset(self.use_covars)
         if covars is not None:
-            logging.info("regressing out covariates...")
+            logging.info("Regressing out covariates...")
             fs_meth_data.regress_out(covars)
         else:
-            logging.info("ignoring covariates")
+            logging.info("Ignoring covariates...")
 
         a = time.time()
         ranked_list = self._calc_low_rank_approx_distances(fs_meth_data) # returns array of the indexes in a sorted order
         b = time.time()
-        logging.debug("low rank approximation RUN TIME %s SECONDS" %(b-a))
+        logging.debug("Low rank approximation RUN TIME %s SECONDS" %(b-a))
         del fs_meth_data # no need for the copy of the data after found the ranked list
         return ranked_list
 

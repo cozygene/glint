@@ -47,22 +47,22 @@ class GlintParser(ModuleParser):
                  - which more? TODO Elior
         """
         optional = parser.add_argument_group('3.Optional arguments')
-        optional.add_argument('-h', '--help', action='help', help = "print this help") # add help here so it will be under same group with all other optional argument
-        optional.add_argument('--out', type = str,   help = "changes the prefix of the output file ")
+        optional.add_argument('-h', '--help', action='help', help = "Prints this help") # add help here so it will be under same group with all other optional argument
+        optional.add_argument('--out', type = str,   help = "Changes the prefix of the output file ")
         def loglevel_value(val):
             # val = int(val)
             if val.lower() not in configurelogging.OPTIONAL_LEVELS.keys():
-                common.terminate("log level is not valid. should be one of %s" % str( configurelogging.OPTIONAL_LEVELS.keys()))
+                common.terminate("Log level is not valid. should be one of %s" % str( configurelogging.OPTIONAL_LEVELS.keys()))
             return configurelogging.OPTIONAL_LEVELS[val]
-        optional.add_argument('--loglevel', type = loglevel_value,  default = 'info', help = "the log level to print")
+        optional.add_argument('--loglevel', type = loglevel_value,  default = 'info', help = "The log level to print")
 
         modules = parser.add_argument_group('4.Glint modules')
-        modules.add_argument('--refactor', action='store_true', help = "<TODO Elior, add help here>")
-        modules.add_argument('--ewas',     action='store_true', help = "<TODO Elior, add help here>" )
-        modules.add_argument('--impute',  action='store_true', help = "<TODO Elior, add help here methylation predictor>" )
-        modules.add_argument('--epi',      action='store_true', help = "<TODO Elior, edit>" )
-        modules.add_argument('--plot',     action='store_true', help = "<TODO Elior, edit>" )
-        modules.add_argument('--houseman', action='store_true', help = "<TODO Elior, edit>" )
+        modules.add_argument('--refactor', action='store_true', help = "Runs the ReFACTor algorithm for capturing cell type composition")
+        modules.add_argument('--ewas',     action='store_true', help = "Runs EWAS" )
+        modules.add_argument('--impute',  action='store_true', help = "Imputes methylation levels from genotypes" )
+        modules.add_argument('--epi',      action='store_true', help = "Runs the EPISTRUCTURE algorithm for capturing population structure from methylation data" )
+        modules.add_argument('--plot',     action='store_true', help = "Allows to generate plots" )
+        modules.add_argument('--houseman', action='store_true', help = "Runs the Houseman algorithm for estimating cell counts" )
 
         super(GlintParser, self).__init__(optional, modules)
     
@@ -172,10 +172,10 @@ class ModulesArgumentParsers(object):
         sole_args_chosen = selected_args.intersection(sole_args)
 
         if len(func_args_chosen) == 0:
-            common.terminate("Nothing to do with the data, select at least one argument from %s" % ", ".join(list(all_func_args)))
+            common.terminate("Nothing to do with the data, select at least one argument from %s." % ", ".join(list(all_func_args)))
 
         elif ((len(func_args_chosen) > (len(sole_args_chosen) + len(data_func_args))) and (len(sole_args_chosen) > 0))or (len(sole_args_chosen) > 1):
-            common.terminate("options from %s cannot be specified with any other flags in the same command. you chose %s" % (str(list(sole_args)), str(list(func_args_chosen))))
+            common.terminate("Options from %s cannot be specified with any other arguments in the same command. you chose %s." % (str(list(sole_args)), str(list(func_args_chosen))))
 
         differ = selected_args.difference(optional_args)
         if differ:
@@ -188,15 +188,15 @@ class ModulesArgumentParsers(object):
                 else:
                     redundent_args.append(flag)
             if unrecognized_args:
-                common.terminate("unrecognized argument " + ", ".join(unrecognized_args))
+                common.terminate("Unrecognized argument " + ", ".join(unrecognized_args))
             if redundent_args:
-                common.terminate("selected redundent argument " + ", ".join(redundent_args))
+                common.terminate("Selected redundent argument " + ", ".join(redundent_args))
 
         # warn if only refactor module is selected and  user selectes data management flags that are not relevant for refactor
         if self.args.refactor and len(func_args_chosen) == 1:
             not_relevant_atgs = list(args_not_relevant_for_refactor_chosen)
             if len(not_relevant_atgs) != 0:
-                logging.warning("selected data management arguments which are not relevant for refactor: %s" % str(not_relevant_atgs))
+                logging.warning("Selected data management arguments which are not relevant for ReFACTor: %s." % str(not_relevant_atgs))
 
     def run(self):
         if self.args.impute:
@@ -216,7 +216,8 @@ class ModulesArgumentParsers(object):
             self.refactor_parser.run(args = self.args,
                                     meth_data = refactor_meth_data,
                                     output_perfix = self.args.out)
-            logging.info("adding refactor components to covariates, set --gsave to save new methData")
+            if self.args.gsave:
+                logging.info("Adding the ReFACTor componetns to the covariates of the data.")
             refactor_comp_names = self.meth_parser.module.add_covar_datas(self.refactor_parser.module.components, "rc") # add refactor components as covariate file
             
             # add refactor components to the list of covariates to use:
@@ -230,7 +231,8 @@ class ModulesArgumentParsers(object):
             self.houseman_parser.run(args = self.args,
                                     meth_data = houseman_meth_data,
                                     output_perfix = self.args.out)
-            logging.info("adding houseman components to covariates, set --gsave to save new methData")
+            if self.args.gsave:
+                logging.info("Adding the Houseman estimates to the covariates of the data.")
             self.meth_parser.module.add_covar_datas(self.houseman_parser.module.components,     \
                                                     covarsnames = self.houseman_parser.module.names) # add houseman components as covariate file
         
@@ -273,8 +275,8 @@ if __name__ == '__main__':
     LOGGER.setLoggerLevel(args.loglevel)
     LOGGER.setLoggerFile(args.out)
 
-    logging.info(">>> running command: python %s" % " ".join(sys.argv))
-    logging.info("Starting glint...")
+    logging.info(">>> python %s" % " ".join(sys.argv))
+    logging.info("Starting GLINT...")
     parser.run()
     b = time.time()
     logging.debug("TOTAL RUN TIME %s SECONDS"%(b-a))
