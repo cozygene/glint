@@ -69,7 +69,7 @@ def default(obj):
                         dtype=str(obj.dtype),
                         shape=obj.shape)
         else:
-            common.terminate("array with dimentions bigger than 2")
+            common.terminate("Dimentions arry is greater than 2.")
     return json_dict
 
 
@@ -79,7 +79,7 @@ def validate_no_missing_values(data):
     Note: data must be number and not string
     """
     if  isnan(data).sum() > 0:
-        common.terminate("missing values are not supported at this version")
+        common.terminate("Missing values are currently not supported.")
 
 
 class TitleManager(object):
@@ -117,13 +117,13 @@ class MethylationData(Module):
         self.cpgnames = sites_list  # the last index of covariate loaded without name, this index wil be added to the default name
         self.sites_size, self.samples_size = self.data.shape
         if (len(self.samples_ids) != self.samples_size):
-            common.terminate("got data with %s samples but %s samples ids" % (self.samples_size, len(self.samples_ids)))
+            common.terminate("Data contain %s samples but only %s samples ids." % (self.samples_size, len(self.samples_ids)))
 
 
         if (len(self.cpgnames) != self.sites_size):
-            common.terminate("got data with %s sites but %s cpgnames" % (self.sites_size, len(self.cpgnames)))
+            common.terminate("Data contain %s sites but only %s CpG identifiers." % (self.sites_size, len(self.cpgnames)))
 
-        logging.debug("got methylation data with %s sites and %s samples" % (self.sites_size, self.samples_size))
+        logging.debug("Methylation data provided with %s sites and %s samples." % (self.sites_size, self.samples_size))
 
         self.phenotype = phenotype
         self.covar = covar
@@ -144,11 +144,11 @@ class MethylationData(Module):
         if not isinstance(datafile, file):
             datafile = open(datafile, 'r')
   
-        logging.info("loading file %s..." % datafile.name)
+        logging.info("Loading file %s..." % datafile.name)
 
         data, samples_ids, cpgnames = common.load_data_file(datafile.name, dim)
         if data is None:
-            common.terminate("there is a problem with the format of the file '%s'" % datafile.name)
+            common.terminate("There is a problem with the format of the file '%s'." % datafile.name)
         return data, samples_ids, cpgnames
 
 
@@ -163,10 +163,10 @@ class MethylationData(Module):
             differ = (set(samples_ids)).symmetric_difference(set(matrix_sample_ids))
             if differ:
                 if len(differ) > 10:
-                    common.terminate("sample ids are not identical to the sample ids in data file: %s and more" % ", ".join(list(differ)[:10]))
+                    common.terminate("Sample identifiers are not identical to the sample identifiers in the data file: %s and more." % ", ".join(list(differ)[:10]))
                 else:
-                    common.terminate("sample ids are not identical to the sample ids in data file: %s" % ", ".join(list(differ)))
-            common.terminate("sample ids are not in the same order as in the datafile") 
+                    common.terminate("Sample identifiers are not identical to the sample identifiers in the data file: %s." % ", ".join(list(differ)))
+            common.terminate("Sample identifiers are not in the same order as in the data file.") 
 
     def _load_and_validate_samples_info(self, data_with_samples_info, samples_size, samples_ids):
         """
@@ -201,9 +201,9 @@ class MethylationData(Module):
         if not phenofile_list:
             return None, None
 
-        logging.info("validating phenotype file...")
+        logging.info("Validating phenotype file...")
         pheno, header = self._load_and_validate_samples_data(phenofile_list, samples_size, samples_ids, default_pheno_name)
-        logging.info("new phenotypes found: %s" % ", ".join(header))
+        logging.info("New phenotypes were found: %s." % ", ".join(header))
         return pheno, header
  
     def _load_and_validate_covar(self, covarfiles_list, samples_size, samples_ids, default_covar_name = DEAFULT_COVAR_NAME):
@@ -214,9 +214,9 @@ class MethylationData(Module):
         if not covarfiles_list:
             return None, None
 
-        logging.info("validating phenotype file...")
+        logging.info("Validating phenotype file...")
         covar, header = self._load_and_validate_samples_data(covarfiles_list, samples_size, samples_ids, default_covar_name)
-        logging.info("new covariates found: %s" % ", ".join(header))
+        logging.info("New covariates were found: %s." % ", ".join(header))
         
         return covar, header
 
@@ -224,7 +224,7 @@ class MethylationData(Module):
         if self.phenonames is not None:
             mutual_names = set(self.phenonames).intersection(set(titles_to_add))
             if mutual_names:
-                common.terminate("more than one phenotype with the name %s" % ", ".join(list(mutual_names)))
+                common.terminate("More than one phenotype with the name %s exist." % ", ".join(list(mutual_names)))
             self.phenonames = hstack((self.phenonames, titles_to_add))
         else:
             self.phenonames = titles_to_add
@@ -233,7 +233,7 @@ class MethylationData(Module):
         if self.covarnames is not None:
             mutual_names = set(self.covarnames).intersection(set(titles_to_add))
             if mutual_names:
-                common.terminate("more than one covariate with the name %s" % ", ".join(list(mutual_names)))
+                common.terminate("More than one covariate with the name %s exist." % ", ".join(list(mutual_names)))
             self.covarnames = hstack((self.covarnames, titles_to_add))
         else:
             self.covarnames = titles_to_add
@@ -293,7 +293,7 @@ class MethylationData(Module):
         
         self.update_covar_data(covardata)
         self.update_covar_header(covarsnames)
-        logging.info("added covariates %s" % ", ".join(covarsnames))
+        logging.info("Added covariates %s." % ", ".join(covarsnames))
         return covarsnames
 
 
@@ -304,16 +304,16 @@ class MethylationData(Module):
         it updates the sites_size, the cpgnames list
         """
         if len(sites_indicies_list) == 0:
-            logging.warning("found no sites to exclude")
+            logging.warning("Found no sites to exclude.")
         else:
             if len(set(range(self.sites_size)).difference(set(sites_indicies_list))) == 0:
-                common.terminate("all sites are about to be remove") 
+                common.terminate("All sites are about to be removed...") 
 
             self.data = delete(self.data, sites_indicies_list, axis = 0)
             self.cpgnames = delete(self.cpgnames, sites_indicies_list)
             size_before = self.sites_size
             self.sites_size = len(self.cpgnames)
-            logging.info("%s sites out of %s were excluded (left %s sites)" % (len(sites_indicies_list), size_before, self.sites_size))
+            logging.info("%s sites out of %s were excluded (%s sites left)." % (len(sites_indicies_list), size_before, self.sites_size))
 
     def remove_samples_indices(self, indices_list):
         """
@@ -323,10 +323,10 @@ class MethylationData(Module):
         it also remove the sample from phenotype and covariates file if provided
         """
         if len(indices_list) == 0:
-            logging.warning("found no samples to remove")
+            logging.warning("Found no samples to remove.")
         else:
             if len(set(range(self.samples_size)).difference(set(indices_list))) == 0:
-                common.terminate("all samples are about to be remove")
+                common.terminate("All samples are about to be removed...")
 
             self.data = delete(self.data, indices_list, axis = 1)
             if self.phenotype is not None:
@@ -337,7 +337,7 @@ class MethylationData(Module):
             self.samples_ids = delete(self.samples_ids, indices_list)
             size_before = self.samples_size
             self.samples_size = len(self.samples_ids)
-            logging.debug("%s samples out of %s were removed (left %s samples)" % (len(indices_list), size_before, self.samples_size))
+            logging.debug("%s samples out of %s were removed (%s samples left)." % (len(indices_list), size_before, self.samples_size))
 
     def get_mean_per_site(self):
         """
@@ -355,12 +355,12 @@ class MethylationData(Module):
         this function removes the cpg sites not found in include_list list from the data
         it updates the sites_size, the cpgnames list and the list holds the average value per site
         """
-        logging.info("including sites...")
+        logging.info("Including sites...")
         assert type(include_list) == list or type(include_list) == ndarray
         remove_indices_list = where(False == in1d(self.cpgnames , include_list))[0]
-        logging.info("include sites: %s CpGs from the reference list of %s CpGs will be included" % (len(self.cpgnames) - len(remove_indices_list), len(include_list)))
+        logging.info("Include sites: %s CpGs from the reference list of %s CpGs will be included..." % (len(self.cpgnames) - len(remove_indices_list), len(include_list)))
         self.exclude_sites_indices(remove_indices_list)
-        logging.debug("methylation data new size is %s sites by %s samples" % self.data.shape)
+        logging.debug("Methylation data new size is %s sites by %s samples." % self.data.shape)
 
     def exclude(self, exclude_list):
         """
@@ -371,7 +371,7 @@ class MethylationData(Module):
         assert type(exclude_list) == list or type(exclude_list) == ndarray
         indices_list = where(in1d(self.cpgnames , exclude_list))[0]
         self.exclude_sites_indices(indices_list)
-        logging.debug("methylation data new size is %s sites by %s samples" % self.data.shape)
+        logging.debug("Methylation data new size is %s sites by %s samples." % self.data.shape)
 
     def keep(self, keep_list):
         """
@@ -379,11 +379,11 @@ class MethylationData(Module):
         this function removes the samples ids not found in keep_list list from the data
         it updates the samples_size and the samples_ids list 
         """
-        logging.info("keeping only samples in the file...")
+        logging.info("Keeping only the samples in the file...")
         assert type(keep_list) == list or type(keep_list) == ndarray
         remove_indices_list = where(False == in1d(self.samples_ids , keep_list))[0]
         self.remove_samples_indices(remove_indices_list)
-        logging.debug("methylation data new size is %s sites by %s samples" % self.data.shape)
+        logging.debug("Methylation data new size is %s sites by %s samples." % self.data.shape)
 
     def remove(self, remove_list):
         """
@@ -391,17 +391,17 @@ class MethylationData(Module):
         this function removes the samples ids found in remove_list from the data
         it updates the samples_size and the samples_ids list 
         """
-        logging.info("removing the samples from the file...")
+        logging.info("Removing the samples from the file...")
         assert type(remove_list) == list or type(remove_list) == ndarray
         indices_list = where(in1d(self.samples_ids , remove_list))[0]
         self.remove_samples_indices(indices_list)
-        logging.debug("methylation data new size is %s sites by %s samples" % self.data.shape)
+        logging.debug("Methylation data new size is %s sites by %s samples." % self.data.shape)
         
     def exclude_sites_with_low_mean(self, min_value):
         """
         removes sites with mean < min_value
         """
-        logging.info("excluding sites with mean lower than %s..." % min_value)
+        logging.info("Excluding sites with mean lower than %s..." % min_value)
         min_values_indices = where(self.get_mean_per_site() < min_value)[0]  
         self.exclude_sites_indices(min_values_indices)
 
@@ -409,7 +409,7 @@ class MethylationData(Module):
         """
         removes sites with mean > max_value
         """
-        logging.info("removing sites with mean greater than %s..." % max_value)
+        logging.info("Removing sites with mean greater than %s..." % max_value)
         max_values_indices = where(self.get_mean_per_site() > max_value)[0]
         self.exclude_sites_indices(max_values_indices)
 
@@ -419,13 +419,13 @@ class MethylationData(Module):
         save cpgnames with  information on each site
         """
         sites_filename = prefix + ".sites." + DATA_SUFFIX
-        logging.info("Saving cpg names and info to %s" % sites_filename)
+        logging.info("Saving CpG names and info to %s..." % sites_filename)
         sites_info = sitesinfo.SitesInfoGenerator(self.cpgnames)
         sites_data = column_stack((self.cpgnames, sites_info.chromosomes, sites_info.positions, sites_info.genes, sites_info.categories))
         savetxt(sites_filename, sites_data, delimiter='\t', fmt = '%-12s\t%-4s\t%-12s\t%-22s\t%-22s', header = "cpgid, chromosome, position, gene, category")
         
         samples_filename = prefix + ".samples." + DATA_SUFFIX
-        logging.info("Saving samples ids and their phenotype and covariates to %s" % samples_filename)
+        logging.info("Saving sample identifiers and their phenotypes and covariates to %s..." % samples_filename)
         samples_data = self.samples_ids
         samples_header = "sampleid"
         fmt = '%-12s'
@@ -465,7 +465,7 @@ class MethylationData(Module):
 
         data = vstack((header, data))
 
-        logging.info("Saving methylation data to %s" % methylation_data_filename)
+        logging.info("Saving methylation data to %s..." % methylation_data_filename)
         savetxt(methylation_data_filename, data, delimiter='\t', fmt='%s')
 
 
@@ -480,12 +480,12 @@ class MethylationData(Module):
         self.save_sites_and_samples(prefix)
         
         filename = prefix + "." + GLINT_FILE_SUFFIX
-        logging.info("Saving methylation data as glint format at %s" % filename)
+        logging.info("Saving methylation data as glint format to %s..." % filename)
         b = time()
         with open(filename, 'wb') as f:
             JSON_encoder = JSONEncoder(default = default)
             f.write(JSON_encoder.encode(self))
-        logging.debug("gsave took (dump binary) %s seconds"%(time()-b))
+        logging.debug("gsave took (dump binary) %s seconds."%(time()-b))
         f.close()
 
 
@@ -494,7 +494,7 @@ class MethylationData(Module):
         input: lowest_std_th threshold for excluding low variance sites, all sites with std lower than lowest_std_th will be excluded 
         lowest_std_th is float between 0 and 1
         """
-        logging.info("excluding site with variance lower than %s..." % lowest_std_th)
+        logging.info("Excluding sites with variance lower than %s..." % lowest_std_th)
         # get std for each site
         # sites_std = nanstd(self.data, axis=1) # calc variance consider NaN - missing values are not supported right noe
         sites_std = std(self.data, axis=1) # calc variance - missing values are not allowed
@@ -506,9 +506,9 @@ class MethylationData(Module):
         # get the first index in the sorted list which have std higher than lowest_std_th and include all indices started from it
         include_from_index = bisect_right(std_sorted, lowest_std_th)
         if (include_from_index == self.sites_size):
-            common.terminate("the provided std parameter excludes all sites (%s)" % lowest_std_th)
+            common.terminate("The provided std parameter excluded all sites (%s)." % lowest_std_th)
         if (include_from_index == 0):
-            logging.warning("the provided std parameter excludes no sites (%s)" % lowest_std_th)
+            logging.warning("The provided std parameter excluded no sites (%s)." % lowest_std_th)
 
         # exclude all sites with low std
         self.exclude_sites_indices(std_sorted_indices[:include_from_index])
@@ -524,13 +524,13 @@ class MethylationData(Module):
 
         maxpcstds_samples_indices = set()
         for pc_index, std_num in pcstds:
-            logging.info("finding samples with std higher than %d stds or lower than %d stds on pc number %d..." % (std_num, -1 * std_num, pc_index))
+            logging.info("Finding samples with standard deviation (STD) higher than %d STDs or lower than %d STDs in principal component number %d..." % (std_num, -1 * std_num, pc_index))
             pc = pca_out.P[:,pc_index-1] # user start counting from 1 and python from 0
             std_pc = std(pc)
             maxpcstds_samples_indices.update(where((pc > std_num * std_pc) | (pc < -1 * std_num * std_pc))[0])
 
         if maxpcstds_samples_indices:
-            logging.info("excluding samples with max std...")
+            logging.info("Excluding samples with max STD...")
             self.remove_samples_indices(list(maxpcstds_samples_indices))
 
     
@@ -575,41 +575,41 @@ class MethylationData(Module):
 
     def get_phenotypes_indicis(self, names_list):
         if self.phenonames is None: # there are no phenotypes
-            common.terminate("there is no phenotype in the data. add phenotype files with --phenofile")
+            common.terminate("There is no phenotype in the data. Add phenotypes file using --phenofile.")
         assert type(names_list) == list or type(names_list) == ndarray
         indices = where(in1d(self.phenonames, names_list))[0]
         if len(indices) != len(names_list):
-            common.terminate("some phenotypes names does not match the names in the data")
+            common.terminate("Used a phenotype name that does not match any of the phenotype names in the data.")
         return indices
 
     def get_covariates_indicis(self, covariates_names_list):
         if self.covarnames is None: # there are no covariates
-            common.terminate("there is no covariate in the data. add covariate files with --covarfile")
+            common.terminate("There is no covariates in the data. Add covariates file using --covarfile.")
         assert type(covariates_names_list) == list or type(covariates_names_list) == ndarray
         indices = where(in1d(self.covarnames , covariates_names_list))[0]
         if len(indices) != len(covariates_names_list):
-            common.terminate("some covariates names does not match the names in the data")
+            common.terminate("Used a covariate name that does not match any of the covariate names in the data.")
         return indices
 
     def get_phenotype_subset(self, names_list):
         if names_list == None:
-            logging.info("ignoring phenotype")
+            logging.info("Ignoring phenotype.")
             return None
         elif names_list == []:
-            logging.info("using all phenotypes")
+            logging.info("Using all phenotypes.")
             return self.phenotype
         else:
-            logging.info("using phenotypes %s" % ", ".join(names_list))
+            logging.info("Using phenotypes %s." % ", ".join(names_list))
             return self.phenotype[:, self.get_phenotypes_indicis(names_list)]
     
     def get_covariates_subset(self, names_list):
         if names_list == None:
             return None
         elif names_list == []:
-            logging.info("using all covariates")
+            logging.info("Using all covariates.")
             return self.covar
         else:
-            logging.info("using covariates %s" % ", ".join(names_list))
+            logging.info("Using covariates %s." % ", ".join(names_list))
             return self.covar[:, self.get_covariates_indicis(names_list)]
 
     def regress_out(self, matrix_to_regress):
@@ -664,10 +664,10 @@ class MethylationDataLoader(MethylationData):
         data, samples_ids, cpgnames = self._load_and_validate_file_of_dimentions(datafile, 2)
 
         if cpgnames is None:
-            common.terminate("there are no cpgnames for the sites in the datafile '%s'" % datafile.name)
+            common.terminate("There are no CpG identifiers for the sites in the datafile '%s'." % datafile.name)
         if samples_ids is None:
-            common.terminate("there are no samples ids (header) in the datafile '%s'" % datafile.name)
-        logging.info("checking for missing values in datafile file...")
+            common.terminate("There are no sample identifiers (header) in the datafile '%s'." % datafile.name)
+        logging.info("Checking for missing values in the data file...")
         validate_no_missing_values(data) #TODO remove when missing values are supported
 
         return data, samples_ids, cpgnames

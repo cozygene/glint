@@ -35,7 +35,7 @@ class Predictor(Module):
     
     def __init__(self, sites_scores_list_file, site_snps_list_file,  sites_ids_list_file, snps_ids_list_file, sites_snps_coeff_list_file):
 
-        logging.info("loading model files...")
+        logging.info("Loading model files...")
         self.site_snps_list_file = site_snps_list_file # will load it line by line later 
 
         with open(snps_ids_list_file, 'r') as f:
@@ -65,7 +65,7 @@ class Predictor(Module):
         samples = loadtxt(plink_ind_file, dtype=str, usecols=(0,))
         number_of_samples = samples.shape[0]
         filename = plink_ind_file.name if type(plink_ind_file) == file else plink_ind_file
-        logging.info("found %s samples in the file '%s'" %(number_of_samples, filename))
+        logging.info("Found %s samples in the file '%s'." %(number_of_samples, filename))
 
         if type(plink_ind_file) == file:
             plink_ind_file.close()
@@ -76,7 +76,7 @@ class Predictor(Module):
         # use only snps that their allele are not the pairs CG or AT - since in those cases we cannot know which strand was tested 
         relevant_snps_indices = self.get_relevant_plink_snp_list(plink_snps_data)
 
-        logging.info("get number of snp occurences...")
+        logging.info("Get number of snp occurences...")
         # extract find occurences per sample for each snp from .geno file
         # snp_occurrences, relevant_snps_indices, missing_sampels_indices, non_missing_sampels_indices = self.get_snps_occurences(plink_geno_file, relevant_snps_indices, number_of_samples, min_missing_values)  #missing samples handling
         snp_occurrences, relevant_snps_indices = self.get_snps_occurences(plink_geno_file, relevant_snps_indices, number_of_samples, min_missing_values) 
@@ -95,7 +95,7 @@ class Predictor(Module):
         number_of_samples = self.predicted_samples.size
 
         if (number_of_samples == 0):
-            common.terminate("All samples removed. There is nothing to predict. quiting...")
+            common.terminate("All samples were removed. There is nothing to impute. Quiting...")
 
         # find sites with score bigger than min_score
         seterr(invalid='ignore') # to ignore the following line warning (These warnings are an intentional aspect of numpy)
@@ -109,12 +109,12 @@ class Predictor(Module):
         # relevant_sites_indices = delete(relevant_sites_indices, bad_sites_indices)
 
         # calc prediction
-        logging.info("predict methylation level...")
+        logging.info("Impute methylation levels...")
         site_prediction, predicted_sites_ids =  self.predict_sites(number_of_samples, relevant_snps_names, relevant_snp_occurrences, relevant_sites_indices)
         if site_prediction == []: # no sites predicted
-            common.terminate("All sites removed. There is nothing to predict.")
-        logging.info("%s sites were imputed for %s samples" % (len(predicted_sites_ids), number_of_samples))
-        logging.info("%s sites with score > %s were not imputed because of missing SNPs" % (len(relevant_sites_indices) - len(predicted_sites_ids), min_score))
+            common.terminate("All sites were removed. There is nothing to impute.")
+        logging.info("%s sites were imputed for %s samples." % (len(predicted_sites_ids), number_of_samples))
+        logging.info("%s sites with score > %s were not imputed due to missing SNPs." % (len(relevant_sites_indices) - len(predicted_sites_ids), min_score))
         self.predicted_sites_names = self.sites_name_per_id[predicted_sites_ids]
         self.site_prediction = site_prediction
         
@@ -209,7 +209,7 @@ class Predictor(Module):
 
         samples_snps_f.close()
         
-        logging.info("removing %d snps with more than %f missing values..." %(snps_missing_values_counter, min_missing_values))
+        logging.info("Removing %d SNPs with more than %f missing values..." %(snps_missing_values_counter, min_missing_values))
         relevant_snps_indices = snp_indices[where(snp_indices != -1)[0]]
         
         # # find samples with too many missing values #missing samples handling
