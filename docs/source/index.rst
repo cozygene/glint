@@ -4,13 +4,13 @@
    contain the root `toctree` directive.
 
 
-Documentation and a simple tutorial: glint!
+Documentation and a simple tutorial: GLINT!
 ===========================================
 
-glint is a user-friendly command line tool for fast analysis of genome-wide DNA methylation data generated using the Illumina human methylation arrays. glint allows to easily run a pipeline of Epigenome-Wide Association Study (EWAS) under different models while accounting for known confounders in methylation data.
+GLINT is a user-friendly command line tool for fast analysis of genome-wide DNA methylation data generated using the Illumina human methylation arrays. GLINT allows to easily run a pipeline of Epigenome-Wide Association Study (EWAS) under different models while accounting for known confounders in methylation data.
 
 
-Getting glint:
+Getting GLINT:
 ^^^^^^^^^^^^^^
 
 .. toctree::
@@ -26,7 +26,7 @@ Quick start tutorial:
 
    tutorial
 
-Using glint:
+Using GLINT:
 ^^^^^^^^^^^^
 
 .. toctree::
@@ -51,9 +51,9 @@ Methylation imputation:
 Versions:
 ^^^^^^^^^
 
-glint 1.0.0
+GLINT 1.0.0
 
-Citing glint:
+Citing GLINT:
 ^^^^^^^^^^^^^
 
 .. toctree::
