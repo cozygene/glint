@@ -103,6 +103,8 @@ class Predictor(Module):
 
         # this code removes the sites in the list bad_sites_list (list of cpgs) from our data. it wast tested.
         # logging.info("remove bad sites..." )
+        # assert type(bad_sites_list) == list or type(bad_sites_list) == ndarray
+        # assert type(self.sites_name_per_id) == list or type(self.sites_name_per_id) == ndarray
         # bad_sites_indices = where(in1d(self.sites_name_per_id, bad_sites_list))[0]
         # relevant_sites_indices = delete(relevant_sites_indices, bad_sites_indices)
 
@@ -300,6 +302,7 @@ class Predictor(Module):
                     next_index += 1
 
         f.close()
+
         if len(sites_predictions) == 0:
             return [], []
         return vstack(tuple(sites_predictions)), predicted_sites_ids

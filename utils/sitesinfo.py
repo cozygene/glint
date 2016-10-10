@@ -1,5 +1,5 @@
 from pandas import Index, unique
-from numpy import loadtxt, empty, where
+from numpy import loadtxt, empty, where, array
 import logging
 import os
 
@@ -52,7 +52,8 @@ class SitesInfoGenerator(SitesInfo):
         orderd_indices = empty((len(sorted_indices)), dtype = int)# will hold the indexes in the order of cpgnames_list
 
         # get the indexes of all_cpgnames where  cpgnames_list found by the order of cpgnames_list 
+        assert type(cpgnames_list) == list or type(cpgnames_list) == ndarray
+        assert type(all_cpgnames) == list or type(all_cpgnames) == ndarray
         indexes_list = where(Index(unique(cpgnames_list)).get_indexer(all_cpgnames) >= 0)[0] # faster than np.where(np.in1d
         orderd_indices[sorted_indices] = indexes_list
-
         return orderd_indices

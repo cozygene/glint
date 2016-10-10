@@ -8,7 +8,7 @@ import logging
 from modules import refactor
 from utils import common
 from module_parser import ModuleParser
-from numpy import loadtxt
+from numpy import loadtxt, array
 
 # list of files containing bad sites ids
 BAD_PROBES_FILES = [
@@ -63,6 +63,7 @@ class RefactorParser( ModuleParser ):
           output_perfix = "output"
         bad_probes_list = set()
         [bad_probes_list.update(loadtxt(probes_file, dtype=str)) for probes_file in BAD_PROBES_FILES]
+        bad_probes_list = array(list(bad_probes_list))
         self.module  = refactor.Refactor(methylation_data = meth_data, 
                               k = args.k, 
                               t = args.t, 

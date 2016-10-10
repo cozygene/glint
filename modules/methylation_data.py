@@ -356,6 +356,7 @@ class MethylationData(Module):
         it updates the sites_size, the cpgnames list and the list holds the average value per site
         """
         logging.info("including sites...")
+        assert type(include_list) == list or type(include_list) == ndarray
         remove_indices_list = where(False == in1d(self.cpgnames , include_list))[0]
         logging.info("include sites: %s CpGs from the reference list of %s CpGs will be included" % (len(self.cpgnames) - len(remove_indices_list), len(include_list)))
         self.exclude_sites_indices(remove_indices_list)
@@ -367,6 +368,7 @@ class MethylationData(Module):
         this function removes the cpg sites found in self.exclude list from the data
         it updates the sites_size, the cpgnames list and the list holds the average value per site
         """
+        assert type(exclude_list) == list or type(exclude_list) == ndarray
         indices_list = where(in1d(self.cpgnames , exclude_list))[0]
         self.exclude_sites_indices(indices_list)
         logging.debug("methylation data new size is %s sites by %s samples" % self.data.shape)
@@ -378,6 +380,7 @@ class MethylationData(Module):
         it updates the samples_size and the samples_ids list 
         """
         logging.info("keeping only samples in the file...")
+        assert type(keep_list) == list or type(keep_list) == ndarray
         remove_indices_list = where(False == in1d(self.samples_ids , keep_list))[0]
         self.remove_samples_indices(remove_indices_list)
         logging.debug("methylation data new size is %s sites by %s samples" % self.data.shape)
@@ -389,6 +392,7 @@ class MethylationData(Module):
         it updates the samples_size and the samples_ids list 
         """
         logging.info("removing the samples from the file...")
+        assert type(remove_list) == list or type(remove_list) == ndarray
         indices_list = where(in1d(self.samples_ids , remove_list))[0]
         self.remove_samples_indices(indices_list)
         logging.debug("methylation data new size is %s sites by %s samples" % self.data.shape)
@@ -572,6 +576,7 @@ class MethylationData(Module):
     def get_phenotypes_indicis(self, names_list):
         if self.phenonames is None: # there are no phenotypes
             common.terminate("there is no phenotype in the data. add phenotype files with --phenofile")
+        assert type(names_list) == list or type(names_list) == ndarray
         indices = where(in1d(self.phenonames, names_list))[0]
         if len(indices) != len(names_list):
             common.terminate("some phenotypes names does not match the names in the data")
@@ -580,6 +585,7 @@ class MethylationData(Module):
     def get_covariates_indicis(self, covariates_names_list):
         if self.covarnames is None: # there are no covariates
             common.terminate("there is no covariate in the data. add covariate files with --covarfile")
+        assert type(covariates_names_list) == list or type(covariates_names_list) == ndarray
         indices = where(in1d(self.covarnames , covariates_names_list))[0]
         if len(indices) != len(covariates_names_list):
             common.terminate("some covariates names does not match the names in the data")
