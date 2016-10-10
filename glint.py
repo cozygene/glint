@@ -257,7 +257,7 @@ class ModulesArgumentParsers(object):
         if self.args.out:
             prefix = self.args.out
         else:
-            prefix = os.path.basename(self.args.datafile.name).split(".")[0]
+            prefix = ".".join(os.path.basename(self.args.datafile.name).split(".")[:-1])
 
         self.meth_parser.save(output_perfix = prefix) #save after all preprocessing  add epi and refactor covars 
         
@@ -273,7 +273,7 @@ if __name__ == '__main__':
     LOGGER.setLoggerLevel(args.loglevel)
     LOGGER.setLoggerFile(args.out)
 
-    logging.info("Executing command 'python %s'" % " ".join(sys.argv))
+    logging.info(">>> running command: python %s" % " ".join(sys.argv))
     logging.info("Starting glint...")
     parser.run()
     b = time.time()
