@@ -59,6 +59,8 @@ class RefactorParser( ModuleParser ):
 
     def run(self, args, meth_data, output_perfix = None):
       try:
+        if args.pheno is not None and meth_data.pheno is None:
+          common.terminate("There is no phenotype in the data, use --phenofile to add phenotype")
         if not output_perfix:
           output_perfix = "output"
         bad_probes_list = set()

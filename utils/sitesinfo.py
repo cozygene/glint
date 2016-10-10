@@ -1,5 +1,5 @@
 from pandas import Index, unique
-from numpy import loadtxt, empty, where, array
+from numpy import loadtxt, empty, where, ndarray
 import logging
 import os
 

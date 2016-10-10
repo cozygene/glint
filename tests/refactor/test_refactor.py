@@ -1,6 +1,6 @@
 from modules import refactor,methylation_data
 from parsers import refactor_parser
-from numpy import loadtxt, array_equal
+from numpy import loadtxt, array_equal, where
 from utils import LinearRegression
 import logging
 from tests.test_tools import tools
@@ -32,6 +32,28 @@ class SenariosTester():
         self.test_senario4()
         logging.info("Testing Finished on SenariosTester")
 
+    def _validate_ranked_lists(self, refactor_module, ranked_list_to_compare):
+        differ = where((ranked_list_to_compare == refactor_module.ranked_sites) == False)[0]
+        differ_count = len(differ)
+        if differ_count == 0: #ranked lists are equal
+            return True
+
+        # check if two sites were switched due to similar score
+        #1. must divide by two
+        if differ_count % 2 != 0:
+            logging.error("ranked lists are not equal on indices %s" %", ".join(differ))
+            return False
+
+        for i in range(differ_count/2):
+            if refactor_module.ranked_sites[differ[i]] == ranked_list_to_compare[differ[i+1]] and refactor_module.ranked_sites[differ[i+1]] == ranked_list_to_compare[differ[i]]:
+                if abs (refactor_module.distances[differ[i]] - refactor_module.distances[differ[i+1]]) < 1e-4:
+                    return True
+        import pdb
+        pdb.set_trace()
+        logging.error("ranked lists not matched")
+        return False
+
+
     def test_senario1(self):
         logging.info("Testing clean refactor components...")
         refactor_meth_data = self.meth_data.copy()
@@ -48,7 +70,7 @@ class SenariosTester():
                                     use_covars = None)
         
         module.run()
-        assert all(ranked == module.ranked_sites)
+        assert self._validate_ranked_lists(module, ranked)
         assert module.components.shape == comp.shape
         for i in range(module.components.shape[1]):
             assert tools.correlation(module.components[:,i], comp[:,i])
@@ -70,7 +92,7 @@ class SenariosTester():
                                     use_covars = [])
         
         module.run()
-        assert all(ranked == module.ranked_sites)
+        assert self._validate_ranked_lists(module, ranked)
         assert module.components.shape == comp.shape
 
         for i in range(module.components.shape[1]):
@@ -93,7 +115,7 @@ class SenariosTester():
                                     use_phenos = ['p2'],
                                     use_covars = [])
         module.run()
-        assert all(ranked == module.ranked_sites)
+        assert self._validate_ranked_lists(module, ranked)
         assert module.components.shape == comp.shape
 
         for i in range(module.components.shape[1]):
@@ -116,7 +138,7 @@ class SenariosTester():
                                     use_phenos = ['p1'],
                                     use_covars = [])
         module.run()
-        assert all(ranked == module.ranked_sites)
+        assert self._validate_ranked_lists(module, ranked)
         assert module.components.shape == comp.shape
 
         for i in range(module.components.shape[1]):

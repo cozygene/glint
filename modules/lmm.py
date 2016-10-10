@@ -139,9 +139,9 @@ class LMM(Module):
         preprocess data and run lmm. 
         
         params:
-        data - the methylation data to test (matrix of n sampels by m sites)
-        pheno - the phenotype    (a 1D vector of size n (sampels) )
-        covars - the covariates.(matrix of n sampels by x covariates or empty)
+        data - the methylation data to test (matrix of n samples by m sites)
+        pheno - the phenotype    (a 1D vector of size n (samples) )
+        covars - the covariates.(matrix of n samples by x covariates or empty)
         normalize_covars - whether to normalize the covariates matrix (supplied with param 'covar') (True - normalize, False - do not normalize)
                              default is False.
                              Note that covariates will be normalized according to asix=0. transpose before calling this function if needed.

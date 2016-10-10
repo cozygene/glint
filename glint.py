@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# import validate_dependencies
+import validate_dependencies
 import argparse
 import os
 import sys

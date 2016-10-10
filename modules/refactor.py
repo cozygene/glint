@@ -151,8 +151,9 @@ class Refactor(Module):
         """
         excludes bad sites from data
         """
-        logging.info("refactor is searching for badly designed sites to exclude...")
-        self.meth_data.exclude(self.bad_probes)
+        if len(self.bad_probes):
+            logging.info("refactor is searching for badly designed sites to exclude...")
+            self.meth_data.exclude(self.bad_probes)
 
     
     def _normal_feature_handler(self, meth_data):
@@ -231,5 +232,6 @@ class Refactor(Module):
 
         # find the distance of each site from its low rank approximation.
         distances = tools.euclidean_distance(An, Bn)
-
-        return  distances.argsort() # returns array of the indexes in a sorted order (the original indexes of the values if the array was sorted) 
+        sorted_indices = distances.argsort()
+        self.distances = distances[sorted_indices]
+        return sorted_indices # returns array of the indexes in a sorted order (the original indexes of the values if the array was sorted) 
