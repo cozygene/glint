@@ -39,7 +39,7 @@ class LMMParser(ModuleParser):
             you can also execute plots after the test by supplying the test's result file
         """
         self.parser = parser
-        lmm_parser = parser.add_argument_group('lmm', 'TODO Elior,add lmm description here')
+        lmm_parser = parser.add_argument_group('lmm', 'Linear mixed models')
 
         def kinship_value(val):
             if val not in lmm.AVAILABLE_KINSHIPS and not os.path.exists(val):
@@ -56,7 +56,7 @@ class LMMParser(ModuleParser):
             return val
         lmm_parser.add_argument('--reml', type=reml_value, default=1, help='type 1 to use REML (restricted maximum likelihood) or 0 to use ML. Default is 1 (REML)')
         lmm_parser.add_argument('--norm', action='store_true', help='Supply this flag in order to normalize covariates matrix (if this flag is not supplied the matrix is not normalized)')
-        lmm_parser.add_argument('--oneld', action='store_true', help='select this in order to generate logdelta once for all sites (by default logdelta is generated seperatly for each site)')
+        lmm_parser.add_argument('--oneld', action='store_true', help='Select this in order to fit log delta once under the null for all sites (by default log delta is generated seperatly for each site)')
         # def pc_num_value(val):
         #     val = int(val)
         #     if val < 0:
@@ -91,11 +91,11 @@ class LMMParser(ModuleParser):
 
             elif args.kinship == 'refactor': # kinship and data to test are the same
                 # todo if --lmm provided with --refactor there is no need to run refactor twice in order to find ranked sites.
-                logging.info("Running lmm with refactor kinship...")
+                logging.info("Running lmm with ReFACTor kinship...")
                 refactor_meth_data = meth_data.copy()
                 self.refactor.run(args, refactor_meth_data, output_perfix)
 
-                logging.info("using best %s sites suggested by refactor as data for kinship..." % args.t)
+                logging.info("Using best %s sites suggested by ReFACTor as the data for constructing the kinship..." % args.t)
                 t_best_sites = self.refactor.module.ranked_sites[:args.t]
                 
                 data_for_kinship = meth_data.copy()
@@ -116,7 +116,7 @@ class LMMParser(ModuleParser):
             
             t0 = time.time()
             if not args.oneld: # run lmm for each site so logdelta will be calculated for each site (TODO sometime move this option as an argument of LMM class and not of the parser (now, parser calls LMM class with different site each time thats patchy)
-              logging.info("LMM calculating logdelta for each site, this will take a while...")
+              logging.info("LMM is calculating logdelta for each site; this may take a while...")
               cpgnames=[]
               pvalues=[]
               intercepts_betas=[]
@@ -142,7 +142,7 @@ class LMMParser(ModuleParser):
 
             else: # run lmm on all data - logdelta is calculated once.
               #run lmm
-              logging.info("computing log delta...")
+              logging.info("Computing log delta...")
               lmm_results = module.run(data, pheno, covars, meth_data.cpgnames, args.norm, args.reml)
               cpgnames, pvalues, intercepts_betas, covars_betas, sites_betas, sigmas_e, sigmas_g, stats =  lmm_results
             

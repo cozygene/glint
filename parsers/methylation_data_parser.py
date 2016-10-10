@@ -76,7 +76,7 @@ class MethylationDataParser(ModuleParser):
         optional = parser.add_argument_group('2.Data management options ')
         optional.add_argument('--covarfile', type = argparse.FileType('r'), nargs='*', help = "A covariates file (or files)")
         optional.add_argument('--phenofile', type = argparse.FileType('r'), nargs='*', help = "A phenotype file (or files)")
-        optional.add_argument('--maxpcstd', metavar=('PC_INDEX (TODO Elior, change those names?', 'STD_COUNT'), type = int, action = 'append', nargs = 2, help = "TODO Elior, edit: pc index and std number of times for removing outliers")
+        optional.add_argument('--maxpcstd', metavar=('PC_INDEX', 'STD_COUNT'), type = int, action = 'append', nargs = 2, help = "PC index and number of standard deviations for removing samples")
             
         group1 = optional.add_mutually_exclusive_group(required = False)
         group1.add_argument('--include', type = argparse.FileType('r'), help = "A file with a list of sites to include in the data; removes the rest of the sites")
@@ -86,8 +86,8 @@ class MethylationDataParser(ModuleParser):
         group2.add_argument('--keep',   type = argparse.FileType('r'), help = "A file with a list of samples to include in the data; removes the rest of the samples")
         group2.add_argument('--remove', type = argparse.FileType('r'), help = "A file with a list of samples to exclude in the data; includes the rest of the samples")
 
-        optional.add_argument('--gsave', action='store_true', help = "Save the data in a glint format; makes following executions faster")
-        optional.add_argument('--txtsave', action='store_true', help = "Save the data in a visible format (text)")
+        optional.add_argument('--gsave', action='store_true', help = "Saves the data in a glint format; makes following executions faster")
+        optional.add_argument('--txtsave', action='store_true', help = "Saves the data in a textual format (.text)")
 
         def methylation_value(num):
             num = float(num)
@@ -98,9 +98,9 @@ class MethylationDataParser(ModuleParser):
         optional.add_argument('--minmean', type = methylation_value, help = "A threshold for the minimal mean methylation level to consider")
         optional.add_argument('--maxmean', type = methylation_value, help = "A threshold for the maximal mean methylation level to consider")
         
-        optional.add_argument('--rmxy', action='store_true', help = "remove methylation sites on X and Y chromosomes")
-        optional.add_argument('--rmns', action='store_true', help = "remove nonspecific sites (nonspecific probes)")
-        optional.add_argument('--rmpoly', action='store_true', help = "remove polymorphic sites (CpGs which are also SNPs)")
+        optional.add_argument('--rmxy', action='store_true', help = "Removes methylation sites residing in chromosomes X and Y")
+        optional.add_argument('--rmns', action='store_true', help = "Removes cross-reactive sites (non-specific probes)")
+        optional.add_argument('--rmpoly', action='store_true', help = "Removes polymorphic sites (CpGs that are also SNPs)")
         
         def std_value(num):
             try:
@@ -111,7 +111,7 @@ class MethylationDataParser(ModuleParser):
             if not (num <= 1 and num >=0):
                 common.terminate("minstd must be a float between 0 and 1")
             return num
-        optional.add_argument('--minstd',  type = std_value, help = "threshold for excluding low variance sites (all sites with std lower than this threshold will be excluded)")
+        optional.add_argument('--minstd',  type = std_value, help = "Threshold for excluding low variance sites (all sites with standard deviation lower than this threshold will be excluded)")
       
         super(MethylationDataParser, self).__init__(required, optional)
         
@@ -129,11 +129,11 @@ class MethylationDataParser(ModuleParser):
         if not isinstance(fileobj, file):
             fileobj = open(fileobj, 'r')
         
-        logging.info("loading file %s..." % fileobj.name)
+        logging.info("Loading file %s..." % fileobj.name)
         try:
             data = common.loadtxt(fileobj.name, dtype = str)
         except:
-            common.terminate("There was error reading the file '%s', make sure you seperate the values with space, tab or comma" % (fileobj.name, dim))
+            common.terminate("There was an error reading the file '%s', make sure you seperate the values with space, tab or comma" % (fileobj.name, dim))
         
         if data.ndim == 0: # file contains only one item
             data = [data.item()]
@@ -142,11 +142,11 @@ class MethylationDataParser(ModuleParser):
 
         data_set = set(data)
         if len(data) != len(data_set):
-            logging.warning("The file %s contains ids more than once" % fileobj.name)
+            logging.warning("The file %s contains some samples more than once" % fileobj.name)
 
         diff =  data_set.difference(set(optional_ids_list))
         if diff != set([]):
-            logging.warning("The file %s contains ids that are not found in the datafile: %s" % (fileobj.name, diff))
+            logging.warning("The file %s contains samples that were not found in the data file: %s" % (fileobj.name, diff))
 
         return data
 
@@ -219,7 +219,7 @@ class MethylationDataParser(ModuleParser):
                                                                result['phenonames'],
                                                                result['title_indexes'])
 
-                logging.debug("load binary data took  %s seconds" %(time()-a))
+                logging.debug("Loading binary data took  %s seconds" %(time()-a))
                 logging.debug("Got methylation data with %s sites and %s samples id" % (self.module.sites_size, self.module.samples_size))
                 # if phenotype or covariates supplied with metylation data, replace module covar and pheno file with new ones
                 if args.phenofile is not None:

@@ -24,9 +24,9 @@ class QQPlotParser(ModuleParser):
 
         will save output file in both .png and .eps formats
         """
-        plot = parser.add_argument_group('qqplot', 'Plotting options TODO Elior, add description which will be shown when --help')
-        plot.add_argument('--results', type = argparse.FileType('r'),  help = "an EWAS test results file (glint format). Supply this if --ewas test was not selected") 
-        plot.add_argument('--title', type = str,  help = "the title for the plot, will be left empty if not supplied")
+        plot = parser.add_argument_group('qqplot', 'Generates qq-plot')
+        plot.add_argument('--results', type = argparse.FileType('r'),  help = "an EWAS test results file. Supply this if --ewas test was not selected") 
+        plot.add_argument('--title', type = str,  help = "The title for the plot, will be left empty if not supplied")
         
         super(QQPlotParser, self).__init__(plot)
 
@@ -34,7 +34,7 @@ class QQPlotParser(ModuleParser):
     def run(self, args, ewas_result_obj = None):
         # not result file nor ewas result supplied
         if ewas_result_obj is None:
-            common.terminate("must supply results to qq-plot. use --result to supply a glint result file or --ewas to run a new test")
+            common.terminate("Must supply results file to qq-plot. Use --result to supply a glint results file or --ewas to run a new test")
         
         # plot the p-value
         output_perfix = args.out
@@ -58,9 +58,9 @@ class ManhattanPlotParser(ModuleParser):
     
         will save output file in both .png and .eps formats
         """
-        plot = parser.add_argument_group('manhattan', 'Plotting options TODO Elior, add description which will be shown when --help')
-        plot.add_argument('--results', type = argparse.FileType('r'),  help = "an EWAS test results file (glint format). Supply this if --ewas test was not selected")
-        plot.add_argument('--title', type = str,  help = "the title for the plot")
+        plot = parser.add_argument_group('manhattan', 'Plots Manhattan plot')
+        plot.add_argument('--results', type = argparse.FileType('r'),  help = "An EWAS test results file. Supply this if --ewas test was not selected")
+        plot.add_argument('--title', type = str,  help = "The title for the plot")
 
         super(ManhattanPlotParser, self).__init__(plot)
 
@@ -68,7 +68,7 @@ class ManhattanPlotParser(ModuleParser):
     def run(self, args, ewas_result_obj = None):
         # not result file nor ewas result supplied
         if ewas_result_obj is None:
-            common.terminate("must supply results to manhattan-plot. use --result to supply a glint result file or --ewas to run a new test")
+            common.terminate("Must supply results file. Use --result to supply a glint result file or --ewas to run a new test")
         
         # plot the p-value
         output_perfix = args.out
@@ -97,8 +97,8 @@ class PCAScatterPlotParser(ModuleParser):
 
     output file saved in both .png and .eps formats
     """
-    pca = parser.add_argument_group('plotpcs', 'TODO Elior, add description which will be shown wjen --help')
-    pca.add_argument('--numpcs', required = True, type = int, default = 2, help = " number of pcs to plot TODO Elior, edit") 
+    pca = parser.add_argument_group('plotpcs', 'Generates scatter plots of the first several PCs of the data')
+    pca.add_argument('--numpcs', required = True, type = int, default = 2, help = "Number of PCs to plot") 
 
 
     self.meth_data_parser = MethylationDataParser(parser)
@@ -177,7 +177,7 @@ class PlotParser(ModuleParser):
         self.required_args.extend(self.manhattan_parser.required_args)
 
     if plot_counter == 0:
-        common.terminate("plese select plot type")
+        common.terminate("Please select a plot type")
     # if plot_counter >1:
     #     common.terminate("plese select only one plot option")
 
@@ -191,7 +191,7 @@ class PlotParser(ModuleParser):
     try:
       # both result file and results from ewas test supplied
       if args.results and ewas_result_obj is not None: # user ran ewas and plot together but supplied results file - do not plot cause it could be 
-          common.terminate("couldn't choose between ewas results file %s and the new test results" % args.results.filename) #todo filename /file?
+          common.terminate("Couldn't choose between ewas results file %s and the new test results" % args.results.filename) #todo filename /file?
 
       #supplied result file - extract results
       if args.results:

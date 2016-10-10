@@ -49,10 +49,10 @@ class RefactorParser( ModuleParser ):
       refactor.add_argument('--k',       type = int, required = True, help = "The number of assumed cell types")
       refactor.add_argument('--t',       type = int, default = 500, help = "The number of sites to use for computing the ReFACtor components (DEFAULT=500)")
       refactor.add_argument('--numcomp', type = int, help = "The number of ReFACTor components to output (DEFAULT=K)")
-      refactor.add_argument('--fs',      type = str, default = 'normal', help = "feature selection mode; options: normal, controls, phenotype (DEFAULT=normal)")
-      refactor.add_argument('--stdth',  type = float, default = 0.01, help = "threshold for excluding low variance sites (DEFAULT=0.02) (all sites with std lower than this threshold will be excluded)") 
-      refactor.add_argument('--covar', type = str, nargs='*', help = "list of covariates names to use. If no name is specified will use all the covariates. If flag is not set, will not use any covariate")
-      refactor.add_argument('--pheno', type = str, nargs='*', help = "list of phenotypes names to use. If no name is specified will use all the phenotypes. If flag is not set, will not use any phenotype")
+      refactor.add_argument('--fs',      type = str, default = 'normal', help = "Feature selection mode; options: normal, controls, phenotype (DEFAULT=normal)")
+      refactor.add_argument('--stdth',  type = float, default = 0.01, help = "Threshold for excluding low variance sites (DEFAULT=0.01) (all sites with std lower than this threshold will be excluded)") 
+      refactor.add_argument('--covar', type = str, nargs='*', help = "List of covariate names to use.")
+      refactor.add_argument('--pheno', type = str, nargs='*', help = "The phenotype name to use (if 'phenotype' was selected under --fs)")
         
       super(RefactorParser, self).__init__(refactor)
 
@@ -60,7 +60,7 @@ class RefactorParser( ModuleParser ):
     def run(self, args, meth_data, output_perfix = None):
       try:
         if args.pheno is not None and meth_data.pheno is None:
-          common.terminate("There is no phenotype in the data, use --phenofile to add phenotype")
+          common.terminate("There is no phenotype in the data, use --phenofile to add phenotype.")
         if not output_perfix:
           output_perfix = "output"
         bad_probes_list = set()

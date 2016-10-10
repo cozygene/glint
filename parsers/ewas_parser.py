@@ -49,9 +49,9 @@ class EWASParser(ModuleParser):
         ewas = parser.add_argument_group('ewas', 'TODO Elior,add ewas description here')
 
         # phenotype is required for all EWAS tests
-        ewas.add_argument('--pheno', required = True, type = str, nargs='*', help = "list of phenotypes names to use. If no name is specified will use all the phenotypes. If flag is not set, will not use any phenotype")
+        ewas.add_argument('--pheno', required = True, type = str, nargs='*', help = "List of phenotype names to use")
         # covar is for lmm, linreg and logreg tests
-        ewas.add_argument('--covar', type = str, nargs='*', help = "list of covariates names to use. If no name is specified will use all the covariates. If flag is not set, will not use any covariate")
+        ewas.add_argument('--covar', type = str, nargs='*', help = "List of covariate names to use")
         def std_value(num):
             try:
                 num = float(num)
@@ -60,14 +60,14 @@ class EWASParser(ModuleParser):
             if not (num <= 1 and num >=0):
                 common.terminate("minstd must be a float between 0 and 1")
             return num
-        ewas.add_argument('--stdth',  type = std_value, help = "threshold for excluding low variance sites (all sites with std lower than this threshold will be excluded)")  
+        ewas.add_argument('--stdth',  type = std_value, help = "Threshold for excluding low variance sites (all sites with standard deviation lower than this threshold will be excluded)")  
       
-        ewas.add_argument('--linreg', action = "store_true", help = "Run a linear regression analysis (executed by default if --ewas is selected)")
-        ewas.add_argument('--logreg', action = "store_true", help = "Run a logistic regression analysis")
-        ewas.add_argument('--wilc',   action = "store_true", help = "Run Wilcoxon rank-sum test")
+        ewas.add_argument('--linreg', action = "store_true", help = "Runs linear regression analysis (executed by default if --ewas is selected)")
+        ewas.add_argument('--logreg', action = "store_true", help = "Runs logistic regression analysis")
+        ewas.add_argument('--wilc',   action = "store_true", help = "Runs Wilcoxon rank-sum test")
         # Note: lmm module is handled not the very best way since there was no time. it appears here under "EWAS" but the glin.py handles it as 
         # an independed module
-        ewas.add_argument('--lmm', dependencies = ["--ewas"], action = "store_true", help = "Run a linear mixed model test. More explanation and options described under \"lmm\"")
+        ewas.add_argument('--lmm', dependencies = ["--ewas"], action = "store_true", help = "Run linear mixed model test")
         
         self.lmm_parser = LMMParser(parser)
         super(EWASParser, self).__init__(ewas)
@@ -82,7 +82,7 @@ class EWASParser(ModuleParser):
         super(EWASParser, self).validate_args(args)
         
         if len(args.pheno) > 1: # 0 is all phenotypes in the data (which could be one)
-            common.terminate("must supply only one phenotype for EWAS")
+            common.terminate("Must supply only one phenotype for EWAS")
 
         test_counter = 0
         if args.lmm:
@@ -93,10 +93,10 @@ class EWASParser(ModuleParser):
             test_counter += 1
         if args.wilc:
             if args.covar:
-                common.terminate("Wilcoxon test cannot take any covaraites. remove --covar flag")
+                common.terminate("Wilcoxon test cannot take any covaraites. Remove the --covar argument.")
             test_counter +=1
         if test_counter > 1:
-            common.terminate("Choose only one EWAS test.")
+            common.terminate("Select only one EWAS test.")
 
         # add lmm parser if lmm was chosen
         if args.lmm:
@@ -107,7 +107,7 @@ class EWASParser(ModuleParser):
         # default test is linear regression
         if test_counter == 0:
             args.linreg = True
-            logging.info("No EWAS test was chosen, running linerar regression by default.")
+            logging.info("No EWAS test was chosen, using the default linear regression.")
 
 
         
@@ -161,10 +161,10 @@ class EWASParser(ModuleParser):
 
             pheno = meth_data.get_phenotype_subset(args.pheno)
             if pheno is None:
-                common.terminate("EWAS couldn't find phenotype, make use you provided phenotype with the flag --phenofile")
+                common.terminate("EWAS couldn't find phenotype, make sure you provided phenotype with the flag --phenofile")
 
             if (pheno.shape[1] != 1): # check if selected more than one phenotype
-                common.terminate("must supply only one phenotype for EWAS")
+                common.terminate("Must supply only one phenotype for EWAS")
 
             covars = meth_data.get_covariates_subset(args.covar)
 

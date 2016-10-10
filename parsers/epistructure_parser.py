@@ -15,9 +15,9 @@ class EpistructureParser(ModuleParser):
         """
         --savepcs:   number of captured ancestry PCs to save
         """
-        epistructure_parser = parser.add_argument_group('epistructure', 'TODO Elior,add epistructure description here')
-        epistructure_parser.add_argument('--savepcs', type = int, default = 1, help = "number of captured ancestry PCs to save TODO Elior, edit")
-        epistructure_parser.add_argument('--covar', type = str, nargs='*', help = "list of covariates names to use. If no name is specified will use all the covariates. If flag is not set, will not use any covariate")
+        epistructure_parser = parser.add_argument_group('epistructure', 'The EPISTRUCTURE algorithm captures population structure from methylation data')
+        epistructure_parser.add_argument('--savepcs', type = int, default = 1, help = "Number of EPISTRUCTURE PCs to save (DEFAULT=1)")
+        epistructure_parser.add_argument('--covar', type = str, nargs='*', help = "List of covariate names to use")
       
         super(EpistructureParser, self).__init__(epistructure_parser)
         

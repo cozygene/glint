@@ -11,7 +11,7 @@ HOUSEMAN_OUTPUT_NAME = "houseman_estimates.txt"
 
 class HousemanParser(ModuleParser):
     def __init__(self, parser):
-        houseman = parser.add_argument_group('houseman todo elior add description') # numbering in the group name because help print it by abc order
+        houseman = parser.add_argument_group('The Houseman algorithm for estimating cell counts') # numbering in the group name because help print it by abc order
         houseman.add_argument('--reference', type = argparse.FileType('r'), default = open(HOUSEMAN_DEFAULT_REFERENCE, 'r'),  help = "reference file in a specific format. see documentation for more details")
         super(HousemanParser, self).__init__(houseman)
 
