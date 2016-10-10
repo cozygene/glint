@@ -151,7 +151,7 @@ class Refactor(Module):
         """
         excludes bad sites from data
         """
-        logging.info("searching for bad sites to exclude...")
+        logging.info("refactor is searching for badly designed sites to exclude...")
         self.meth_data.exclude(self.bad_probes)
 
     
