@@ -35,7 +35,7 @@ def euclidean_distance(A, B):
     calculates euclidean distance between two n X m matrixes A and B
     Note: Both A and B dimensions are n X m 
     """
-    return sqrt(((A - B)**2).sum(axis=0))
+    return sqrt(((A - B)**2).sum(axis=0)) # another option is " linalg.norm(A-B, axis=0)"
 
 
 
