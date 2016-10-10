@@ -1,8 +1,8 @@
 
-How to cite glint?
+How to cite GLINT?
 ==================
 
-If you use glint in any published work, please cite the paper describing it (**comming soon**).
+If you use GLINT in any published work, please cite the paper describing it (**comming soon**).
 
 In addition:
 

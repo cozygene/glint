@@ -54,7 +54,7 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = u'glint'
+project = u'GLINT'
 copyright = u'2016, Elior Rahmani'
 author = u'Elior Rahmani'
 

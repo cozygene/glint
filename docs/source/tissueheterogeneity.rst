@@ -7,7 +7,7 @@ Tissue heterogeneity
 
 When methylation data are collected from an heterogeneous source (e.g. whole blood) the cell type compositions of samples in the data are known to be a major source of variation, and therefore a potential confounder in EWAS. Here we provide an implementation of the ReFACTor algorithm by Rahmani et al. for inferring cell type compostion information in methylation data [1]_. In addition, we provide an implementation of the reference-based method by Houseman et al. [2]_, allowing to estimate cell counts (cell proportion) of the samples in the data.
 
-.. note:: The example commands described bellow assume that the user generated `glint files`_ with covariates file and phenotypes file.
+.. note:: The example commands described bellow assume that the user generated `GLINT files`_ with covariates file and phenotypes file.
 
 
 |
@@ -30,11 +30,11 @@ Computes the ReFACTor components and generates two output files:
 
 .. note:: For best performance of ReFACTor we recommend adding known gneome-wide effectors as covariates using the `--covar`_ argument.
 
-.. note:: glint computes the ReFACTor components while automatically ignoring X and Y chromosomes sites, polymorphic sites and cross-reactive sites according to Chen et al. [3]_.
+.. note:: GLINT computes the ReFACTor components while automatically ignoring X and Y chromosomes sites, polymorphic sites and cross-reactive sites according to Chen et al. [3]_.
 
 .. note:: Use `--out`_ in order to change the default output name.
 
-.. note:: Use `--refactor`_ together with `--gsave`_ in order to generate a new version of glint files with the computed ReFACTor components (these will be included in the *datafile.samples.txt* file).
+.. note:: Use `--refactor`_ together with `--gsave`_ in order to generate a new version of GLINT files with the computed ReFACTor components (these will be included in the *datafile.samples.txt* file).
 
 
 
@@ -62,7 +62,7 @@ For example::
 
 	python glint.py --datafile datafile.glint --refactor --k 6 --covar c1 c2 c3
 
-will compute the ReFACTor components while accounting for the covariates c1, c2 and c3. The names of the covariates are defined by the headers in the *datafile.samples.txt* file associated with the *datafile.glint*. For more details see `glint files`_.
+will compute the ReFACTor components while accounting for the covariates c1, c2 and c3. The names of the covariates are defined by the headers in the *datafile.samples.txt* file associated with the *datafile.glint*. For more details see `GLINT files`_.
 
 .. note:: Use the argument `--covarfile`_ in order to provide covariates that were not included in the *datafile.glint* file or in case where a textual version of the data is used rather than a *.glint* file.
 
@@ -123,7 +123,7 @@ For example::
 
 	python glint.py --datafile datafile.glint --refactor --k 6 --fs controls --pheno y1
 
-will compute the ReFACTor components using the *controls* feature selection based on the phenotype y1. The names of the phenotypes are defined by the headers in the *datafile.samples.txt* file associated with the *datafile.glint*. For more details see `glint files`_.
+will compute the ReFACTor components using the *controls* feature selection based on the phenotype y1. The names of the phenotypes are defined by the headers in the *datafile.samples.txt* file associated with the *datafile.glint*. For more details see `GLINT files`_.
 
 .. note:: Use the argument `--phenofile`_ in order to provide phenotypes that were not included in the *datafile.glint* file or in case where a textual version of the data is used rather than a *.glint* file.
 
@@ -153,14 +153,14 @@ will compute cell count estimates.
 
 .. note:: Use `--out`_ in order to change the default output name.
 
-.. note:: Use `--houseman`_ together with `--gsave`_ in order to generate a new version of glint files with the computed cell count estimates (these will be included in the *datafile.samples.txt* file).
+.. note:: Use `--houseman`_ together with `--gsave`_ in order to generate a new version of GLINT files with the computed cell count estimates (these will be included in the *datafile.samples.txt* file).
 
 
 .. _--reference:
 
 **--reference**
 
-Allows to include user-supplied reference data. This argument gets path to a tab-delimited file of sites by cell types matrix of mean methylation levels (for each methylation site in each cell type). The first row should include "ID" followed by cell type names and the first column should include CpG identifiers. The default reference in glint contains 7 leukocyte cell types.
+Allows to include user-supplied reference data. This argument gets path to a tab-delimited file of sites by cell types matrix of mean methylation levels (for each methylation site in each cell type). The first row should include "ID" followed by cell type names and the first column should include CpG identifiers. The default reference in GLINT contains 7 leukocyte cell types.
 
 
 For example::
@@ -184,7 +184,7 @@ will compute cell count estimates using the reference data in *reference.txt*.
 
 .. _--phenofile: input.html#phenofile
 
-.. _glint files: input.html#glint-files
+.. _GLINT files: input.html#glint-files
 
 
 

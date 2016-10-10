@@ -3,13 +3,13 @@
 Imputation from genotype data
 =============================
 
-glint allows to impute methylation levels from genotype data. Assuming genotype data are available for your samples, glint can impute the methylation levels of some methylation sites.
+GLINT allows to impute methylation levels from genotype data. Assuming genotype data are available for your samples, GLINT can impute the methylation levels of some methylation sites.
 
-The imputation is based on the Epistructure paper by Rahmani et al. [1]_. As described in the paper, a linear model was fitted for each methylation site from cis-located SNPs in a large dataset for which both methylation and genotype data were available. A score was then defined for each site, based on the squared linear correlation of the model. Here, we use the coefficients of these linear models in order to predict methylation levels based on the SNPs. Sites having higher scores are expected to be predicted more accurately compared with sites having lower scores.
+The imputation is based on the EPISTRUCTURE paper by Rahmani et al. [1]_. As described in the paper, a linear model was fitted for each methylation site from cis-located SNPs in a large dataset for which both methylation and genotype data were available. A score was then defined for each site, based on the squared linear correlation of the model. Here, we use the coefficients of these linear models in order to predict methylation levels based on the SNPs. Sites having higher scores are expected to be predicted more accurately compared with sites having lower scores.
 
-.. note:: The example commands described bellow assume that the user generated `glint files`_ with covariates file and phenotypes file.
+.. note:: The example commands described bellow assume that the user generated `GLINT files`_ with covariates file and phenotypes file.
 
-.. note:: Polymorphic CpGs according to Chen et al. [2]_ are not imputed.
+.. note:: We suggest users to apply a full GWAS quality control pipeline on their genotype data before imputing metylation levels, e.g. using PLINK_.
 
 .. note:: The linear models for imputation were fitted based on European individuals.
 
@@ -26,9 +26,11 @@ For example::
 
 	python glint.py --impute --snp genotypes.snp --geno genotypes.geno --ind genotypes.ind
 
-will generate glint files with imputed methylation data for a group of methylation sites, based on the *.snp*, *.geno* and *.ind* EIGENSTRAT files of the genotype data.
+will generate GLINT files with imputed methylation data for a group of methylation sites, based on the *.snp*, *.geno* and *.ind* EIGENSTRAT files of the genotype data.
 
-.. note:: --impute will automatically generate glint files with the imputed methylation levels, therefore there is no need to add the --gsave argument.
+.. note:: --impute will automatically generate GLINT files with the imputed methylation levels, therefore there is no need to add the --gsave argument.
+
+.. note:: Polymorphic CpGs according to Chen et al. [2]_ are not imputed.
 
 .. note:: Use `--out`_ in order to change the default output name.
 
@@ -53,19 +55,22 @@ will impute methylation levels for every site with a score greater than 0.4.
 
 
 
-Controls the fraction of missing values allowed for samples and SNPs in the EIGENSTRAT input files. Samples with fraction of missing values above the specified value will be ignored as well as SNPs with higher than specified missing values (such SNPs will not be used in the imputation). The deafult value is 0.03.
+Controls the fraction of missing values allowed for SNPs in the EIGENSTRAT input files. SNPs with fraction of missing values above the specified value will be ignored and will not be used in the imputation. The deafult value is 0.03.
 
 For example::
 
 	python glint.py --impute --snp genotypes.snp --geno genotypes.geno --ind genotypes.ind --maxmiss 0.01
 
-will impute methylation levels for samples with no more than 1% of missing SNPs using SNPs with no more than 1% of missing values.
+will impute methylation levels for the samples in the data using SNPs with no more than 1% of missing values.
+
 
 
 
 .. _--out: input.html#out
 
-.. _glint files: input.html#glint-files
+.. _GLINT files: input.html#glint-files
+
+.. _PLINK: http://pngu.mgh.harvard.edu/~purcell/plink/
 
 
 .. _here: http://genepath.med.harvard.edu/~reich/InputFileFormats.htm

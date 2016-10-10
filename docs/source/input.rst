@@ -4,11 +4,11 @@
 Input
 =====
 
-The following section describes arguments that allow to provide data files for glint, and the `--gsave`_ argument that allows to save and work with a binary version of the data (`glint files`_) for gaining computation speed-up.
+The following section describes arguments that allow to provide data files for GLINT, and the `--gsave`_ argument that allows to save and work with a binary version of the data (`GLINT files`_) for gaining computation speed-up.
 
-.. note:: glint does not work on raw data, but rather assumes data are given after raw data preprocessing.
+.. note:: GLINT does not work on raw data, but rather assumes data are given after raw data preprocessing.
 
-.. note:: glint currently does not allow NA values in the data. For users having NA values in their data files see `handling NA values`_.
+.. note:: GLINT currently does not allow NA values in the data. For users having NA values in their data files see `handling NA values`_.
 
 
 
@@ -29,24 +29,24 @@ The `tutorial files`_ can be used as example files.
 
 Path to a tab-delimited file of sites by samples matrix of methylation levels. The first row should include "ID" followed by sample identifiers and the first column should include CpG identifiers. 
 
-For example, adding the following to your glint command::
+For example, adding the following to your GLINT command::
 
 	--datafile datafile.txt
 
 will load the methylation data matrix in the *datafile.txt* file. See the tutorial *datafile.txt* file as an example file.
 
-.. note:: In order to speed-up glint, we recommend working with a binary version of the data. See `--gsave`_ for more details.
+.. note:: In order to speed-up GLINT, we recommend working with a binary version of the data. See `--gsave`_ for more details.
 
-.. note:: For users having *.Rdata* files with methylation data we provide a script for generating files in the required format - see `Convert RData file into glint format`_ for more details.
+.. note:: For users having *.Rdata* files with methylation data we provide a script for generating files in the required format - see `Convert RData file into GLINT format`_ for more details.
 
 
 .. _--covarfile: 
 
 **--covarfile**
 
-Path to a tab-delimited file of samples by covariates matrix. The first row may be a row of headers - "ID" followed by the names of the covariates, and the first column should include sample identifiers. If a row of headers is not provided then glint will automatically generate a name for each covariate.
+Path to a tab-delimited file of samples by covariates matrix. The first row may be a row of headers - "ID" followed by the names of the covariates, and the first column should include sample identifiers. If a row of headers is not provided then GLINT will automatically generate a name for each covariate.
 
-For example, adding the following to your glint command::
+For example, adding the following to your GLINT command::
 
 	--covarfile covariates.txt
 
@@ -60,9 +60,9 @@ will provide the covariates matrix in the *covariates.txt* file. See the tutoria
 
 **--phenofile**
 
-Path to a tab-delimited file of samples by phenotypes matrix. The first row may be a row of headers - "ID" followed by the names of the phenotypes, and the first column should include sample identifiers. If a row of headers is not provided then glint will automatically generate a name for each phenotype.
+Path to a tab-delimited file of samples by phenotypes matrix. The first row may be a row of headers - "ID" followed by the names of the phenotypes, and the first column should include sample identifiers. If a row of headers is not provided then GLINT will automatically generate a name for each phenotype.
 
-For example, adding the following to your glint command::
+For example, adding the following to your GLINT command::
 
 	--phenofile phenotypes.txt
 
@@ -81,23 +81,23 @@ For example::
 
 	python glint.py --datafile datafile.txt --gsave --out newdata
 
-will generate glint files (see `--gsave`_) with *newdata* prefix.
+will generate GLINT files (see `--gsave`_) with *newdata* prefix.
 
 
 |
 |
 
 
-.. _glint files:
+.. _GLINT files:
 
-glint files
+GLINT files
 ^^^^^^^^^^^
 
 .. _--gsave:
 
 **--gsave**
 
-Saves glint files, including a binary version of the methylation data (*.glint* file) for gaining computation speed-up in the following commands. In addition, this command saves two additional files:
+Saves GLINT files, including a binary version of the methylation data (*.glint* file) for gaining computation speed-up in the following commands. In addition, this command saves two additional files:
 
 - *datafile.sites.txt* - contains the CpG identifiers of the sites in the data and additional information for each CpG: chromosome, position, nearest gene and genomic category.
 
@@ -139,9 +139,9 @@ will create a file titled *datafile.txt* with a textual version of the methylati
 |
 |
 
-.. _Convert RData file into glint format:
+.. _Convert RData file into GLINT format:
 
-Convert R file to glint format
+Convert R file to GLINT format
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 **convertToGlintInput.R:**
@@ -155,7 +155,7 @@ For example::
 
 	Rscript convertToGlintInput.R datafile.RData X
 
-will save a tab-delimited text file containing sites by samples methylation data matrix as appear in the variable X that is saved in the *datafile.RData* file. The resulted file can be then provided as an input to glint (using `--datafile`_).
+will save a tab-delimited text file containing sites by samples methylation data matrix as appear in the variable X that is saved in the *datafile.RData* file. The resulted file can be then provided as an input to GLINT (using `--datafile`_).
 
 |
 
@@ -174,8 +174,8 @@ will assume that the information in the variable X is formatted as samples by si
 Handling NA values
 ^^^^^^^^^^^^^^^^^^
 
-glint currently does not allow NA values in the data. For users having NA values in their data we provide an external script *replace_missing_values.py* for a basic imputation of NA values.
-This script replaces NA values of each site with its mean methylation level (according to all non-NA values of the site), and outputs a new data file with no NA values that can be provided to glint as an input.
+GLINT currently does not allow NA values in the data. For users having NA values in their data we provide an external script *replace_missing_values.py* for a basic imputation of NA values.
+This script replaces NA values of each site with its mean methylation level (according to all non-NA values of the site), and outputs a new data file with no NA values that can be provided to GLINT as an input.
 
 |
 

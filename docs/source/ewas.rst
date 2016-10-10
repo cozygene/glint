@@ -4,9 +4,9 @@
 EWAS
 ====
 
-glint allows to perform epigenome-wide association study (EWAS) under several different models, as described bellow. All of the different models require using the general arguments desribed below under "General arguments".
+GLINT allows to perform epigenome-wide association study (EWAS) under several different models, as described bellow. All of the different models require using the general arguments desribed below under "General arguments".
 
-.. note:: The example commands described bellow assume that the user generated `glint files`_ with covariates file and phenotypes file.
+.. note:: The example commands described bellow assume that the user generated `GLINT files`_ with covariates file and phenotypes file.
 
 
 |
@@ -21,9 +21,9 @@ General arguments
 
 Runs an association test on each site in the data and outputs a results file.
 
-.. note:: If `--ewas`_ is used without additional arguments glint will use linear regression as a default.
+.. note:: If `--ewas`_ is used without additional arguments GLINT will use linear regression as a default.
 
-.. note:: glint can produce plots based on the results file. For more details read about the `--plot`_ argument.
+.. note:: GLINT can produce plots based on the results file. For more details read about the `--plot`_ argument.
 
 .. note:: Use `--out`_ in order to change the default output name.
 
@@ -39,7 +39,7 @@ For example::
 	python glint.py --datafile datafile.glint --ewas --linreg --pheno y1
 
 
-will run EWAS using linear regression model with the phenotype y1. The names of the phenotypes are defined by the headers in the *datafile.samples.txt* file associated with the *datafile.glint*. For more details see `glint files`_.
+will run EWAS using linear regression model with the phenotype y1. The names of the phenotypes are defined by the headers in the *datafile.samples.txt* file associated with the *datafile.glint*. For more details see `GLINT files`_.
 
 .. note:: Use the argument `--phenofile`_ in order to provide phenotypes that were not included in the *datafile.glint* file or in case where a textual version of the data is used rather than a *.glint* file.
 
@@ -54,13 +54,13 @@ For example::
 
 	python glint.py --datafile datafile.glint --ewas --linreg --covar c1 c2 c3
 
-will run EWAS using linear regression model with the covariates c1, c2 and c3. The names of the covariates are defined by the headers in the *datafile.samples.txt* file associated with the *datafile.glint*. For more details see `glint files`_.
+will run EWAS using linear regression model with the covariates c1, c2 and c3. The names of the covariates are defined by the headers in the *datafile.samples.txt* file associated with the *datafile.glint*. For more details see `GLINT files`_.
 
 Alternatively, run::
 
 	python glint.py --datafile datafile.glint --ewas --linreg --covar
 
-without specifying names of covariates in order to include into the model all of the covariates included in the glint file.
+without specifying names of covariates in order to include into the model all of the covariates included in the GLINT file.
 
 .. note:: Use the argument `--covarfile`_ in order to provide covariates that were not included in the *datafile.glint* file or in case where a textual version of the data is used rather than a *.glint* file.
 
@@ -158,7 +158,7 @@ The output file named *results.glint.lmm.txt** includes a list of the sites, sor
 
 **--kinship**
 
-The kinship matrix for modelling the inter-individual similarity in the data that is required for the LMM. glint allows two options:
+The kinship matrix for modelling the inter-individual similarity in the data that is required for the LMM. GLINT allows two options:
 
 - User-supplied kinship - users can suplly a text file with samples by samples kinship matrix (with no row or column headers). 
 - *refactor* - the ReFACTor algorithm can be used for constructing the kinship matrix. If this option is used then ReFACTor is executed for selecting the top informative sites in the data. The kinship matrix is then constructed by calculatign the empirical covariance matrix of the samples based on the selected sites.
@@ -203,7 +203,7 @@ will perform EWAS on the data using LMM after normalizing the covariates c1, c2 
 
 **--oneld**
 
-This argument allows to fit the log delta parameter in the Fast-LMM model only once (instead for each site separately).
+This argument allows to fit the log delta parameter in the Fast-LMM model only once under the null model (instead for each site separately).
 
 For example::
 
@@ -224,7 +224,7 @@ will perform EWAS on the data using LMM with a single value of log detla.
 
 .. _--refactor: tissueheterogeneity.html#refactor
 
-.. _glint files: input.html#glint-files
+.. _GLINT files: input.html#glint-files
 
 
 .. [1] Lippert, Christoph, Jennifer Listgarten, Ying Liu, Carl M. Kadie, Robert I. Davidson, and David Heckerman. "FaST linear mixed models for genome-wide association studies." Nature methods 8, no. 10 (2011): 833-835.

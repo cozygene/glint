@@ -6,7 +6,7 @@ Data management
 The following section describes arguments that allow to perform basic data management and quality control procedures on data.
 
 
-.. note:: The example commands described bellow assume that the user generated `glint files`_ with covariates file and phenotypes file.
+.. note:: The example commands described bellow assume that the user generated `GLINT files`_ with covariates file and phenotypes file.
 
 .. note:: Data management commands applied to data do not change the input files. In order to save the changes into a new file use the `--gsave`_ or `--txtsave`_ commands.
 
@@ -180,7 +180,7 @@ will remove all polymorphic sites from the data.
 
 .. _--plotpcs: plots.html#plotpcs
 
-.. _glint files: input.html#glint-files
+.. _GLINT files: input.html#glint-files
 
 
 .. [1] Chen, Yi-an, Mathieu Lemire, Sanaa Choufani, Darci T. Butcher, Daria Grafodatskaya, Brent W. Zanke, Steven Gallinger, Thomas J. Hudson, and Rosanna Weksberg. "Discovery of cross-reactive probes and polymorphic CpGs in the Illumina Infinium HumanMethylation450 microarray." Epigenetics 8, no. 2 (2013): 203-209.
