@@ -46,7 +46,7 @@ class EWASParser(ModuleParser):
             in order to plot the output call --plot with the plot you want.
             you can also execute plots after the test by supplying the test's result file
         """
-        ewas = parser.add_argument_group('ewas', 'TODO Elior,add ewas description here')
+        ewas = parser.add_argument_group('ewas', 'Epigenome-wide association study')
 
         # phenotype is required for all EWAS tests
         ewas.add_argument('--pheno', required = True, type = str, nargs='*', help = "List of phenotype names to use")

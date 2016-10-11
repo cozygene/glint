@@ -117,15 +117,15 @@ class PCAScatterPlotParser(ModuleParser):
     try:
       assert args.numpcs + 1 < meth_data.samples_size
 
-      logging.info("running PCA...")
+      logging.info("Running PCA...")
       pca_out = pca.PCA(meth_data.data.transpose()) # meth_data should be transposed before passing to pca
       
-      logging.info("plotting first %s PCs..." % args.numpcs)
+      logging.info("Plotting first %s PCs..." % args.numpcs)
       pca_scatter_plot = plot.PCAScatterPlot(pca_out, plots_number = args.numpcs, save_file = output_filename)
       pca_scatter_plot.draw()
 
     except Exception:
-      logging.exception("in pca plot parser")
+      logging.exception("In pca plot parser")
       raise
     
 
@@ -144,7 +144,7 @@ class PlotParser(ModuleParser):
   all plots saves output file in .png and .eps formats.
   """
   def __init__(self, parser):
-    plot = parser.add_argument_group('plot', 'Plotting options TODO Elior, add description which will be shown when --help')
+    plot = parser.add_argument_group('plot', 'For data visualization.')
     plot.add_argument('--qqplot', action='store_true',   help = "QQ-plot")
     plot.add_argument('--manhattan', action='store_true', help = "Manhattan plot")
     plot.add_argument('--plotpcs', action='store_true', help = "PCA scatter plot")
