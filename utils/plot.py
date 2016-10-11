@@ -128,7 +128,7 @@ class PCAScatterPlot(Plot):
 
     def __init__(self, pca_out, save_file=None, plots_number=1):
         if plots_number  >= pca_out.P.shape[1] - 1:
-            logging.warning("there are no %s pcs to show, will show all existing pcs" % plots_number)
+            logging.warning("There are no %s PCs to show, will show all existing pcs." % plots_number)
             plots_number = pca_out.P.shape[1] - 1
 
         super(PCAScatterPlot, self).__init__(save_file, plots_number)

@@ -217,7 +217,7 @@ class ModulesArgumentParsers(object):
                                     meth_data = refactor_meth_data,
                                     output_perfix = self.args.out)
             if self.args.gsave:
-                logging.info("Adding the ReFACTor componetns to the covariates of the data.")
+                logging.info("Adding the ReFACTor componetns to the covariates of the data...")
             refactor_comp_names = self.meth_parser.module.add_covar_datas(self.refactor_parser.module.components, "rc") # add refactor components as covariate file
             
             # add refactor components to the list of covariates to use:
@@ -270,13 +270,14 @@ if __name__ == '__main__':
     selected_args = [arg for arg in sys.argv if arg.startswith("--")] 
     parser = ModulesArgumentParsers(selected_args)
 
+    logging.info(">>> python %s" % " ".join(sys.argv))
+    logging.info("Starting GLINT...")
+    
     parser.add_arguments()
     args = parser.parse_args()
     LOGGER.setLoggerLevel(args.loglevel)
     LOGGER.setLoggerFile(args.out)
 
-    logging.info(">>> python %s" % " ".join(sys.argv))
-    logging.info("Starting GLINT...")
     parser.run()
     b = time.time()
     logging.debug("TOTAL RUN TIME %s SECONDS"%(b-a))

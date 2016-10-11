@@ -201,7 +201,7 @@ class MethylationData(Module):
         if not phenofile_list:
             return None, None
 
-        logging.info("Validating phenotype file...")
+        logging.info("Validating phenotypes file...")
         pheno, header = self._load_and_validate_samples_data(phenofile_list, samples_size, samples_ids, default_pheno_name)
         logging.info("New phenotypes were found: %s." % ", ".join(header))
         return pheno, header
@@ -214,7 +214,7 @@ class MethylationData(Module):
         if not covarfiles_list:
             return None, None
 
-        logging.info("Validating phenotype file...")
+        logging.info("Validating covariates file...")
         covar, header = self._load_and_validate_samples_data(covarfiles_list, samples_size, samples_ids, default_covar_name)
         logging.info("New covariates were found: %s." % ", ".join(header))
         
@@ -419,9 +419,9 @@ class MethylationData(Module):
         save cpgnames with  information on each site
         """
         sites_filename = prefix + ".sites." + DATA_SUFFIX
-        logging.info("Saving CpG names and info to %s..." % sites_filename)
         sites_info = sitesinfo.SitesInfoGenerator(self.cpgnames)
         sites_data = column_stack((self.cpgnames, sites_info.chromosomes, sites_info.positions, sites_info.genes, sites_info.categories))
+        logging.info("Saving CpG names and info to %s..." % sites_filename)
         savetxt(sites_filename, sites_data, delimiter='\t', fmt = '%-12s\t%-4s\t%-12s\t%-22s\t%-22s', header = "cpgid, chromosome, position, gene, category")
         
         samples_filename = prefix + ".samples." + DATA_SUFFIX
@@ -480,7 +480,7 @@ class MethylationData(Module):
         self.save_sites_and_samples(prefix)
         
         filename = prefix + "." + GLINT_FILE_SUFFIX
-        logging.info("Saving methylation data as glint format to %s..." % filename)
+        logging.info("Saving methylation data in glint format to %s..." % filename)
         b = time()
         with open(filename, 'wb') as f:
             JSON_encoder = JSONEncoder(default = default)
@@ -530,7 +530,7 @@ class MethylationData(Module):
             maxpcstds_samples_indices.update(where((pc > std_num * std_pc) | (pc < -1 * std_num * std_pc))[0])
 
         if maxpcstds_samples_indices:
-            logging.info("Excluding samples with max STD...")
+            logging.info("Excluding samples according to STDs...")
             self.remove_samples_indices(list(maxpcstds_samples_indices))
 
     
@@ -599,7 +599,7 @@ class MethylationData(Module):
             logging.info("Using all phenotypes.")
             return self.phenotype
         else:
-            logging.info("Using phenotypes %s." % ", ".join(names_list))
+            logging.info("Using phenotype %s." % ", ".join(names_list))
             return self.phenotype[:, self.get_phenotypes_indicis(names_list)]
     
     def get_covariates_subset(self, names_list):

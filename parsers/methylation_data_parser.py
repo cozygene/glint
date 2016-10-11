@@ -174,13 +174,13 @@ class MethylationDataParser(ModuleParser):
             self.module.remove_lowest_std_sites(self.args.minstd)
 
         if self.args.rmxy:
-            logging.info("searching for sites from X and Y chromosomes to exclude...")
+            logging.info("Searching for sites from X and Y chromosomes to exclude...")
             self.module.exclude(common.loadtxt(HUMAN_X_Y, dtype = str))
         if self.args.rmns:
-            logging.info("searching for non-specific sites to exclude...")
+            logging.info("Searching for non-specific sites to exclude...")
             self.module.exclude(common.loadtxt(NONSPECIFIC_PROBES, dtype = str))
         if self.args.rmpoly:
-            logging.info("searching for polymorphic sites to exclude...")
+            logging.info("Searching for polymorphic sites to exclude...")
             self.module.exclude(common.loadtxt(POLYMORPHIC_CPGS, dtype = str))
 
     # must  be called after run
@@ -205,7 +205,7 @@ class MethylationDataParser(ModuleParser):
             self.args = args
             self.module = None
             if args.datafile.name.endswith(methylation_data.GLINT_FILE_SUFFIX):
-                logging.info("Loading glint file: %s..." % args.datafile.name)
+                logging.info("Loading glint file %s..." % args.datafile.name)
                 a = time()
                 dataf = args.datafile.read()
                 JSON_decoder = JSONDecoder(object_hook= methylation_data.json_numpy_obj_hook)

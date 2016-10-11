@@ -27,7 +27,7 @@ class SitesInfoGenerator(SitesInfo):
     ISLAND_INDEX = 4
 
     def __init__(self, cpgnames_list):
-        logging.info("loading information about methylation sites...")
+        logging.info("Loading information about methylation sites...")
         data = loadtxt(SITES_INFO_FILE, dtype = str, ndmin = 2, delimiter=',')
         all_cpgnames = data[:, self.CPGNAME_INDEX]
         indices = self._get_cpgnames_indicis(all_cpgnames, cpgnames_list)
@@ -46,7 +46,7 @@ class SitesInfoGenerator(SitesInfo):
         the indexes are ordered by cpgnames_list:
             if output is this function output so all_cpgnames[output[0]] is equal to  cpgnames[0]
         """
-        logging.info("searching for relevant methylation sites information...")
+        logging.info("Searching for relevant methylation sites information...")
         
         sorted_indices = cpgnames_list.argsort()  # the indexes of cpgnames_list when values are sorted
         orderd_indices = empty((len(sorted_indices)), dtype = int)# will hold the indexes in the order of cpgnames_list

@@ -43,10 +43,10 @@ def load_float_data_and_headers(filepath, delimiter='\t', dtype = float32, na_va
     tab_sep = first_row.split('\t')
     if space_sep != tab_sep:
         if len(space_sep) > len(tab_sep) and delimiter == '\t':
-            logging.info("switching to space delimited matrix")
+            logging.info("Switching to space delimited matrix...")
             delimiter = ' '
         elif len(tab_sep) > len(space_sep) and delimiter == ' ':
-            logging.info("switching to tab delimited matrix")
+            logging.info("Switching to tab delimited matrix...")
             delimiter = '\t'
 
     first_row = first_row.split()
@@ -86,8 +86,8 @@ def load_float_data_and_headers(filepath, delimiter='\t', dtype = float32, na_va
         
         
     except Exception as e:
-        logging.exception("while loading data")
-        terminate("file contains values which are not float") 
+        logging.exception("While loading data")
+        terminate("File contains non float values.") 
 
     # convert to array
     if col_names is not None:
@@ -95,7 +95,7 @@ def load_float_data_and_headers(filepath, delimiter='\t', dtype = float32, na_va
     if data is not None:
         data = DataFrame.as_matrix(data)
     else:
-        common.terminate("no data found in the file %s" % filepath)
+        common.terminate("No data were found in the file %s." % filepath)
 
     return data, col_names, row_names
 
@@ -109,14 +109,14 @@ def load_data_file(filepath, dim, dtype = float32, na_values = None):
     try:
         data, col_names, row_names = load_float_data_and_headers(filepath, delimiter='\t', dtype = dtype, na_values = na_values)
     except Exception as e:
-        logging.exception("while loading data !!%s!!")#todo remove this
-        terminate("some error with the data file format, please check the delimiter")
+        logging.exception("While loading data !!%s!!")#todo remove this
+        terminate("Some error with the data file format; please check the delimiter.")
     
-    logging.debug("read with pandas took %s seconds" % (time()-a))
+    logging.debug("Read with pandas took %s seconds." % (time()-a))
     
     if data is None:
-        terminate("could not read data file")
+        terminate("Could not read data file.")
     if data.size == 1:
-        logging.warning("only one value found in the file: %s" % data)
+        logging.warning("Only one value found in the file: %s." % data)
 
     return data, col_names, row_names

@@ -63,7 +63,7 @@ def eigenDecompose(X):
     logging.info("computing eigendecomposition...")
     s,U = eigh(X) #Returns the eigenvalues and eigenvectors
     if (npnim(s) < -1e-4):
-        common.terminate("Negative eigenvalues found")
+        common.terminate("Negative eigenvalues were found.")
     s[s<0]=0    
     ind = argsort(s)
     ind = ind[s>1e-12]

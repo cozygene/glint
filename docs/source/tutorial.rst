@@ -50,7 +50,7 @@ We remove these outlier samples by indicating 4 SDs as the maximum level allowed
 As before, we use the `--gsave`_ argument for generating GLINT files, only this time with outliers excluded. This results in the following files: *data_cleaned.glint*, *data_cleaned.samples.txt* and *data_cleaned.sites.txt* files.
 
 
-4. **Estimate cell type composition**
+4. **Capture cell type composition**
 
 Since our data were collected from a heterogeneous source (blood tissue), we run ReFACTor in order to account for the cell type composition in the downstream analysis and generate new GLINT files with the results. The resulted ReFACTor components will be used later as covariates in our EWAS analysis, as tissue heterogeneity is a potential confounder in EWAS [2]_. In order to boost ReFACTor's performance in capturing the cell composition, we run ReFACTor while adding potential methylation altering factors as covariates. We do that by using the `--covar`_ argument which allows us to add covariates by their names (as they appear in the covariates file):
 
@@ -62,7 +62,7 @@ This command creates *data_cleaned_v2.refactor.components.txt* and *data_cleaned
 Note that *data_cleaned_v2.samples.txt* includes new covariates: rc1, rc2, ..., rck - these are the ReFACTor components.
 
 
-5. **Estimate population structure**
+5. **Infer population structure**
 
 Since our data were collected from admixed population and we do not have ancestry information available, we estimate the population structure in the data directly from the methylation levels using the EPISTRUCTURE algorithm [3]_ and generate new GLINT files with the results. In order to boost the performance of EPISTRUCTURE in capturing the ancestry information, we run EPISTRUCTURE while adding strong genome-wide effectors as covariates - in our case we add the estimates of the cell composition.
 The resulted EPISTRUCTURE PCs will be used later as covariates in our EWAS::

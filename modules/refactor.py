@@ -104,7 +104,7 @@ class Refactor(Module):
 
     def run( self ):
         # TODO use module name from config file instead of "ReFACTor"
-        logging.info('Starting ReFACTor v%s...' % self.VERSION); 
+        logging.info('Starting ReFACTor...'); 
         self.components, self.ranked_sites_indices = self._refactor()
         self.ranked_sites = self.meth_data.cpgnames[self.ranked_sites_indices]
         logging.info('ReFACTor is done!')
