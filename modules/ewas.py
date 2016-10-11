@@ -113,7 +113,7 @@ class LinearRegression(Regression):
         #running association tests
         results =  self.regression()
         b = time.time()
-        logging.info('EWAS linear regression is one!')
+        logging.info('EWAS linear regression is done!')
         logging.debug('LINEAR REGRESSION TOOK %s SECONDS' %(b-a))
         return results
 
