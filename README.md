@@ -57,7 +57,7 @@ The script automatically installs missing dependencies that are required for GLI
 *Note* that GLINT first validates that all it's dependencies are installed before executing. If it finds a problem it will instruct you.
 
 ### Troubleshooting
-1. Make sure you run GLINT with Anaconda Python command line, to find it:  
+1. Make sure you run GLINT with Anaconda Python command line (if you don't have Anaconda installed please see Download and Installation, to find it:  
   **Windows** todo  
   **Linux** run on command line: ```which conda```.    
     If that command returns nothing than you dont have Anaconda installed, refer to Download and Installation.
