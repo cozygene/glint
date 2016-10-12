@@ -81,7 +81,6 @@ elif os.name == 'posix': # Unix
 
 
     
-GLINT_OBLIGATORY_DEPENDENCIES = ['numpy', 'scipy', 'sklearn', 'matplotlib', 'pandas', 'statsmodels', 'cvxopt'] # TODO move to configuration file
 GLINT_OPTIONAL_DEPENDENCIES = []
 
 # def setup_glint():
@@ -242,6 +241,9 @@ def install_glint():
     # setup_glint()
     
     # install dependencies
+    from validate_dependencies import GLINT_OBLIGATORY_DEPENDENCIES_WITH_CONDA, GLINT_OBLIGATORY_DEPENDENCIES_NO_CONDA 
+    GLINT_OBLIGATORY_DEPENDENCIES = GLINT_OBLIGATORY_DEPENDENCIES_WITH_CONDA + GLINT_OBLIGATORY_DEPENDENCIES_NO_CONDA 
+
     dependencies_to_install = check_dependencies(GLINT_OBLIGATORY_DEPENDENCIES + GLINT_OPTIONAL_DEPENDENCIES)
 
     if len(dependencies_to_install) == 0:
