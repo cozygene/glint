@@ -47,7 +47,7 @@ class GlintParser(ModuleParser):
                  - which more? TODO Elior
         """
         optional = parser.add_argument_group('3.Optional arguments')
-        optional.add_argument('-h', '--help', action='help', help = "Prints this help") # add help here so it will be under same group with all other optional argument
+        optional.add_argument('-h', '--h', '--help', action='help', help = "Prints this help") # add help here so it will be under same group with all other optional argument
         optional.add_argument('--out', type = str,   help = "Changes the prefix of the output file ")
         def loglevel_value(val):
             # val = int(val)
