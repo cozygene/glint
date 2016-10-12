@@ -20,7 +20,7 @@ this script:
 GLINT_OBLIGATORY_DEPENDENCIES_WITH_CONDA = ['numpy', 'scipy', 'sklearn', 'matplotlib', 'pandas', 'statsmodels'] # TODO move to configuration file
 # dependencies that are not included in anaconda
 GLINT_OBLIGATORY_DEPENDENCIES_NO_CONDA = ['cvxopt'] # TODO move to configuration file
-INSTALL_WINDODWS = {'cvxopt':"echo hi"}
+INSTALL_WINDODWS = {'cvxopt':"conda install -c omnia cvxop"}
 INSTALL_LINUX = {'cvxopt': "sudo `which conda` install -c anaconda cvxopt"} #conda install -c anaconda cvxopt=1.1.8
 
 ERROR_MSG = "Something is wrong with GLINT dependencies, please follow the README at https://github.com/cozygene/glint"
