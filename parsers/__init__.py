@@ -2,7 +2,7 @@ from refactor_parser import RefactorParser
 from ewas_parser import EWASParser
 from methylation_data_parser import MethylationDataParser
 from module_parser import ModuleParser
-from predictor_parser import PredictorParser
+from imputing_parser import ImputingParser
 from epistructure_parser import EpistructureParser
 from lmm_parser import LMMParser
 from plot_parser import PlotParser

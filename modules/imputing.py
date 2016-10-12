@@ -6,24 +6,24 @@ from module import Module
 from methylation_data import MethylationData
 from utils import common
 
-class Predictor(Module):
+class Imputation(Module):
     """
-    predict methylation level of methylation sites by snps.
+    impute methylation level of methylation sites by snps.
     the snps data given by plink files
 
-    ignore sample (dont predict its methylation sites) when it has more than x snps that are missing (missing values)
-    ignore snp (dont predict with it) when it has more than x samples that are missing (missing values)
+    ignore sample (dont impute its methylation sites) when it has more than x snps that are missing (missing values)
+    ignore snp (dont impute with it) when it has more than x samples that are missing (missing values)
     x has default value but can be changed
     
     ignore sites with low score (user can select the score) (score list is in the file "sites_scores_list")
 
-    predict methylation level of a site if we have information about at least one snp that predicts it
+    impute methylation level of a site if we have information about at least one snp that imputes it
 
-    prediction model:
+    imputation model:
     If the model for some methylation site m is m=c1*s1+c2*s2 (model is given in the parsed data returned from convert_model_file_to_bin.py script
-    a detailed explaintion is provided in PredictorParser)
+    a detailed explaintion is provided in ImputingParser)
     where c1,c2 are the coefficients in the model file and s1,s2 are the values of the SNPs s1,s2,
-    then the predicted value of m for individual i will be m_i=c1*s1_i+c2*s2_i, where s1_i,s2_i are the values of SNPs s1,s2 in individual i
+    then the imputed value of m for individual i will be m_i=c1*s1_i+c2*s2_i, where s1_i,s2_i are the values of SNPs s1,s2 in individual i
     """
     
     NA_VALUE = 9
@@ -53,14 +53,14 @@ class Predictor(Module):
 
         self.sites_scores = loadtxt(sites_scores_list_file)
 
-    def predict(self, min_score, plink_snp_file, plink_geno_file, plink_ind_file, min_missing_values):
+    def impute(self, min_score, plink_snp_file, plink_geno_file, plink_ind_file, min_missing_values):
         """
-        predict with following rules:
+        impute with following rules:
         replace missing values with mean (unless there are more htan min_missing_values missing values)
-        remove samples (dont predict them) which have more than min_missing_values missing snps (out of all its snps)
-        remove snps (sont predict with them) which have more than min_missing_values missing samples (out of all its samples)
+        remove samples (dont impute them) which have more than min_missing_values missing snps (out of all its snps)
+        remove snps (sont impute with them) which have more than min_missing_values missing samples (out of all its samples)
         remore site with score lower than min_score
-        dont predict sites that we dont have any snp (if we have at least one - predict it)
+        dont impute sites that we dont have any snp (if we have at least one - impute it)
         """
         samples = loadtxt(plink_ind_file, dtype=str, usecols=(0,))
         number_of_samples = samples.shape[0]
@@ -91,8 +91,8 @@ class Predictor(Module):
                 relevant_snp_occurrences.append(snp_occurrences[i])
 
         # remove snps that we dont have information on
-        self.predicted_samples = samples#[non_missing_sampels_indices] #missing samples handling
-        number_of_samples = self.predicted_samples.size
+        self.imputed_samples = samples#[non_missing_sampels_indices] #missing samples handling
+        number_of_samples = self.imputed_samples.size
 
         if (number_of_samples == 0):
             common.terminate("All samples were removed. There is nothing to impute. Quiting...")
@@ -108,15 +108,15 @@ class Predictor(Module):
         # bad_sites_indices = where(in1d(self.sites_name_per_id, bad_sites_list))[0]
         # relevant_sites_indices = delete(relevant_sites_indices, bad_sites_indices)
 
-        # calc prediction
+        # impute
         logging.info("Impute methylation levels...")
-        site_prediction, predicted_sites_ids =  self.predict_sites(number_of_samples, relevant_snps_names, relevant_snp_occurrences, relevant_sites_indices)
-        if site_prediction == []: # no sites predicted
+        site_imputation, imputed_sites_ids =  self.impute_sites(number_of_samples, relevant_snps_names, relevant_snp_occurrences, relevant_sites_indices)
+        if site_imputation == []: # no sites imputed
             common.terminate("All sites were removed. There is nothing to impute.")
-        logging.info("%s sites were imputed for %s samples." % (len(predicted_sites_ids), number_of_samples))
-        logging.info("%s sites with score > %s were not imputed due to missing SNPs." % (len(relevant_sites_indices) - len(predicted_sites_ids), min_score))
-        self.predicted_sites_names = self.sites_name_per_id[predicted_sites_ids]
-        self.site_prediction = site_prediction
+        logging.info("%s sites were imputed for %s samples." % (len(imputed_sites_ids), number_of_samples))
+        logging.info("%s sites with score > %s were not imputed due to missing SNPs." % (len(relevant_sites_indices) - len(imputed_sites_ids), min_score))
+        self.imputed_sites_names = self.sites_name_per_id[imputed_sites_ids]
+        self.site_imputation = site_imputation
         
     def get_relevant_plink_snp_list(self, plink_snps_data):
         """
@@ -155,8 +155,8 @@ class Predictor(Module):
             the line is a string above [0,1,2] which represent number of occurences of this snp for each sample 
             (number of occurences of snp i in sample j is the value in line i in the j'th index)
 
-        if there are too many missing values in snp X: ignore this snp for all samples, and dont use it to predict site methylation level
-        otherwise, replace it's missing values with the mean of the snp (predict it's missing values by average over all other samples number of occurences)
+        if there are too many missing values in snp X: ignore this snp for all samples, and dont use it to impute site methylation level
+        otherwise, replace it's missing values with the mean of the snp (impute it's missing values by average over all other samples number of occurences)
 
         Note that we dont handle sample with too many missing values - it's the user responsibility to do quality control and remove samples with many missing values 
         (to enable this feature bring back all the comments saying "missing samples handling")
@@ -194,12 +194,12 @@ class Predictor(Module):
                 na_count = len(na_indices)
                 na_percentage = float(na_count) / number_of_samples
                 if na_percentage > min_missing_values:
-                    # too many missing values in this snp: ignore this snp for all samples, and dont use it to predict site methylation level
+                    # too many missing values in this snp: ignore this snp for all samples, and dont use it to impute site methylation level
                     snp_indices[next_index] = -1 # mark as not relevant
                     snps_missing_values_counter += 1
                 else:
                     if na_count != 0 :
-                        # "predict" snp occurences  - relate the mean of non-missing samples in this snp
+                        # impute snp occurences  - relate the mean of non-missing samples in this snp
                         non_na_indices = delete(range(len(snp_occurrences)), na_indices)
                         snp_occurrences[na_indices] = mean(snp_occurrences[non_na_indices])
 
@@ -226,20 +226,20 @@ class Predictor(Module):
         return relevant_snp_occurrences, relevant_snps_indices#, missing_sampels_indices, non_missing_sampels_indices #missing samples handling
 
 
-    def predict_site(self, number_of_samples, site_snps_ids, snps_coeffs, relevant_snps_ids, relevant_snp_occurrences):
+    def impute_site(self, number_of_samples, site_snps_ids, snps_coeffs, relevant_snps_ids, relevant_snp_occurrences):
         """
         site_snps_ids - the ids of all snps that are the site predictors
         snps_coeffs - an array such that snps_coeffs[i] is the coefficient of the snp which id is site_snps_ids[i]
-        relevant_snps_ids - list of the relevant snps for prediction (we don't predict using 
+        relevant_snps_ids - list of the relevant snps for imputation (we don't impute using 
                             every snp, for wxample we ignore snps which alleles are A and T)
         relevant_snp_occurrences - an array of arrays , size aXb where a is number of relevant snps and b is number of samples.
                                     relevant_snp_occurrences[i][j] is number of alleles of 
                                     snp id ID such that relevant_snps_indices_per_id[ID] = i  in sample j.
 
-        predict each site with the following model:
+        impute each site with the following model:
 
         Assume we have a methylation site m with two predictors s1, s2 and assume that their reference alleles are G, C and coefficients c1, c2,
-        respectively. Given the genotypes of an individual i in SNPs s1,s2  (denote s1_i,s2_i), we predict m_i, the methylation level of 
+        respectively. Given the genotypes of an individual i in SNPs s1,s2  (denote s1_i,s2_i), we impute m_i, the methylation level of 
         individual i in meth site m, as follows:
         m_i_predicted = c1*(number of 'G' alleles in s1_i) + c2*(number of 'C' alleles in s2_i)
         """
@@ -247,44 +247,44 @@ class Predictor(Module):
         for index, snp_id in enumerate(relevant_snps_ids):
             snp_index_per_id[snp_id] = index
 
-        site_prediction = zeros(number_of_samples)
+        site_imputation = zeros(number_of_samples)
 
         for i,snp_id in enumerate(site_snps_ids):
             if snp_id in relevant_snps_ids:
-                site_prediction += snps_coeffs[i] * relevant_snp_occurrences[snp_index_per_id[snp_id]]
+                site_imputation += snps_coeffs[i] * relevant_snp_occurrences[snp_index_per_id[snp_id]]
 
-        return site_prediction
+        return site_imputation
 
 
-    def predict_sites(self, number_of_samples, relevant_snps_names, relevant_snp_occurrences, relevant_sites_indices):
+    def impute_sites(self, number_of_samples, relevant_snps_names, relevant_snp_occurrences, relevant_sites_indices):
 
         """
-        predict each site that we have  at least informations about one of the sites predicting snps
-        if we have no snp to predict with - dont predict the site
+        impute each site that we have  at least informations about one of the sites imputing snps
+        if we have no snp to impute with - dont impute the site
 
         number_of_samples - (int) number of samples (n)
-        relevant_snps_names - an array of names of the relevant snps for sites prediction (we don't predict using 
+        relevant_snps_names - an array of names of the relevant snps for sites imputation (we don't impute using 
                               every snp, for example we ignore snps which alleles are A and T).
                               array of size s - number of relevant snps
                               relevant_snps_names[i] is the name of the ith snp ("rsXXX..")
-        relevant_snp_occurrences - array of size sXn where s is the number of snps that are relevant for this site prediction
+        relevant_snp_occurrences - array of size sXn where s is the number of snps that are relevant for this site imputation
                                     and  n is number of samples.
                                     relevant_snp_occurrences[i][j] is the number of occurences of the i-th snp in sample j.
-        relevant_sites_indices - a list (array) of the indices of the sites that we will predict now. array of size m - number of sites
+        relevant_sites_indices - a list (array) of the indices of the sites that we will impute now. array of size m - number of sites
 
         return:
-            matrix of size mXn (m- number of predicted sites, n- number of samples) of the prediction
-            predicted_sites_ids - list of the predicted sited ids
+            matrix of size mXn (m- number of imputed sites, n- number of samples) of the imputation
+            imputed_sites_ids - list of the imputed sited ids
 
         """
         
         relevant_snps_ids = [self.snps_id_per_name[name] for name in relevant_snps_names]
         relevant_snps_ids_set = set(relevant_snps_ids)
 
-        # iterate over each site and predict its value
+        # iterate over each site and impute its value
         next_index = 0
-        sites_predictions = []
-        predicted_sites_ids = []
+        sites_imputations = []
+        imputed_sites_ids = []
 
         with open(self.site_snps_list_file, 'r') as f:
             # iterate over only relevant sites
@@ -293,23 +293,23 @@ class Predictor(Module):
                 if (next_index < len(relevant_sites_indices)) and (i == relevant_sites_indices[next_index]):
                     site_snps_ids = [int(sid) for sid in site_snps.split('\t')[:-1]]
                     
-                    # if we have information about at least one of the sites predicting snps
+                    # if we have information about at least one of the sites imputing snps
                     if len(set(site_snps_ids).difference(relevant_snps_ids_set)) < len(site_snps_ids):
-                        site_prediction = self.predict_site(number_of_samples, site_snps_ids, self.sites_snps_coeff[i], relevant_snps_ids, relevant_snp_occurrences)
-                        sites_predictions.append(site_prediction)
-                        predicted_sites_ids.append(i)
+                        site_imputation = self.impute_site(number_of_samples, site_snps_ids, self.sites_snps_coeff[i], relevant_snps_ids, relevant_snp_occurrences)
+                        sites_imputations.append(site_imputation)
+                        imputed_sites_ids.append(i)
 
                     next_index += 1
 
         f.close()
 
-        if len(sites_predictions) == 0:
+        if len(sites_imputations) == 0:
             return [], []
-        return vstack(tuple(sites_predictions)), predicted_sites_ids
+        return vstack(tuple(sites_imputations)), imputed_sites_ids
 
 
     def meth_data(self):
-        return MethylationData(self.site_prediction, self.predicted_samples, self.predicted_sites_names)
+        return MethylationData(self.site_imputation, self.imputed_samples, self.imputed_sites_names)
         
 
 

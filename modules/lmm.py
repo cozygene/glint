@@ -157,7 +157,7 @@ class LMM(Module):
             covars = tools.standardize(covars, axis = 0)
         covars = np.concatenate((covars,np.ones((number_of_samples, 1))), axis=1)
         
-        logdelta = findLogDelta(self.U, self.s, pheno, covars, reml=(reml>0))
+        logdelta = findLogDelta(self.U, self.s, pheno, covars, reml=reml)
 
 
         sorted_cpgnames, sorted_cpg_indices, p_vals, beta_est, sigma_e_est, sigma_g_est, statistics = \

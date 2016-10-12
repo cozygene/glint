@@ -9,7 +9,7 @@ from utils import common
 from numpy import loadtxt
 from utils import GlintArgumentParser
 from parsers import ModuleParser, RefactorParser, EWASParser, \
-                    MethylationDataParser, PredictorParser, \
+                    MethylationDataParser, ImputingParser, \
                     EpistructureParser, LMMParser, PlotParser, HousemanParser  #dont remove this is imported in,,,
 
 LOGGER = configurelogging.ConfigureLogging()
@@ -99,7 +99,7 @@ class ModulesArgumentParsers(object):
         #modules in the order they'll appear on --help
         self.refactor_parser = RefactorParser(self.parser)
         self.ewas_parser = EWASParser(self.parser)
-        self.predictor_parser = PredictorParser(self.parser)
+        self.imputing_parser = ImputingParser(self.parser)
         self.epi_parser = EpistructureParser(self.parser)
         self.houseman_parser = HousemanParser(self.parser)
         self.plot_parser = PlotParser(self.parser)
@@ -113,10 +113,10 @@ class ModulesArgumentParsers(object):
         optional_args.extend(self.glint_parser.all_args)
 
 
-        # prediction runs without datafile
+        # imputation runs without datafile
         if self.args.impute:
-            self.predictor_parser.validate_args(self.args)
-            optional_args.extend(self.predictor_parser.all_args)
+            self.imputing_parser.validate_args(self.args)
+            optional_args.extend(self.imputing_parser.all_args)
 
             self.check_selected_args(optional_args)
             return self.args
@@ -200,7 +200,7 @@ class ModulesArgumentParsers(object):
 
     def run(self):
         if self.args.impute:
-            self.predictor_parser.run(args, output_perfix = self.args.out)
+            self.imputing_parser.run(args, output_perfix = self.args.out)
             return
 
         if (self.args.qqplot or args.manhattan) and not self.args.ewas: # if user asked to run plot without running EWAS test, run plot and quit

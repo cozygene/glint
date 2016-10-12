@@ -2,9 +2,9 @@ from numpy import array, delete, where, in1d
 
 """
 This script is not for glint users but for the SW developers.
-It does the preprocessing for prediction of methylation level by SNPs.
+It does the preprocessing for imputation of methylation level by SNPs.
 
-This script parsers the "model"* file, i.e. the file with the coefficients for making methylation predictions from SNPs.
+This script parsers the "model"* file, i.e. the file with the coefficients for making methylation imputations from SNPs.
 The file is "heavy" and it takes time to read and parse it. So this preprocessing-script does the "hard work",
 extracts and saves the relevant information in a way that it will be efficient to get it on "real time".
 
@@ -12,7 +12,7 @@ The output files of the deleted scripts are
     - "sites_ids_list" a list of cpgs (that can be explained by SNPs), which describes the cpgs IDs: the id of the cpg name at line number i is i.
     - "snps_ids_list"  a list of SNPs descibing their ids:  the id of the SNP at line number i is i.
     - "site_snps_list" which describe for each site the snps that "explain" it. the numbers in the i'th line are the ids of the snps descibe the site which id is i.
-    - "sites_scores_list" the score at the i'th line is the predictions correlation of i'th site (site which id is i)
+    - "sites_scores_list" the score at the i'th line is the imputations correlation of i'th site (site which id is i)
     - "sites_snps_coeff_list" the numbers at the i'th line are the coefficients of the snps which "explain" the i'th site. the j'th number is the coefficient of the j'th snp at the i'th i in the file "site_snps_list"
 
 Note: I decided to save lists and not pickles after comparing the runtime of loading both of them. 
@@ -24,10 +24,10 @@ This script should be executed once, in cases when:
 
 * in this case the "model" file name was KORA_model_multiple_snps_W_50_M_10.
  The structure of the file, culumn by column: 
-  cpg id, chromosome num, score (prediction correlation), lasso's lambda, number of predicting SNPs (an integer in the range 1-10),
-  the position in basepairs of the predicting SNPs (the average across the predicting SNPs).
-  The following columns are triplets, each describing one of the the predicting SNPs of the current cpg. 
-  For each predicting SNP we have 3 values: "rs" id (the identifier of the SNP - note that it doesn't always start with "rs"),
+  cpg id, chromosome num, score (imputation correlation), lasso's lambda, number of imputing SNPs (an integer in the range 1-10),
+  the position in basepairs of the imputing SNPs (the average across the imputing SNPs).
+  The following columns are triplets, each describing one of the the imputing SNPs of the current cpg. 
+  For each imputing SNP we have 3 values: "rs" id (the identifier of the SNP - note that it doesn't always start with "rs"),
   reference allele, coefficient.
 """
 # the path to the model file which will be preproccesed 
@@ -36,8 +36,8 @@ KORA_MODEL_FILE_PATH =  "enter the path here" #KORA_model_multiple_snps_W_50_M_1
  # path to the list artifacts sites
 BAD_PROBES_FILE_PATH = "parsers/assets/polymorphic_cpgs.txt"
 SITE_ID_INDEX = 0
-PREDICTION_CORRELATION_SCORE_INDEX = 2
-NUMBER_OF_PREDICTIONG_SNPS_INDEX = 4
+IMPUTATION_CORRELATION_SCORE_INDEX = 2
+NUMBER_OF_IMPUTATING_SNPS_INDEX = 4
 FIRST_SNP_INDEX = 6
 
 data = file(KORA_MODEL_FILE_PATH, 'r').read()
@@ -65,8 +65,8 @@ print "Parsing data... this gonna take some time..."
 for site in keep_sites:
     site_info = site.split('\t')
     site_id = site_info[SITE_ID_INDEX]
-    site_score = site_info[PREDICTION_CORRELATION_SCORE_INDEX]
-    number_of_predictors = int(site_info[NUMBER_OF_PREDICTIONG_SNPS_INDEX])
+    site_score = site_info[IMPUTATION_CORRELATION_SCORE_INDEX]
+    number_of_predictors = int(site_info[NUMBER_OF_IMPUTATING_SNPS_INDEX])
     current_site_snps_list = []
     current_site_coeffs_list = []
     for i in range(number_of_predictors):
