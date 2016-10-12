@@ -60,12 +60,13 @@ The script automatically installs missing dependencies that are required for GLI
 1. Make sure you have Anaconda isntalled, see Download and installation for more details.  
   If you dont have Anaconda installed and running ```python install.py``` failed, than the easy solution is to install Anaconda. Otherwise, search on the web how to install each dependency in the list appears in Dependencies.
 2. Make sure you run GLINT with Anaconda Python command line, to find it:  
-  **Windows** todo  
-  **Linux** run on command line: ```which conda```.    
+  **Windows**: todo    
+4. try to run glint again
+  **Linux**: run on command line: ```which conda```.    
     If that command returns nothing than you dont have Anaconda installed, refer to Download and Installation.
-    Otherwise, if for example the output of the command is /home/user/anaconda2/bin/conda than Anaconda Python command line is at /home/user/anaconda2/bin/python.  
+    Otherwise, if for example the output of the command is /home/user/anaconda2/bin/conda than Anaconda Python command line is at /home/user/anaconda2/bin/python. Now try to run ```/home/user/anaconda2/bin/python glint.py ...```
   **MacOs** todo
-3. Make sure you have all dependencies installed. If you have Anaconda installed, than all the dependencies are installed automatically except *cvxopt*. To install it see Dependencies.
+3. Make sure you have all dependencies installed. If you have Anaconda installed, than all the dependencies are installed automatically except *cvxopt*. To install it see Dependencies. If the installation fails, search online: "how to install cvxopt with anaconda on [one of Windows/Linux/MacOS]"
  
 ### Citing GLINT
 elior..todo
