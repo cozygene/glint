@@ -4,7 +4,7 @@ import argparse
 import logging
 from utils import common, plot, pca
 from module_parser import ModuleParser
-from modules import ewas, kit
+from modules import ewas
 from parsers import MethylationDataParser
 
 QQ_PLOT_SUFFIX = ".glint.qqplot"
