@@ -1,7 +1,7 @@
 import logging
 import cvxopt
 from utils import common
-from numpy import loadtxt, zeros, matrix, array, savetxt, column_stack, vstack
+from numpy import loadtxt, zeros, matrix, array, savetxt, column_stack, vstack, double
 from module import  Module
 
 
@@ -47,8 +47,8 @@ class Houseman(Module):
         ref_data_final = ref_data[keep,:]
 
         n = len(self.meth_data.data[0])
-        m_cvxopt = cvxopt.matrix(ref_data_final)
-        o_cvxopt = cvxopt.matrix(self.meth_data.data)
+        m_cvxopt = cvxopt.matrix(ref_data_final.astype(double)) #CVX only accepts doubles, not floats
+        o_cvxopt = cvxopt.matrix(self.meth_data.data.astype(double))
         m, k = m_cvxopt.size
         R_est = zeros((n, k)) 
         for i in range(n): 

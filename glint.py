@@ -233,8 +233,13 @@ class ModulesArgumentParsers(object):
                                     output_perfix = self.args.out)
             if self.args.gsave:
                 logging.info("Adding the Houseman estimates to the covariates of the data.")
-            self.meth_parser.module.add_covar_datas(self.houseman_parser.module.components,     \
+            houseman_comp_names = self.meth_parser.module.add_covar_datas(self.houseman_parser.module.components,     \
                                                     covarsnames = self.houseman_parser.module.names) # add houseman components as covariate file
+            # add houseman components to the list of covariates to use:
+            if self.args.covar is not None:
+                self.args.covar.append(houseman_comp_names)
+            else:
+                self.args.covar = houseman_comp_names
         
         # ewas tests must be called after refactor
         ewas_results = None

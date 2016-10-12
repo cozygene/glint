@@ -1,3 +1,4 @@
+import validate_dependencies
 from configuration import configurelogging
 import logging
 configurelogging.ConfigureLogging(loglevel = logging.DEBUG)
