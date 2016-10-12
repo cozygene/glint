@@ -11,10 +11,10 @@ For more details see "Documentation"
 1. Download the latest release from <a href="put the link here todo" target="_blank"> todo!edit this!here</a>.
 2. Install <a href="https://www.continuum.io/downloads" target="_blank">Anaconda Python version 2.7</a> which includes most of our dependencies.  
     - If you already have Python2.7 and don't want to install Anaconda, please see "Dependencies".
-3. Install *cvxopt* using Anaconda:  
-    **Windows** run ```todo```
-    **Linux** run ```sudo `which conda` install -c anaconda cvxopt```
-    **MacOS** run ```todo```
+3. Install *cvxopt* using Anaconda:   
+    on **Windows** run ```todo```  
+    on **Linux** run ```sudo `which conda` install -c anaconda cvxopt```  
+    on **MacOS** run ```todo```  
     
 For more details see "Dependencies".  
   
@@ -54,15 +54,15 @@ python install.py
 ```
 The script automatically installs missing dependencies that are required for GLINT. Note that in some environments the script may fail to install some of the dependencies, in which case you will need to manually install them or  <a href="https://www.continuum.io/downloads" target="_blank">Anaconda</a>.
 
-Note that GLINT firt checkes that all it's dependencies are installed before executing. If it finds a problem it will instruct you.
+*Note* that GLINT first validates that all it's dependencies are installed before executing. If it finds a problem it will instruct you.
 
 ### Troubleshooting
-1. Make sure you run GLINT with Anaconda Python command line, to find it:
-  **Windows**
-  **Linux** run on command line: ```which conda```.  
+1. Make sure you run GLINT with Anaconda Python command line, to find it:  
+  **Windows** todo  
+  **Linux** run on command line: ```which conda```.    
     If that command returns nothing than you dont have Anaconda installed, refer to Download and Installation.
-    Otherwise, if for example the output of the command is /home/user/anaconda2/bin/conda than Anaconda Python command line is at /home/user/anaconda2/bin/python.
-  **MacOs**
+    Otherwise, if for example the output of the command is /home/user/anaconda2/bin/conda than Anaconda Python command line is at /home/user/anaconda2/bin/python.  
+  **MacOs** todo
 2. Make sure you have all dependencies installed.If you installed Anaconda, than all the dependencies are installed automatically except *cvxopt*. To install it see Dependencies
    If you dont have Anaconda installed and running ```python install.py``` failed, than the easy solution is to install Anaconda. Otherwise, search on the web how to install each dependency in the list appears in Dependencies.
 
