@@ -178,13 +178,13 @@ will use the ReFACTor algorithm for constructing the kinship matrix (where 6 is 
 
 
 
-**--reml**
+**--ml**
 
-Allows to indicate whether rstricted maximum likelihood estimation (REML) or maximum likelihood estimation (ML) should be used. The default value is 1 (REML). Alternatively, ML can be selected usign the value 0.
+Allows to indicate whether rstricted maximum likelihood estimation (REML) or maximum likelihood estimation (ML) should be used. If this flag is supplied than ML is used, otherwise REML is used (default).
 
 For example::
 
-	python glint.py --datafile datafile.glint --ewas --lmm --pheno y1 --kinship kinship.txt --reml 0
+	python glint.py --datafile datafile.glint --ewas --lmm --pheno y1 --kinship kinship.txt --ml
 
 will perform EWAS on the data using LMM with ML estimation.
 

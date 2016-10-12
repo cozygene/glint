@@ -49,12 +49,13 @@ class LMMParser(ModuleParser):
             return val
         lmm_parser.add_argument('--kinship', type = kinship_value, required = True, help = "The way to generate kinship matrix. Options are %s. if \"refactor\" is selected than refactor flags need to be supplied (more info under \"refactor\" section). " % str(lmm.AVAILABLE_KINSHIPS))
         
-        def reml_value(val):
-            val = int(val)
-            if val != 0 and val != 1:
-                common.terminate("reml must be 0 or 1")
-            return val
-        lmm_parser.add_argument('--reml', type=reml_value, default=1, help='type 1 to use REML (restricted maximum likelihood) or 0 to use ML. Default is 1 (REML)')
+        # def reml_value(val):
+        #     val = int(val)
+        #     if val != 0 and val != 1:
+        #         common.terminate("reml must be 0 or 1")
+        #     return val
+        # lmm_parser.add_argument('--reml', type=reml_value, default=1, help='type 1 to use REML (restricted maximum likelihood) or 0 to use ML. Default is 1 (REML)')
+        lmm_parser.add_argument('--re', action='store_true', help='Supply this flag in order to use ML. Defualt (if this flag is not supplied) is REML (restricted maximum likelihood) ')
         lmm_parser.add_argument('--norm', action='store_true', help='Supply this flag in order to normalize covariates matrix (if this flag is not supplied the matrix is not normalized)')
         lmm_parser.add_argument('--oneld', action='store_true', help='Select this in order to fit log delta once under the null for all sites (by default log delta is generated seperatly for each site)')
         # def pc_num_value(val):
@@ -128,7 +129,7 @@ class LMMParser(ModuleParser):
 
               for i in range(meth_data.sites_size):
                 data_site_i = data[:,i].reshape((-1,1)) # n samples by 1 site
-                res = module.run(data_site_i, pheno, covars, [meth_data.cpgnames[i]], args.norm, args.reml)
+                res = module.run(data_site_i, pheno, covars, [meth_data.cpgnames[i]], args.norm, not args.re)
                 cpgname, pvalue, intercept_beta, covariates_beta, site_beta, sigma_e, sigma_g, statistic = res
                 
                 cpgnames.append(cpgname[0])
@@ -143,7 +144,7 @@ class LMMParser(ModuleParser):
             else: # run lmm on all data - logdelta is calculated once.
               #run lmm
               logging.info("Computing log delta...")
-              lmm_results = module.run(data, pheno, covars, meth_data.cpgnames, args.norm, args.reml)
+              lmm_results = module.run(data, pheno, covars, meth_data.cpgnames, args.norm, not args.re)
               cpgnames, pvalues, intercepts_betas, covars_betas, sites_betas, sigmas_e, sigmas_g, stats =  lmm_results
             
 
