@@ -22,6 +22,7 @@ class Houseman(Module):
 
         self.components = self.houseman(ref_data, ref_ids)
         self.save(outputfile)
+        self.outputfile = outputfile
 
     def houseman(self, ref_data, ref_ids):
         """

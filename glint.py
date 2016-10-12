@@ -219,6 +219,9 @@ class ModulesArgumentParsers(object):
             if self.args.gsave:
                 logging.info("Adding the ReFACTor componetns to the covariates of the data...")
             refactor_comp_names = self.meth_parser.module.add_covar_datas(self.refactor_parser.module.components, "rc") # add refactor components as covariate file
+
+            if not self.args.gsave:
+                logging.info("To use ReFACTor componetns as covariates run glint.py with --covarfile %s" % self.refactor_parser.module.components_output_filename)
             
             # add refactor components to the list of covariates to use:
             if self.args.covar is not None:
@@ -235,6 +238,9 @@ class ModulesArgumentParsers(object):
                 logging.info("Adding the Houseman estimates to the covariates of the data.")
             houseman_comp_names = self.meth_parser.module.add_covar_datas(self.houseman_parser.module.components,     \
                                                     covarsnames = self.houseman_parser.module.names) # add houseman components as covariate file
+            if not self.args.gsave:
+                logging.info("To use Houseman estimates as covariates run glint.py with --covarfile %s" % self.houseman_parser.module.outputfile)
+
             # add houseman components to the list of covariates to use:
             if self.args.covar is not None:
                 self.args.covar.append(houseman_comp_names)
