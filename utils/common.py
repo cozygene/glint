@@ -87,7 +87,7 @@ def load_float_data_and_headers(filepath, delimiter='\t', dtype = float32, na_va
         
     except Exception as e:
         logging.exception("While loading data")
-        terminate("File contains non float values.") 
+        terminate("Error with the format of the file. It's possible the file contains non float values or it's not space/tab-delimited.") 
 
     # convert to array
     if col_names is not None:

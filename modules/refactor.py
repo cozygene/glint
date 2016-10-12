@@ -52,6 +52,7 @@ class Refactor(Module):
         self.bad_probes =                 bad_probes_list
         self.ranked_output_filename =     ranked_output_filename
         self.components_output_filename = components_output_filename
+        logging.info("ReFACTor's arguments: k=%s, t=%s, num of components=%s, minimal std=%s" %(self.k, self.t, self.num_components, self.minstd))
 
     def _validate_fs(self, feature_selection):
         if feature_selection not in self.FEATURE_SELECTION:
@@ -159,7 +160,8 @@ class Refactor(Module):
         the normal feature selection does not change the data
         Note: function name must be of the format FEATURE_FUNC_NAME_FORMAT
         """
-        pass
+        logging.info("Using 'normal' feature selection") # does nothing..
+
     
     
     def _phenotype_feature_handler(self, meth_data):
@@ -167,7 +169,7 @@ class Refactor(Module):
         regress out the phenotype
         Note: function name must be of the format FEATURE_FUNC_NAME_FORMAT
         """
-        logging.info("Running 'phenotype' feature selection...")
+        logging.info("Using 'phenotype' feature selection...")
         phenotype = meth_data.get_phenotype_subset(self.use_phenos)
         if phenotype.ndim == 2 and phenotype.shape[1] > 1:
             logging.warning("'phenotype' feature selection was used with more than one phenotype.")
@@ -181,7 +183,7 @@ class Refactor(Module):
         keep only the controls samples in the data
         Note: function name must be of the format FEATURE_FUNC_NAME_FORMAT
         """
-        logging.info("Running 'controls' feature selection...")
+        logging.info("Using 'controls' feature selection...")
         
         phenotype = meth_data.get_phenotype_subset(self.use_phenos)
 
@@ -204,7 +206,7 @@ class Refactor(Module):
             logging.info("Regressing out covariates...")
             fs_meth_data.regress_out(covars)
         else:
-            logging.info("Ignoring covariates...")
+            logging.info("ReFACTor ignores covariates")
 
         a = time.time()
         ranked_list = self._calc_low_rank_approx_distances(fs_meth_data) # returns array of the indexes in a sorted order
