@@ -23,30 +23,9 @@ GLINT_OBLIGATORY_DEPENDENCIES_NO_CONDA = ['cvxopt'] # TODO move to configuration
 INSTALL_WINDODWS = {'cvxopt':"conda install -c omnia cvxop"}
 INSTALL_LINUX = {'cvxopt': "sudo `which conda` install -c anaconda cvxopt"} #conda install -c anaconda cvxopt=1.1.8
 
-ERROR_MSG = "Something is wrong with GLINT dependencies, please follow the README at https://github.com/cozygene/glint"
-
-PYTHONPATH_EXPLAIN = \
-"""
-Something is wrong with the environment. This probably happened since you had python installed on your pc before you installed anaconda.
-All you need to do is add the Anaconda path to your environment variables. Follow these steps:
-
-1. find the path where Anaconda was installed. One way to do that is to press "Start" (win-key) and search for "conda",
-   when you find it, dont open it but right click on it -> "properties" and there you can see the path.
-   For this example, lets assume you found it at "C:\Users\me\Anaconda".
-
-2. look for "site-packages"  folder insite Anaconda folder you found (you can use the "search" box in the explorer)
-    For this example, lets assume you found it at "C:\Users\me\Anaconda\Lib\site-packages"
-
-3. add the full "site-packages" path to system variables:
-    3.1 go to My Computer > Properties > Advanced System Settings > Environment Variables 
-    3.2 edit PYTHONPATH variable: insert the "site-packages" path at the begining
-        for this example, lets assume PYTHONPATH is now "C:\Python27\Lib;C:\Python27\DLLs;"
-        change it to "C:\Users\me\Anaconda\Lib\site-packages;C:\Python27\Lib;C:\Python27\DLLs;"
-4. try to run glint again
-"""
 DEPENDENCIES_EXPLANATION = "\nsome dependencies are missing.\nto install either run\n\tpython install.py\nor install anaconda from https://www.continuum.io/downloads.\ndependencies are: %s\nplease contact us on failure"
-INSTALL_ANACONDA = "\nSome dependencies are missing.\nTo install them please install Anaconda Pythn from https://www.continuum.io/downloads.\ndependencies are: %s\nplease contact us on failure\nFor more information see the README at https://github.com/cozygene/glint" 
-RUN_INSTALL_SCRIPT = "please run install.py"
+INSTALL_ANACONDA = "Some dependencies are missing"
+TROUBLESHOOT = "Please follow the instructions at https://github.com/cozygene/glint/blob/master/README.md#troubleshooting"
 
 def import_dependencies(dependencies_list):
     for module_name in dependencies_list:
@@ -54,14 +33,14 @@ def import_dependencies(dependencies_list):
     
 def install_without_anaconda():
     if sys.platform.startswith("win") or "nt" in os.name: # you run windows, we dont know to install dependencie sthere
-        print INSTALL_ANACONDA
+        print INSTALL_ANACONDA, TROUBLESHOOT
         sys.exit()
     elif sys.platform.startswith("lin") or "posix" in os.name: # you run linux
         # install dependencis that are not installed
         not_installed = check_dependencies(GLINT_OBLIGATORY_DEPENDENCIES_NO_CONDA + GLINT_OBLIGATORY_DEPENDENCIES_WITH_CONDA)
         if not_installed == []: # we succeeded to install all dependencies
             return True
-        print INSTALL_ANACONDA
+        print INSTALL_ANACONDA, TROUBLESHOOT
         sys.exit()
 
 def install_packages_with_conda(dependencies_list):
@@ -73,7 +52,12 @@ def install_packages_with_conda(dependencies_list):
     
     for pkg in dependencies_list:
         if pkg in install_instructions:
-            res = subprocess.check_output(install_instructions[pkg], shell=True, stderr = subprocess.STDOUT)
+            try:
+                res = subprocess.check_output(install_instructions[pkg], shell=True, stderr = subprocess.STDOUT)
+            except Exception as e:
+                print e
+                print "Could not install cvxopt", TROUBLESHOOT
+                sys.exit()
             try:
                 import_dependencies([pkg])
             except:
@@ -102,20 +86,30 @@ def add_anaconda_to_path_win(path):
     """
 
     # if anaconda was found, try to add it to path and import dependencies
-    
-    success = False
-    if os.path.exists(os.path.join(path,"Lib","site-packages")):
-        module_dir = os.path.join(path,"Lib","site-packages")
-        try:
-            sys.path.insert(0, module_dir) # add to PYTHONPATH 
-            import_dependencies()
-            success = True
-        except:
-            del sys.path[0]
+    anaconda_python = os.path.join(path,"python")
+    print "\nYou have Anaconda installed but you are not running it's command, you need to run:\n\n%s %s" %(anaconda_python, " ".join(sys.argv))
+    sys.exit()
+    # success = False
+    # if os.path.exists(os.path.join(path,"Lib","site-packages")):
+        # module_dir = os.path.join(path,"Lib","site-packages")
+        # sys.path.insert(0, r"C:\Users\me\Anaconda2\Lib\site-packages\statsmodels\base") # add to PYTHONPATH 
 
-    # if we couldn't add Anaconda to PATH, tell the user how to do it
-    if not success:
-        print PYTHONPATH_EXPLAIN
+        # try:
+            # import_dependencies(GLINT_OBLIGATORY_DEPENDENCIES_NO_CONDA)
+        # except:
+			# print "Some dependencies are missing, trying to install them..."
+			# success = install_packages_with_conda(GLINT_OBLIGATORY_DEPENDENCIES_NO_CONDA)
+			# if not success:
+				# print ERROR_MSG, TROUBLESHOOT
+				# sys.exit()
+			
+        # try:
+            # import_dependencies(GLINT_OBLIGATORY_DEPENDENCIES_WITH_CONDA)
+            # success = True
+        # except:
+            # del sys.path[0]
+            # print "Some dependencies are missing,", TROUBLESHOOT
+            # sys.exit()
 
 def run_me_with_anaconda():
     if sys.platform.startswith("win") or "nt" in os.name: # you run windows
@@ -139,17 +133,19 @@ conda_path = spawn.find_executable("conda") # "conda" is the command line instal
 if not conda_path:
     install_without_anaconda()
 
+#from now code assumes anaconda is installes
+		
 # see if we are running anaconda python
 anaconda_dir = os.path.dirname(conda_path).lower()
-if anaconda_dir in sys.executable.lower():
+
+if anaconda_dir in sys.executable.lower() or os.path.dirname(anaconda_dir) in sys.executable.lower():
     print "You are now running Anaconda Python"
     try:
         for pkg in GLINT_OBLIGATORY_DEPENDENCIES_WITH_CONDA:
             import_dependencies([pkg])
     except:
         # something is wrong since we are missing dependencies that included in anaconda
-        print ERROR_MSG
-        print pkg
+        print "There is a problem with the dependency %s," % pkg , TROUBLESHOOT
         sys.exit()
 
     try:
@@ -158,8 +154,9 @@ if anaconda_dir in sys.executable.lower():
         print "Some dependencies are missing, trying to install them..."
         success = install_packages_with_conda(GLINT_OBLIGATORY_DEPENDENCIES_NO_CONDA)
         if not success:
-            print ERROR_MSG
+            print ERROR_MSG, TROUBLESHOOT
             sys.exit()
+			
 else: 
     # we are not running anaconda python - execute it
     run_me_with_anaconda()
