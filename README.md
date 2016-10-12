@@ -62,13 +62,13 @@ The script automatically installs missing dependencies that are required for GLI
   If you dont have Anaconda installed and running ```python install.py``` failed, than the easy solution is to install Anaconda. Otherwise, search on the web how to install each dependency in the list appears in Dependencies.
 2. Make sure you run GLINT with Anaconda Python command line:  
   **Windows**:  
-    -. Find the path to python command line tool: press "Start" (win-key) and search for "conda". When you find it, dont open it but right click on it -> "properties" and there you can see the path under "Location".
+    a. Find the path to python command line tool: press "Start" (win-key) and search for "conda". When you find it, dont open it but right click on it -> "properties" and there you can see the path under "Location".
    For this example, lets assume you found it at "C:\Users\me\Anaconda2\Scripts" so Anaconda Python supposed to be at C:\Users\me\Anaconda2\python  
-    -. Run GLINT with that path: run ```C:\Users\me\Anaconda2\python glint.py...```  
+    b. Run GLINT with that path: run ```C:\Users\me\Anaconda2\python glint.py...```  
   
   **Linux**: 
-    -. Find the path to python command line tool: run on command line: ```which conda```. If that command returns nothing than you don't have Anaconda installed, refer to Download and Installation. Otherwise, if for example the output of the command is /home/user/anaconda2/bin/conda than Anaconda Python command line is at /home/user/anaconda2/bin/python.
-    -. run GLINT with that path: run ```/home/user/anaconda2/bin/python glint.py ...```  
+    a. Find the path to python command line tool: run on command line: ```which conda```. If that command returns nothing than you don't have Anaconda installed, refer to Download and Installation. Otherwise, if for example the output of the command is /home/user/anaconda2/bin/conda than Anaconda Python command line is at /home/user/anaconda2/bin/python.  
+    b. run GLINT with that path: run ```/home/user/anaconda2/bin/python glint.py ...```  
   
   **MacOs** todo
 3. Make sure you have all dependencies installed. If you have Anaconda installed, than all the dependencies are installed automatically except *cvxopt*. To install it see Dependencies. If the installation fails, search online: "how to install cvxopt with anaconda on [one of Windows/Linux/MacOS]"
