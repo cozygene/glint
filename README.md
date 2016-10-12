@@ -64,7 +64,7 @@ The script automatically installs missing dependencies that are required for GLI
   **Windows**:  
     - find the path to python command line tool: press "Start" (win-key) and search for "conda". When you find it, dont open it but right click on it -> "properties" and there you can see the path under "Location".
    For this example, lets assume you found it at "C:\Users\me\Anaconda2\Scripts" so Anaconda Python supposed to be at C:\Users\me\Anaconda2\python  
-    - run GLINT with that path: run ```C:\Users\me\Anaconda2\python glint.py...```  
+    - run GLINT with that path: run ```C:\Users\me\Anaconda2\python glint.py...```
     **Linux**: 
     - find the path to python command line tool: run on command line: ```which conda```. If that command returns nothing than you don't have Anaconda installed, refer to Download and Installation. Otherwise, if for example the output of the command is /home/user/anaconda2/bin/conda than Anaconda Python command line is at /home/user/anaconda2/bin/python.
     - run GLINT with that path: run ```/home/user/anaconda2/bin/python glint.py ...```
