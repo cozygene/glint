@@ -1,7 +1,7 @@
 import sys
 import os
 from distutils import spawn
-from install import check_dependencies
+from install import check_dependencies, color_print, FOREGROUND, BACKGROUND
 import subprocess
 
 """
@@ -33,35 +33,41 @@ def import_dependencies(dependencies_list):
     
 def install_without_anaconda():
     if sys.platform.startswith("win") or "nt" in os.name: # you run windows, we dont know to install dependencie sthere
-        print INSTALL_ANACONDA, TROUBLESHOOT
+        color_print(INSTALL_ANACONDA +" "+ TROUBLESHOOT, FOREGROUND.RED)
         sys.exit()
     elif sys.platform.startswith("lin") or "posix" in os.name: # you run linux
         # install dependencis that are not installed
         not_installed = check_dependencies(GLINT_OBLIGATORY_DEPENDENCIES_NO_CONDA + GLINT_OBLIGATORY_DEPENDENCIES_WITH_CONDA)
         if not_installed == []: # we succeeded to install all dependencies
+            print("Dependencies are installed")
             return True
-        print INSTALL_ANACONDA, TROUBLESHOOT
+        color_print(INSTALL_ANACONDA+" "+ TROUBLESHOOT, FOREGROUND.RED)
         sys.exit()
 
 def install_packages_with_conda(dependencies_list):
     install_instructions = dict()
     if sys.platform.startswith("win") or "nt" in os.name: # you run windows
         install_instructions = INSTALL_WINDODWS
-    elif sys.platform.startswith("lin") or "posix" in os.name: # you run linux
+    elif sys.platform.startswith("lin"): # you run linux
         install_instructions = INSTALL_LINUX
-    
+    elif sys.platform.startswith("darwin"): # you run linux
+        color_print("To install package '%s' please run:\n  %s" % (dependencies_list[0], INSTALL_LINUX[dependencies_list[0]]), FOREGROUND.RED)
+        sys.exit()
+
+    print("Trying to install dependencies...")
     for pkg in dependencies_list:
         if pkg in install_instructions:
             try:
                 res = subprocess.check_output(install_instructions[pkg], shell=True, stderr = subprocess.STDOUT)
             except Exception as e:
                 print e
-                print "Could not install cvxopt", TROUBLESHOOT
+                color_print("Could not install cvxopt, " + TROUBLESHOOT, FOREGROUND.RED)
                 sys.exit()
             try:
                 import_dependencies([pkg])
             except:
                 print "Could not install package %s" % pkg
+                color_print("To install package '%s' please run:\n  %s" % (pkg, install_instructions[pkg]), FOREGROUND.RED)
                 return False
         else:
             return False
@@ -87,7 +93,7 @@ def add_anaconda_to_path_win(path):
 
     # if anaconda was found, try to add it to path and import dependencies
     anaconda_python = os.path.join(path,"python")
-    print "\nYou have Anaconda installed but you are not running it's command, you need to run:\n\n%s %s" %(anaconda_python, " ".join(sys.argv))
+    color_print("\nYou have Anaconda installed but you are not running it's python, please run:\n\n%s %s" %(anaconda_python, " ".join(sys.argv)), FOREGROUND.RED)
     sys.exit()
     # success = False
     # if os.path.exists(os.path.join(path,"Lib","site-packages")):
@@ -119,12 +125,11 @@ def run_me_with_anaconda():
             last_path = path
             path = os.path.dirname(path)
         add_anaconda_to_path_win(path)
-    elif sys.platform.startswith("lin") or "posix" in os.name: # you run linux
+    elif "posix" in os.name: # you run linux/macos
         add_anaconda_to_path_lin(conda_path)
     else:
-        print "Please read the readme at https://github.com/cozygene/glint"
+        color_print("You have Anaconda installed but you are not running it's python "+ TROUBLESHOOT, FOREGROUND.RED)
         sys.exit()
-        # DEPENDENCIES_EXPLANATION % "\n\t".join(GLINT_OBLIGATORY_DEPENDENCIES)
 
 print "Validating all dependencies are installed..."
 # search if anaconda exist
@@ -132,6 +137,7 @@ conda_path = spawn.find_executable("conda") # "conda" is the command line instal
 # if anaconda wasnt found, tell the user to run installation script
 if not conda_path:
     install_without_anaconda()
+    sys.exit()
 
 #from now code assumes anaconda is installes
 		
@@ -145,16 +151,16 @@ if anaconda_dir in sys.executable.lower() or os.path.dirname(anaconda_dir) in sy
             import_dependencies([pkg])
     except:
         # something is wrong since we are missing dependencies that included in anaconda
-        print "There is a problem with the dependency %s," % pkg , TROUBLESHOOT
+        color_print("There was a problem with the dependency %s, " % pkg + TROUBLESHOOT, FOREGROUND.RED)
         sys.exit()
 
     try:
         import_dependencies(GLINT_OBLIGATORY_DEPENDENCIES_NO_CONDA)
     except:
-        print "Some dependencies are missing, trying to install them..."
+        print "Some dependencies are missing"
         success = install_packages_with_conda(GLINT_OBLIGATORY_DEPENDENCIES_NO_CONDA)
         if not success:
-            print ERROR_MSG, TROUBLESHOOT
+            color_print("Could not install dependencies, ", TROUBLESHOOT, FOREGROUND.RED)
             sys.exit()
 			
 else: 
