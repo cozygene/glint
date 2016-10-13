@@ -220,6 +220,14 @@ class ModulesArgumentParsers(object):
                 logging.info("Adding the ReFACTor componetns to the covariates of the data...")
             refactor_comp_names = self.meth_parser.module.add_covar_datas(self.refactor_parser.module.components, "rc") # add refactor components as covariate file
 
+            with open(self.refactor_parser.module.components_output_filename, 'r') as f:
+                data = f.read()
+            f.close()
+            
+            with open(self.refactor_parser.module.components_output_filename, 'w') as f:
+                f.write(" ".join(["ID"]+refactor_comp_names) + "\n"+ data)
+            f.close()
+
             if not self.args.gsave:
                 logging.info("To use ReFACTor componetns as covariates run glint.py with --covarfile %s" % self.refactor_parser.module.components_output_filename)
             
