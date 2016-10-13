@@ -11,7 +11,7 @@ For more details about GLINT see the <a href="blank" target="_blank">documentati
     - If you already have Python 2.7 and do not want to install Anaconda please see "Dependencies" bellow.
 3. Install the *cvxopt* package for Python using Anaconda:   
     **Windows** run ```conda install -c omnia cvxop```  
-    **Linux and MacOS** run ```sudo `which conda` install -c anaconda cvxopt```   
+    **Linux or MacOS** run ```sudo `which conda` install -c anaconda cvxopt```   
     
 ### Documentation and a quick start tutorial
 A detailed documentation of glint can be found <a href="todo add link to docs" target="_blank">here</a>. In addition, we provide a <a href="todo add link to tutorial" target="_blank">quick start tutorial</a> that will get you started with GLINT quickly.
