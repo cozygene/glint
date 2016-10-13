@@ -122,7 +122,7 @@ Finally, in our example we found a single significant association in chromosome 
 |
 
 
-.. _here: blank
+.. _here: https://github.com/cozygene/glint/releases/Tutorial_files.zip
 
 .. _download GLINT: download.html
 

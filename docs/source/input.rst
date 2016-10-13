@@ -27,7 +27,7 @@ The `tutorial files`_ can be used as example files.
 
 **--datafile:**	
 
-Path to a tab-delimited file of sites by samples matrix of methylation levels. The first row should include "ID" followed by sample identifiers and the first column should include CpG identifiers. 
+Path to a file containing sites by samples matrix of methylation levels. The first row should include "ID" followed by sample identifiers and the first column should include CpG identifiers. The file can be either tab-delimited, comma-delimited or space-delimited.
 
 For example, adding the following to your GLINT command::
 
@@ -44,7 +44,7 @@ will load the methylation data matrix in the *datafile.txt* file. See the tutori
 
 **--covarfile**
 
-Path to a tab-delimited file of samples by covariates matrix. The first row may be a row of headers - "ID" followed by the names of the covariates, and the first column should include sample identifiers. If a row of headers is not provided then GLINT will automatically generate a name for each covariate.
+Path to a file containing samples by covariates matrix. The first row may be a row of headers - "ID" followed by the names of the covariates, and the first column should include sample identifiers. If a row of headers is not provided then GLINT will automatically generate a name for each covariate. The file can be either tab-delimited, comma-delimited or space-delimited.
 
 For example, adding the following to your GLINT command::
 
@@ -60,7 +60,7 @@ will provide the covariates matrix in the *covariates.txt* file. See the tutoria
 
 **--phenofile**
 
-Path to a tab-delimited file of samples by phenotypes matrix. The first row may be a row of headers - "ID" followed by the names of the phenotypes, and the first column should include sample identifiers. If a row of headers is not provided then GLINT will automatically generate a name for each phenotype.
+Path to a file containing samples by phenotypes matrix. The first row may be a row of headers - "ID" followed by the names of the phenotypes, and the first column should include sample identifiers. If a row of headers is not provided then GLINT will automatically generate a name for each phenotype. The file can be either tab-delimited, comma-delimited or space-delimited.
 
 For example, adding the following to your GLINT command::
 

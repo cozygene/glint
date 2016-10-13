@@ -160,7 +160,7 @@ will compute cell count estimates.
 
 **--reference**
 
-Allows to include user-supplied reference data. This argument gets path to a tab-delimited file of sites by cell types matrix of mean methylation levels (for each methylation site in each cell type). The first row should include "ID" followed by cell type names and the first column should include CpG identifiers. The default reference in GLINT contains 7 leukocyte cell types.
+Allows to include user-supplied reference data. This argument gets path to a file containing sites by cell types matrix of mean methylation levels (for each methylation site in each cell type). The first row should include "ID" followed by cell type names and the first column should include CpG identifiers. The default reference in GLINT contains 7 leukocyte cell types. The file can be either tab-delimited, comma-delimited or space-delimited.
 
 
 For example::
