@@ -142,7 +142,14 @@ class EWASParser(ModuleParser):
     def runLogReg(self, args, data, cpgnames, pheno, covars):
         output_perfix = args.out
         output_file = "results" + LOGREG_OUT_SUFFIX if output_perfix is None else output_perfix + LOGREG_OUT_SUFFIX
-        return self.runRegression(data, ewas.LogisticRegression, "LogReg", output_file, cpgnames, pheno, covars)
+        import time
+        a = time.time()
+        res1 =  self.runRegression(data, ewas.LogisticRegression, "LogReg", output_file, cpgnames, pheno, covars)
+        b = time.time()
+        res2 =  self.runRegression(data, ewas.LogisticRegression2, "LogReg", output_file, cpgnames, pheno, covars)
+        c = time.time()
+        print "time1 %s" %(b-a)
+        print "time2 %s" %(c-b)
 
     def runWilcoxon(self, args, data, cpgnames, pheno):
         output_perfix = args.out

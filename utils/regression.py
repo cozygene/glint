@@ -55,8 +55,32 @@ class LogisticRegression(object):
         # result.pvalues # p values
         # result.tvalues # Return the t-statistic for a given parameter estimate.
         return result.params, result.tvalues, result.pvalues #coefficients, t-statistic and p-values
-        
+    @staticmethod 
+    def fit_model2(y,x,covars = None):
+        if x.ndim == 1:
+            x = x.reshape(-1,1) # make sure dim is (n,1) and not(n,)
+        if y.ndim == 1:
+            y = y.reshape(-1, 1)
 
+        X = x
+        if covars is not None:
+            X = column_stack((covars, X))
+        
+        regr = linear_model.LogisticRegression(False)
+        n = X.shape[0] # number of sites
+        X = np.concatenate((np.ones((n,1)), X), axis=1)
+
+        mdl = regr.fit(X,y)
+        sse = np.sum((mdl.predict(X) - y) ** 2, axis=0) / float(X.shape[0] - X.shape[1])
+        se = np.array([
+            np.sqrt(np.diagonal(sse[i] * np.linalg.inv(np.dot(X.T, X))))
+                                                    for i in range(sse.shape[0])
+                    ])
+
+        Ts = mdl.coef_ / se
+        p = 2 * (1 - t.cdf(np.abs(Ts), y.shape[0] - X.shape[1]))
+        return mdl.coef_.reshape(-1), Ts.reshape(-1), p.reshape(-1)  #coefficients, t-statistic and p-values
+        
 class LinearRegression(object):
 
     def __init__(self):

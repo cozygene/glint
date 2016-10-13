@@ -73,6 +73,29 @@ class Regression(Module):
             sorted_covars_betas = output[:,4:-1].astype(float32)
         return sorted_cpgnames , sorted_pvalues, sorted_tstats, sorted_intercept_beta, sorted_covars_betas, sorted_site_beta
 
+class LogisticRegression2(Regression):
+    """
+    Only for cases where the phenotype is binary
+    """
+    
+    def __init__(self, data, cpgnames, pheno, covars = None):
+        """
+        data - the methylation data matrix site by samples
+        cpgnames - the list of cpgnames (sites) in the same order as in data
+        pheno - the phenotypes vector (1D) to use (samples in the same order as in data) 
+        covars - the covariates matrix (can be more then 1 covariates) to use, if None- no covariates will be used (samples in the same order as in data) 
+        """
+        if not tools.is_binary_vector(pheno):
+            common.terminate("logistic regression test - phenotype must be binary")
+        super(LogisticRegression, self).__init__(data, "LogReg", regression.LogisticRegression.fit_model2, cpgnames, pheno, covars)
+
+    def run(self):
+        logging.info("Running logistic regression test...")
+        results = self.regression()
+        logging.info('EWAS logistic regression is done!')
+        return results
+
+
 class LogisticRegression(Regression):
     """
     Only for cases where the phenotype is binary
@@ -308,7 +331,7 @@ class EWASResultsCreator(EWASResults):
     def save(self, output_filename):
         output = vstack((self.title, self.data))
         logging.info("%s results are saved to file %s." % (self.test_name, output_filename))
-        savetxt(output_filename, output, fmt = "%s", delimiter=self.DELIMITER)
+        # savetxt(output_filename, output, fmt = "%s", delimiter=self.DELIMITER)
 
         
 class EWASResultsParser(EWASResults):
