@@ -35,9 +35,7 @@ In order to install the dependency *cvxopt* with Anaconda run:
 
 **Windows** : ```conda install -c omnia cvxop```
 
-**Linux**: ```sudo `which conda` install -c anaconda cvxopt```
-
-**MacOS**: ```todo```
+**Linux or MacOS**: ```sudo `which conda` install -c anaconda cvxopt```
 
 In case the installation of *cvxopt* fails, we advise to search online: "how to install cvxopt with anaconda on [one of Windows/Linux/MacOS]"
  
