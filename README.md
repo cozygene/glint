@@ -54,7 +54,7 @@ The script automatically tries to install missing dependencies that are required
 Restart the Preview app - quit it and try to open the figure again.
 
 ### Citing GLINT
-If you use GLINT in any published work please cite it. Information about how to cite GLINT can be found in the documentation <a href="howtocite.html" target="_blank">here</a>.
+If you use GLINT in any published work please cite it. Information about how to cite GLINT can be found in the documentation <a href="http://glint-epigenetics.readthedocs.io/en/latest/howtocite.html" target="_blank">here</a>.
 
 ### Authors
 
