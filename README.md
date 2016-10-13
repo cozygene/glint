@@ -49,6 +49,8 @@ python install.py
 The script automatically tries to install missing dependencies that are required for GLINT. Note that in some environments the script may fail to install some of the dependencies, in which case you will need to either manually install them or download <a href="https://www.continuum.io/downloads" target="_blank">Anaconda for Python 2.7</a>.
 
 ### Troubleshooting
+
+#### Missing Dependency?
 1. Make sure you have Anaconda isntalled, see Download and installation for more details.  
   If you dont have Anaconda installed and running ```python install.py``` failed, than the easy solution is to install Anaconda. Otherwise, search on the web how to install each dependency in the list appears in Dependencies.
 2. Make sure you run GLINT with Anaconda Python command line:  
@@ -64,6 +66,9 @@ The script automatically tries to install missing dependencies that are required
   **MacOs** todo
 3. Make sure you have all dependencies installed. If you have Anaconda installed, than all the dependencies are installed automatically except *cvxopt*. To install it see Dependencies. If the installation fails, search online: "how to install cvxopt with anaconda on [one of Windows/Linux/MacOS]"
  
+#### .eps Figures can't be opened on MacOS?
+Restart the Preveiw app: quit it and try to open the figure again.
+
 ### Citing GLINT
 If you use GLINT in any published work please cite it. Information about how to cite GLINT can be found in the documentation <a href="howtocite.html" target="_blank">here</a>.
 
