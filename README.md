@@ -66,7 +66,7 @@ The script automatically tries to install missing dependencies that are required
   **MacOs** todo
 3. Make sure you have all dependencies installed. If you have Anaconda installed, than all the dependencies are installed automatically except *cvxopt*. To install it see Dependencies. If the installation fails, search online: "how to install cvxopt with anaconda on [one of Windows/Linux/MacOS]"
  
-#### .eps Figures can't be opened on MacOS?
+#### MacOs can't show .eps Figure?
 Restart the Preveiw app: quit it and try to open the figure again.
 
 ### Citing GLINT
