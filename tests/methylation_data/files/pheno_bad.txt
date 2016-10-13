@@ -1,0 +1,6 @@
+sample0	1	2	3
+sample1	1	2	3
+sample4	1	2	3
+sample5	1	2	3
+sample2	1	2	3
+sample3	1	2	3

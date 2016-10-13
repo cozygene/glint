@@ -1,84 +1,237 @@
+import os
+import sys
 import logging
 from sklearn import preprocessing
-from sklearn.decomposition import PCA
-from numpy import dot, linalg, sqrt
+from numpy import sqrt, savetxt, column_stack, where, delete
+from utils import tools, pca, LinearRegression, common
+from module import Module
+import time
 
-VERSION = 1.0 #TODO move to other place
+RANKED_FILENAME =       'refactor.rankedlist.txt'
+COMPONENTS_FILENAME =   'refactor.components.txt'
+#NOTE remember to copy the matrix before making changes!!!!
 
-def refactor(O, K, t, num_components, ranked_filename='refactor.out.rankedlist.txt', components_filename='refactor.out.components.txt'):
+class Refactor(Module):
+    VERSION = 1.0 #TODO move to config file
 
-    logging.info('Starting ReFACTor v%s...' % VERSION);
+
+    # all feature selection options. Note: if you add more options you need to write a handler (function that is named by the FEATURE_FUNC_NAME_FORMAT) for each option and 
+    FEATURE_SELECTION = ['normal', 'phenotype', 'controls']
+    FEATURE_FUNC_NAME_FORMAT = "_{feature_option_name}_feature_handler"   # feature selections function name format
+
+    def __init__( self,
+                  methylation_data,
+                  k,
+                  t = 500,
+                  minstd = 0.02,
+                  num_components = None,
+                  use_covars = None,
+                  use_phenos = None,
+                  bad_probes_list = [],
+                  feature_selection = 'normal',
+                  ranked_output_filename = RANKED_FILENAME,
+                  components_output_filename = COMPONENTS_FILENAME
+                ):
+        """
+        if use_covars is:
+                None - no covariates will take into account
+                [] (empty list) - all covariates will take into account
+                [covar_name1, ... covar_nameX] - only covar names specified in the list will be takem into account
+        """
+        self.meth_data = methylation_data
+        feature_selection = feature_selection.lower().strip()
+        
+        # validate and process all variables
+        self.use_phenos = use_phenos
+        self.use_covars = use_covars
+        self.fs_preprocessing =           self._validate_fs(feature_selection) 
+        self.k =                          self._validate_k(k)
+        self.t =                          self._validate_t(t)
+        self.minstd =                     self._validate_stdth(minstd)
+        self.num_components =             self._validate_num_comp(num_components)
+        self.bad_probes =                 bad_probes_list
+        self.ranked_output_filename =     ranked_output_filename
+        self.components_output_filename = components_output_filename
+        logging.info("ReFACTor's arguments: k=%s, t=%s, num of components=%s, minimal std=%s" %(self.k, self.t, self.num_components, self.minstd))
+
+    def _validate_fs(self, feature_selection):
+        if feature_selection not in self.FEATURE_SELECTION:
+            common.terminate("Choose feature selection from the options: %s (selected fs: %s)." % ( self.FEATURE_SELECTION, feature_selection ))
+        
+        if self.use_phenos is None:
+            if feature_selection == 'phenotype':
+                common.terminate("Must provide a phenotype (--pheno) when selecting feature selection of type 'phenotype'.")
+            elif feature_selection == 'controls':
+                common.terminate("Must provide one phenotype (--pheno) in a binary format when selection feature selection of type 'controls'.")
+            
+        return getattr(self, self.FEATURE_FUNC_NAME_FORMAT.format(feature_option_name=feature_selection))
+
+    """
+    2 <= k <= samples size
+    """
+    def _validate_k(self,k):
+        if not (k >= 2 and k <= self.meth_data.samples_size):
+            common.terminate("k must be at least 2 and lower than the number of samples. k = %s, samples = %s." % (k, self.meth_data.samples_size))
+
+        return k
+
+    """
+    k <= t <= sites size
+    must be called after _validate_k
+    """
+    def _validate_t(self,t):
+        if t > self.meth_data.sites_size or t < self.k : 
+            common.terminate("t cannot be greater than the number of sites or lower than k . t = %s, sites = %s, k = %s." % (t, self.meth_data.sites_size, self.k))
+
+        return t
+
+    """
+    0 < stdth < 1
+    """
+    def _validate_stdth(self, stdth):
+        if stdth > 1 or stdth < 0:
+            common.terminate("minstd cannot be greater than 1 and lower than 0. stdth = %s." % stdth)
+        return stdth
+
+    """
+    k <= num_comp  <= samples size
+    must be called after _validate_k
+    """
+    def _validate_num_comp(self,num_comp):
+        if num_comp and not (num_comp >= self.k and num_comp <= self.meth_data.samples_size):
+            common.terminate("The number of components must be at least k and lower than the number of samples. num_comp = %s, samples = %s, k = %s." % (num_comp, self.meth_data.samples_size, self.k))
+
+        return num_comp if num_comp else self.k
+
+    def run( self ):
+        # TODO use module name from config file instead of "ReFACTor"
+        logging.info('Starting ReFACTor...'); 
+        self.components, self.ranked_sites_indices = self._refactor()
+        self.ranked_sites = self.meth_data.cpgnames[self.ranked_sites_indices]
+        logging.info('ReFACTor is done!')
+
+   
+
+    def _refactor( self ):
+        """
+        run refactor:
+            exclude bad probes
+            remove sites with low std
+            remove covariates
+            run feature selection
+            computing the ReFACTor components
+            find ranked list of the data features
+        """
+        self._exclude_bad_probes()
+        # self.meth_data.remove_missing_values_sites() # nan are not supported TODO uncomment when supported
+        self.meth_data.remove_lowest_std_sites(self.minstd)
+        # self.meth_data.replace_missing_values_by_mean() # nan are not supported TODO uncomment when supported
+       
+        # feature selection
+        ranked_list = self._feature_selection()
+        logging.info('Computing the ReFACTor components...')
+        sites = ranked_list[:self.t] # take best t sites indices
+        pca_out = pca.PCA(self.meth_data.data[sites,:].transpose())
+        score = pca_out.P
+
+        logging.info('Saving a ranked list of the data features to %s...' % self.ranked_output_filename)
+        ranked_list_output = [self.meth_data.cpgnames[index] for index in ranked_list]
+        savetxt(self.ranked_output_filename, ranked_list_output, fmt='%s')
+
+        logging.info('Saving the ReFACTor components to %s...' % self.components_output_filename)
+        components = score[:,:self.num_components]
+        components_output = column_stack((self.meth_data.samples_ids, components))
+        savetxt(self.components_output_filename, components_output, fmt='%s')
+        
+        return components, ranked_list
+
+
+    def _exclude_bad_probes(self):
+        """
+        excludes bad sites from data
+        """
+        if len(self.bad_probes):
+            logging.info("ReFACTor is searching for badly designed sites to exclude...")
+            self.meth_data.exclude(self.bad_probes)
 
     
-    print O
-    print O.transpose()
-    # sample_id <- O[1, -1] # extract samples ID
-    # O <- O[-1,] # remove sample ID from matrix
-    # cpgnames <- O[, 1] ## set rownames
-    # O <- O[, -1] 
-    # O = matrix(as.numeric(O),nrow=nrow(O),ncol=ncol(O))
+    def _normal_feature_handler(self, meth_data):
+        """
+        the normal feature selection does not change the data
+        Note: function name must be of the format FEATURE_FUNC_NAME_FORMAT
+        """
+        logging.info("Using 'normal' feature selection") # does nothing..
 
-    # num_components = K;
+    
+    
+    def _phenotype_feature_handler(self, meth_data):
+        """
+        regress out the phenotype
+        Note: function name must be of the format FEATURE_FUNC_NAME_FORMAT
+        """
+        logging.info("Using 'phenotype' feature selection...")
+        phenotype = meth_data.get_phenotype_subset(self.use_phenos)
+        if phenotype.ndim == 2 and phenotype.shape[1] > 1:
+            logging.warning("'phenotype' feature selection was used with more than one phenotype.")
+        
+        logging.info("Regressing out phenotype...")
+        meth_data.regress_out(phenotype)
+        
 
-    logging.info('Running a standard PCA...')
-    scaler = preprocessing.StandardScaler().fit(O.transpose())
-    pca = PCA(n_components=num_components)
-    pcs = pca.fit(O.transpose())
-    # pcs = prcomp(scale( t(O) ));
+    def _controls_feature_handler(self, meth_data):  
+        """
+        keep only the controls samples in the data
+        Note: function name must be of the format FEATURE_FUNC_NAME_FORMAT
+        """
+        logging.info("Using 'controls' feature selection...")
+        
+        phenotype = meth_data.get_phenotype_subset(self.use_phenos)
 
+        if not tools.is_binary_vector(phenotype):
+            common.terminate("Phenotype in not a binary vector (must be a 1D binary vector when using 'controls' feature selection).")
+            
+        controls_samples_indices = where(phenotype == 0)[0] # assumes its a 1D binary vector
+        if (self.k > len(controls_samples_indices)):
+            common.terminate("k cannot be greater than the number of control samples.")
 
+        remove_indices = delete(range(meth_data.samples_size), controls_samples_indices)
+        meth_data.remove_samples_indices(remove_indices)
+        
+    def _feature_selection(self):
+        fs_meth_data = self.meth_data.copy() # create a copy to work on for feature selection only
+        self.fs_preprocessing(fs_meth_data) # 'phenotype' or 'controls' feature selection
+        
+        covars = fs_meth_data.get_covariates_subset(self.use_covars)
+        if covars is not None:
+            logging.info("Regressing out covariates...")
+            fs_meth_data.regress_out(covars)
+        else:
+            logging.info("ReFACTor ignores covariates")
 
-    coeff = pcs.components_
-    # coeff = pcs$rotation #U   pcs.components_
-    score = pcs.transform(O.transpose())
-    # score = pcs$x #P pcs.transform(X)
+        a = time.time()
+        ranked_list = self._calc_low_rank_approx_distances(fs_meth_data) # returns array of the indexes in a sorted order
+        b = time.time()
+        logging.debug("Low rank approximation RUN TIME %s SECONDS" %(b-a))
+        del fs_meth_data # no need for the copy of the data after found the ranked list
+        return ranked_list
 
-    logging.info('Compute a low rank approximation of input data and rank sites...')
-    x = dot(score[:,1:K], coeff[:,1:K].transpose())
-    # x = score[,1:K]%*%t(coeff[,1:K]);
-    An = preprocessing.StandardScaler().fit( O.transpose(), with_mean = True, with_std = False )
-    # An = scale(t(O),center=T,scale=F)
-    Bn = preprocessing.StandardScaler().fit( x, with_mean = True, with_std = False )
-    # Bn = scale(x,center=T,scale=F)
+    """
+    TODO add explanation
+    """
+    def _calc_low_rank_approx_distances(self, meth_data): # feature selection
+        logging.info('Computing low rank approximation of the input data and ranking sites...')
 
-    An = ( An.transpose() * (1 / sqrt(numpy.apply_along_axis(sum, 0, linalg.matrix_power(An,2))))).transpose() 
-    # An = t(t(An)*(1/sqrt(apply(An^2,2,sum))))
+        x = tools.low_rank_approximation(meth_data.data.transpose(), self.k)
 
-    Bn = ( Bn.transpose() * (1 / sqrt(numpy.apply_along_axis(sum, 0, linalg.matrix_power(Bn,2))))).transpose() 
-    # Bn = t(t(Bn)*(1/sqrt(apply(Bn^2,2,sum))))
+        An = preprocessing.StandardScaler( with_mean = True, with_std = False ).fit(meth_data.data.transpose()).transform(meth_data.data.transpose())
+        Bn = preprocessing.StandardScaler( with_mean = True, with_std = False ).fit(x).transform(x)
 
+        # normalization
+        An = An * ( 1 / sqrt((An**2).sum(axis=0)) ) 
+        Bn = Bn * ( 1 / sqrt((Bn**2).sum(axis=0)) )
 
-    # # Find the distance of each site from its low rank approximation.
-    distances = numpy.apply_along_axis(sum, 0, linalg.matrix_power(An - Bn,2))
-    # distances = apply((An-Bn)^2,2,sum)^0.5 ;
-
-    dsort = sort(distances) ???
-    # dsort = sort(distances,index.return=T);
-    ??? https://stat.ethz.ch/R-manual/R-devel/library/base/html/sort.html
-    # ranked_list = dsort$ix
-
-    logging.info('Compute ReFACTor components...')
-    sites = ranked_list[1:t]
-    # sites = ranked_list[1:t];
-    scaler = preprocessing.StandardScaler().fit(O[sites,:].transpose())
-    pcs = PCA(n_components=num_components).fit(O[sites,:].transpose())
-    pcs = prcomp(scale(t(O[sites,])));
-    # pcs = prcomp(scale(t(O[sites,])));
-    first_score = score[:,1:K]
-    # first_score <- score[,1:K];
-    score = pcs.transform(O.transpose())
-    # score = pcs$x
-
-    logging.info('Saving a ranked list of the data features...');
-    file(ranked_filename, 'wb').write( ??? )
-    # write(t(cbind(ranked_list,cpgnames[ranked_list])),file=ranked_filename,ncol=2)
-
-    logging.info('Saving the ReFACTor components...');
-    file(components_filename, 'wb').write( ??? )
-    # write(t(score[,1:num_components]),file=components_filename,ncol=num_components)
-
-    return score[,1:num_components], ranked_list, first_score 
-    # result <- list(refactor_components=score[,1:num_components],ranked_list=ranked_list, first_pca = first_score) 
-    # return(result)
-
-
+        # find the distance of each site from its low rank approximation.
+        distances = tools.euclidean_distance(An, Bn)
+        sorted_indices = distances.argsort()
+        self.distances = distances[sorted_indices]
+        return sorted_indices # returns array of the indexes in a sorted order (the original indexes of the values if the array was sorted) 
