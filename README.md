@@ -44,18 +44,14 @@ The script automatically tries to install missing dependencies that are required
 2. Make sure you run GLINT with the Anaconda Python command line (assuming you installed Anaconda Python):  
   **Windows**:  
     a. Find the path to Anaconda Python: press "Start" (win-key) and search for "conda". When you find it, do not open it but right click on it -> "properties", and extract the path written under "Location".
-    b. Use the path to the Anaconda Python instead of the standard "python" command. For example, if you found the path to be "C:\Users\me\Anaconda2\Scripts" then Anaconda Python is supposed to be at C:\Users\me\Anaconda2\python, in which case run each GLINT command as follows:
-    run ```C:\Users\me\Anaconda2\python glint.py...```  
+    b. Use the path to the Anaconda Python instead of the standard "python" command. For example, if you found the path to be "C:\Users\me\Anaconda2\Scripts" then Anaconda Python is supposed to be under C:\Users\me\Anaconda2\python, in which case run each GLINT command as follows: ```C:\Users\me\Anaconda2\python glint.py...```  
   
   **Linux or MacOS**:  
-    a. Find the path to python command line tool: run on command line: ```which conda```. If that command returns nothing than you don't have Anaconda installed, refer to Download and Installation. Otherwise, if for example the output of the command is /home/user/anaconda2/bin/conda than Anaconda Python command line is at /home/user/anaconda2/bin/python.  
-    b. run GLINT with that path: run ```/home/user/anaconda2/bin/python glint.py ...```  
+    a. Find the path to Anaconda Python: run in the terminal: ```which conda```. If that command does not return anything then you do not have Anaconda installed; refer to "Download and Installation".
+    b. Use the path to the Anaconda Python instead of the standard "python" command. For example, if you found the path to be "/home/user/anaconda2/bin/" then Anaconda Python is supposed to be under /home/user/anaconda2/bin/python, in which case run each GLINT command as follows: ```/home/user/anaconda2/bin/python glint.py ...```  
  
-#### MacOs can't show .eps Figure?
-Restart the Preveiw app: quit it and try to open the figure again.
-
-#### cvxopt
-In case the installation of *cvxopt* fails, we advise to search online: "how to install cvxopt with anaconda on [one of Windows/Linux/MacOS]"
+#### MacOs cannot show .eps figures?
+Restart the Preview app - quit it and try to open the figure again.
 
 ### Citing GLINT
 If you use GLINT in any published work please cite it. Information about how to cite GLINT can be found in the documentation <a href="howtocite.html" target="_blank">here</a>.
