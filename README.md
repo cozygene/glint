@@ -1,37 +1,26 @@
 # GLINT
-An easy and efficient command-line tool for the analysis of DNA methylation data and conducting EWAS.  
-Our software does not require any programming proficiency.
 
-The software provides options for data managment, novel methods for correction of cell type composition (ReFACTor), ancestry estimation and methylation imputation. Statistical tests such as linear regressin, logistic regression, LMM and Wilcoxon. Generation of publication-quality plots and more.
+GLINT is a user-friendly command line tool for fast analysis of genome-wide DNA methylation data generated using the Illumina human methylation arrays. GLINT allows to easily run a pipeline of Epigenome-Wide Association Study (EWAS) under different models while accounting for known confounders in methylation data.
 
-For more details see "Documentation"  
+For more details about GLINT see the <a href="blank" target="_blank">documentation</a>.
 
 ### Download and Installation
 
-1. Download the latest release from <a href="put the link here todo" target="_blank"> todo!edit this!here</a>.
-2. Install <a href="https://www.continuum.io/downloads" target="_blank">Anaconda Python version 2.7</a> which includes most of our dependencies.  
-    - If you already have Python2.7 and don't want to install Anaconda, please see "Dependencies".
-3. Install *cvxopt* using Anaconda:   
-    on **Windows** run ```conda install -c omnia cvxop```  
-    on **Linux** run ```sudo `which conda` install -c anaconda cvxopt```  
-    on **MacOS** run ```todo```  
+1. Download the latest release of GLINT from <a href="https://github.com/cozygene/glint/releases" target="_blank">here</a>.
+2. Install the latest release of <a href="https://www.continuum.io/downloads" target="_blank">Anaconda for Python 2.7</a> which includes most of our dependencies.  
+    - If you already have Python 2.7 and do not want to install Anaconda please see "Dependencies" bellow.
+3. Install the *cvxopt* package for Python using Anaconda:   
+    **Windows** run ```conda install -c omnia cvxop```  
+    **Linux** run ```sudo `which conda` install -c anaconda cvxopt```  
+    **MacOS** run ```todo```  
     
-For more details see "Dependencies".  
-  
-### Quick example
-This command will conduct EWAS on metylation data and a phenotype. First it'll remove the low variance sites, then it'll run linear regression and finally it'll generate a publication-quality qq-plot and Manhattan plot.
-```
-python glint.py --datafile data.txt --minstd 0.02 --ewas --linreg --phenofile phenotype.txt --pheno age --plot --qqplot --manhhattan
-```
-**In order to quick learn more options, try this <a href="todo add link to tutorial" target="_blank">tutorial</a>**  
+### Documentation and a quick start tutorial
+A detailed documentation of glint can be found <a href="todo add link to docs" target="_blank">here</a>. In addition, we provide a <a href="todo add link to tutorial" target="_blank">quick start tutorial</a> that will get you started with GLINT quickly.
 
-### Documentation
-Detailed documentation explaining all the features can be found <a href="todo add link to docs" target="_blank">here</a>.  
-We also supply a quick  <a href="todo add link to tutorial" target="_blank">tutorial</a> that will walk you through the basic options avaliable  
-
+ 
 ### Dependencies
 
-This release of GLINT was implemented for Python 2.7 and has the following dependencies:
+GLINT was implemented for Python 2.7 and has the following dependencies:
 
     numpy
     scipy
@@ -39,23 +28,25 @@ This release of GLINT was implemented for Python 2.7 and has the following depen
     pandas
     matplotlib
     statsmodels
-    cvxopt (not included in Anaconda)
+    cvxopt (not included in Anaconda by default)
     
 
-We recommend installing <a href="https://www.continuum.io/downloads" target="_blank">Anaconda Python version 2.7</a>, which already includes most of necessary dependencies.  
-To install dependency *cvxopt* with Anaconda run:
-on **Windows** : ```conda install -c omnia cvxop```
-on **Linux**: ```sudo `which conda` install -c anaconda cvxopt```
-on **MacOS**: ```todo```
-If *cvxopt* installation fails, search online: "how to install cvxopt with anaconda on [one of Windows/Linux/MacOS]"
+We recommend installing the latest release of <a href="https://www.continuum.io/downloads" target="_blank">Anaconda for Python 2.7</a>, which already includes most of necessary dependencies. 
+In order to install the dependency *cvxopt* with Anaconda run:
+
+**Windows** : ```conda install -c omnia cvxop```
+
+**Linux**: ```sudo `which conda` install -c anaconda cvxopt```
+
+**MacOS**: ```todo```
+
+In case the installation of *cvxopt* fails, we advise to search online: "how to install cvxopt with anaconda on [one of Windows/Linux/MacOS]"
  
-If you already have Python installed and do not want to install Anaconda Python, run "install.py" script (found in the "python" folder):
+In case you already have Python 2.7 installed and do not want to install Anaconda Python, run the "install.py" script we provide:
 ```
 python install.py
 ```
-The script automatically installs missing dependencies that are required for GLINT. Note that in some environments the script may fail to install some of the dependencies, in which case you will need to manually install them or  <a href="https://www.continuum.io/downloads" target="_blank">Anaconda</a>.
-
-*Note* that GLINT first validates that all it's dependencies are installed before executing. If it finds a problem it will instruct you.
+The script automatically tries to install missing dependencies that are required for GLINT. Note that in some environments the script may fail to install some of the dependencies, in which case you will need to either manually install them or download <a href="https://www.continuum.io/downloads" target="_blank">Anaconda for Python 2.7</a>.
 
 ### Troubleshooting
 1. Make sure you have Anaconda isntalled, see Download and installation for more details.  
@@ -74,11 +65,8 @@ The script automatically installs missing dependencies that are required for GLI
 3. Make sure you have all dependencies installed. If you have Anaconda installed, than all the dependencies are installed automatically except *cvxopt*. To install it see Dependencies. If the installation fails, search online: "how to install cvxopt with anaconda on [one of Windows/Linux/MacOS]"
  
 ### Citing GLINT
-elior..todo
-
+If you use GLINT in any published work please cite it. Information about how to cite GLINT can be found in the documentation <a href="howtocite.html" target="_blank">here</a>.
 
 ### Authors
 
-This software was developed by Reut Yedidim, Omer Weissbrod  and Elior Rahmani.
-
-For any question and for reporting bugs please send an email to Elior Rahmani at: elior.rahmani@gmail.com
+This software was developed by Reut Yedidim and Elior Rahmani. Code contributions were made by Omer Weissbrod and Dan coster. For any question and for reporting bugs or suggesting new features please send an email to Elior Rahmani at: elior.rahmani@gmail.com
