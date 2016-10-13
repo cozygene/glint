@@ -7,7 +7,7 @@
 Documentation and a simple tutorial: GLINT!
 ===========================================
 
-GLINT is a user-friendly command line tool for fast analysis of genome-wide DNA methylation data generated using the Illumina human methylation arrays. GLINT allows to easily run a pipeline of Epigenome-Wide Association Study (EWAS) under different models while accounting for known confounders in methylation data.
+GLINT is a user-friendly command-line tool for fast analysis of genome-wide DNA methylation data generated using the Illumina human methylation arrays. GLINT allows to easily run a pipeline of Epigenome-Wide Association Study (EWAS) under different models while accounting for known confounders in methylation data.
 
 
 Getting GLINT:
