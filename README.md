@@ -12,7 +12,7 @@ For more details about GLINT see the <a href="blank" target="_blank">documentati
 3. Install the *cvxopt* package for Python using Anaconda:   
     **Windows** run ```conda install -c omnia cvxop```  
     **Linux** run ```sudo `which conda` install -c anaconda cvxopt```  
-    **MacOS** run ```todo```  
+    **MacOS** run ```sudo `which conda` install -c anaconda cvxopt```   
     
 ### Documentation and a quick start tutorial
 A detailed documentation of glint can be found <a href="todo add link to docs" target="_blank">here</a>. In addition, we provide a <a href="todo add link to tutorial" target="_blank">quick start tutorial</a> that will get you started with GLINT quickly.
@@ -59,12 +59,9 @@ The script automatically tries to install missing dependencies that are required
    For this example, lets assume you found it at "C:\Users\me\Anaconda2\Scripts" so Anaconda Python supposed to be at C:\Users\me\Anaconda2\python  
     b. Run GLINT with that path: run ```C:\Users\me\Anaconda2\python glint.py...```  
   
-  **Linux**: 
+  **Linux or MacOS**: 
     a. Find the path to python command line tool: run on command line: ```which conda```. If that command returns nothing than you don't have Anaconda installed, refer to Download and Installation. Otherwise, if for example the output of the command is /home/user/anaconda2/bin/conda than Anaconda Python command line is at /home/user/anaconda2/bin/python.  
     b. run GLINT with that path: run ```/home/user/anaconda2/bin/python glint.py ...```  
-  
-  **MacOs** todo
-3. Make sure you have all dependencies installed. If you have Anaconda installed, than all the dependencies are installed automatically except *cvxopt*. To install it see Dependencies. If the installation fails, search online: "how to install cvxopt with anaconda on [one of Windows/Linux/MacOS]"
  
 #### MacOs can't show .eps Figure?
 Restart the Preveiw app: quit it and try to open the figure again.
