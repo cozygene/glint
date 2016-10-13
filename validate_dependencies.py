@@ -53,7 +53,7 @@ def install_packages_with_conda(dependencies_list):
     color_print("To install dependency '%s' please run:\n  %s" % (dependencies_list[0], install_instructions[dependencies_list[0]]), FOREGROUND.RED)
     sys.exit()
 
-    # that code supposed
+    # that code supposed to install cvxopt but it doesn't show the installation output to the user...
     # print("Trying to install dependencies...")
     # for pkg in dependencies_list:
     #     if pkg in install_instructions:
