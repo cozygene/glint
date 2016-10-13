@@ -58,7 +58,7 @@ The script automatically tries to install missing dependencies that are required
    For this example, lets assume you found it at "C:\Users\me\Anaconda2\Scripts" so Anaconda Python supposed to be at C:\Users\me\Anaconda2\python  
     b. Run GLINT with that path: run ```C:\Users\me\Anaconda2\python glint.py...```  
   
-  **Linux or MacOS**: 
+  **Linux or MacOS**:  
     a. Find the path to python command line tool: run on command line: ```which conda```. If that command returns nothing than you don't have Anaconda installed, refer to Download and Installation. Otherwise, if for example the output of the command is /home/user/anaconda2/bin/conda than Anaconda Python command line is at /home/user/anaconda2/bin/python.  
     b. run GLINT with that path: run ```/home/user/anaconda2/bin/python glint.py ...```  
  
