@@ -5,6 +5,10 @@ import inspect
 from pandas import read_csv, DataFrame
 from numpy import float32, array
 
+DELIMITERS = {'\t': 'tab',
+              ' ' : 'space', 
+              ',' : 'comma'}
+              
 def terminate(error_msg):
     logging.error("ERROR: " + error_msg)
     sys.exit(2)
@@ -13,6 +17,18 @@ def get_dim(vector):
     if vector.ndim == 1 or (vector.ndim == 2 and vector.shape[1] == 1):
         return 1
     return 2
+
+def get_delimiter(line):
+    lengths = []
+    for sep in DELIMITERS.keys():
+        lengths.append(len(line.split(sep)))
+    max_len = max(lengths) # the right delimiter will split the line to more than one cell
+    assert lengths.count(max_len) == 1 # only one possible delimiter
+    max_i = lengths.index(max_len)
+    for l in lengths:
+        assert l in [max_len, 1]
+    return DELIMITERS.keys()[max_i]
+
 
 def loadtxt(filepath, dtype = None, header = None, delimiter='\t'):
     if dtype:
@@ -39,17 +55,12 @@ def load_float_data_and_headers(filepath, delimiter='\t', dtype = float32, na_va
     f.close()
 
     #find right delimiter
-    space_sep = first_row.split(' ')
-    tab_sep = first_row.split('\t')
-    if space_sep != tab_sep:
-        if len(space_sep) > len(tab_sep) and delimiter == '\t':
-            logging.info("Switching to space delimited matrix...")
-            delimiter = ' '
-        elif len(tab_sep) > len(space_sep) and delimiter == ' ':
-            logging.info("Switching to tab delimited matrix...")
-            delimiter = '\t'
-
-    first_row = first_row.split()
+    sep = get_delimiter(first_row)
+    if sep != delimiter:
+        logging.info("Switching to %s delimited matrix..." % DELIMITERS[sep])
+        delimiter = sep
+        
+    first_row = first_row.strip().split(delimiter)
     num_of_cols = len(first_row)
 
 
@@ -87,7 +98,7 @@ def load_float_data_and_headers(filepath, delimiter='\t', dtype = float32, na_va
         
     except Exception as e:
         logging.exception("While loading data")
-        terminate("Error with the format of the file. It's possible the file contains non float values or it's not space/tab-delimited.") 
+        terminate("Error with the format of the file. delimiter must be one of %s and float data" % ", ".join(DELIMITERS.keys())) 
 
     # convert to array
     if col_names is not None:
@@ -109,7 +120,7 @@ def load_data_file(filepath, dim, dtype = float32, na_values = None):
     try:
         data, col_names, row_names = load_float_data_and_headers(filepath, delimiter='\t', dtype = dtype, na_values = na_values)
     except Exception as e:
-        logging.exception("While loading data !!%s!!")#todo remove this
+        logging.exception("While loading data")
         terminate("Some error with the data file format; please check the delimiter.")
     
     logging.debug("Read with pandas took %s seconds." % (time()-a))

@@ -48,30 +48,30 @@ def install_packages_with_conda(dependencies_list):
     install_instructions = dict()
     if sys.platform.startswith("win") or "nt" in os.name: # you run windows
         install_instructions = INSTALL_WINDODWS
-    elif sys.platform.startswith("lin"): # you run linux
+    elif "posix" in os.name: # you run linux/macos 
         install_instructions = INSTALL_LINUX
-    elif sys.platform.startswith("darwin"): # you run linux
-        color_print("To install package '%s' please run:\n  %s" % (dependencies_list[0], INSTALL_LINUX[dependencies_list[0]]), FOREGROUND.RED)
-        sys.exit()
+    color_print("To install dependency '%s' please run:\n  %s" % (dependencies_list[0], install_instructions[dependencies_list[0]]), FOREGROUND.RED)
+    sys.exit()
 
-    print("Trying to install dependencies...")
-    for pkg in dependencies_list:
-        if pkg in install_instructions:
-            try:
-                res = subprocess.check_output(install_instructions[pkg], shell=True, stderr = subprocess.STDOUT)
-            except Exception as e:
-                print e
-                color_print("Could not install cvxopt, " + TROUBLESHOOT, FOREGROUND.RED)
-                sys.exit()
-            try:
-                import_dependencies([pkg])
-            except:
-                print "Could not install package %s" % pkg
-                color_print("To install package '%s' please run:\n  %s" % (pkg, install_instructions[pkg]), FOREGROUND.RED)
-                return False
-        else:
-            return False
-    return True
+    # that code supposed
+    # print("Trying to install dependencies...")
+    # for pkg in dependencies_list:
+    #     if pkg in install_instructions:
+    #         try:
+    #             res = subprocess.check_output(install_instructions[pkg], shell=True, stderr = subprocess.STDOUT)
+    #         except Exception as e:
+    #             print e
+    #             color_print("Could not install cvxopt, " + TROUBLESHOOT, FOREGROUND.RED)
+    #             sys.exit()
+    #         try:
+    #             import_dependencies([pkg])
+    #         except:
+    #             print "Could not install package %s" % pkg
+    #             color_print("To install package '%s' please run:\n  %s" % (pkg, install_instructions[pkg]), FOREGROUND.RED)
+    #             return False
+    #     else:
+    #         return False
+    # return True
 
 def add_anaconda_to_path_lin(path):
     """
