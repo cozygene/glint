@@ -38,7 +38,7 @@ The script automatically tries to install missing dependencies that are required
 
 ### Troubleshooting
 
-#### Missing Dependency?
+#### Missing dependency?
 1. Make sure you have Anaconda isntalled, see "Download and installation" for more details.  
   If you do not have Anaconda installed and running ```python install.py``` failed, then the easy solution is to install Anaconda. Otherwise, you will need to install all the Python packages listed under "Dependencies".
 2. Make sure you run GLINT with the Anaconda Python command line (assuming you installed Anaconda Python):  
@@ -48,6 +48,7 @@ The script automatically tries to install missing dependencies that are required
   
   **Linux or MacOS**:  
     a. Find the path to Anaconda Python: run in the terminal: ```which conda```. If that command does not return anything then you do not have Anaconda installed; refer to "Download and Installation".
+    
     b. Use the path to the Anaconda Python instead of the standard "python" command. For example, if you found the path to be "/home/user/anaconda2/bin/" then Anaconda Python is supposed to be under /home/user/anaconda2/bin/python, in which case run each GLINT command as follows: ```/home/user/anaconda2/bin/python glint.py ...```  
  
 #### MacOs cannot show .eps figures?
