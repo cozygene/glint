@@ -2,7 +2,7 @@
 
 GLINT is a user-friendly command line tool for fast analysis of genome-wide DNA methylation data generated using the Illumina human methylation arrays. GLINT allows to easily run a pipeline of Epigenome-Wide Association Study (EWAS) under different models while accounting for known confounders in methylation data.
 
-For more details about GLINT see the <a href="blank" target="_blank">documentation</a>.
+For more details about GLINT see the <a href="http://glint-epigenetics.readthedocs.io/" target="_blank">documentation</a>.
 
 ### Download and Installation
 
@@ -14,7 +14,7 @@ For more details about GLINT see the <a href="blank" target="_blank">documentati
     **Linux or MacOS** run ```sudo `which conda` install -c anaconda cvxopt```   
     
 ### Documentation and a quick start tutorial
-A detailed documentation of glint can be found <a href="todo add link to docs" target="_blank">here</a>. In addition, we provide a <a href="todo add link to tutorial" target="_blank">quick start tutorial</a> that will get you started with GLINT quickly.
+A detailed documentation of GLINT can be found <a href="http://glint-epigenetics.readthedocs.io/" target="_blank">here</a>. In addition, we provide a <a href="http://glint-epigenetics.readthedocs.io/en/latest/tutorial.html" target="_blank">quick start tutorial</a> that will get you started with GLINT quickly.
 
  
 ### Dependencies
