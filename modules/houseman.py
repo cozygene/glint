@@ -73,7 +73,7 @@ class Houseman(Module):
             components_output = column_stack((self.meth_data.samples_ids, self.components))
             header = ["ID"] + list(self.names)
             components_output = vstack((header, components_output))
-            savetxt(outputfile+"S", components_output, fmt='%s') #output looks betther with space delimiter and not tab
+            savetxt(outputfile, components_output, fmt='%s') #output looks betther with space delimiter and not tab
             
 
 
