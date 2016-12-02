@@ -42,7 +42,7 @@ def get_data_type(data_type_str):
         return int
     return None
 
-def replace_missing(data_filename, missing_value_indicator, data_max_missing_values, samples_max_missing_values, sep = " ", suffix = ".no_missing_values"):
+def replace_missing(data_filename, missing_value_indicator, data_max_missing_values, samples_max_missing_values, sep = " ", suffix = ".no_missing_values", header = None):
     """
     replaces missing values by mean (mean of non-missing data/samples) and saves the output to the file named data_filename + suffix
     if there are too many missing samples (more than samples_max_missing_values) - they are removed
@@ -102,7 +102,7 @@ def replace_missing(data_filename, missing_value_indicator, data_max_missing_val
         replace = True
 
     try:
-        all_data, col_names, row_names = common.load_data_file(data_filename, 2, na_values= missing_value_indicator)
+        all_data, col_names, row_names = common.load_data_file(data_filename, 2, header=header, na_values= missing_value_indicator)
 
         if all_data.ndim != dim:
             raw_input("Error: got data from dimensions %d while excepted to %d. Please check all paramenters are OK (data type and separator)." %(all_data.ndim, dim))
@@ -120,10 +120,10 @@ def replace_missing(data_filename, missing_value_indicator, data_max_missing_val
             data_to_save = column_stack((row_names, data_to_save))
         if col_names is not None:
             if row_names is not None:
-                header = ["ID"] + list(col_names)
+                new_header = ["ID"] + list(col_names)
             else:
-                header = col_names
-            data_to_save = vstack((header, data_to_save))
+                new_header = col_names
+            data_to_save = vstack((new_header, data_to_save))
             
         savetxt(output_filename, data_to_save, fmt='%s')
         return output_data
@@ -142,6 +142,7 @@ def parse_args(argv=None):
     parser.add_argument("--maxi", required=True,type = float, help="the maximum missing values allowed per sample (percentage - values between 0 and 1). If a sample has more than this amount of missing values (sites) it will be deleted.")
     parser.add_argument("--sep", type=str, default="\t", help="the separator sign of the matrix in data_filename. Default is tab")
     parser.add_argument("--suffix", type=str, default=".no_missing_values", help="the suffix for the output filename")
+    # parser.add_argument("--header", action='store_true', help="supply this flag if your datafile contains a header")
     #parser.add_argument("--dim", type=int, default=2, help="the dimensions of the matrix in the datafile. Default is 2")
     
 
@@ -149,4 +150,4 @@ def parse_args(argv=None):
 
 if __name__=="__main__":
     args = parse_args()
-    replace_missing(args.datafile, args.chr, args.maxs, args.maxi, args.sep , args.suffix)
+    replace_missing(args.datafile, args.chr, args.maxs, args.maxi, args.sep , args.suffix, None)

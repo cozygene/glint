@@ -17,6 +17,12 @@ DATA_SUFFIX = "txt"
 DEAFULT_COVAR_NAME = "c"
 DEFAULT_PHENO_NAME = "p"
 
+def is_number(s):
+    try:
+        float(s)
+        return True
+    except ValueError:
+        return False
 
 def json_numpy_obj_hook(dct):
     """
@@ -136,20 +142,23 @@ class MethylationData(Module):
             self.header_manager = TitleManager()
 
 
-    def _load_and_validate_file_of_dimentions(self, datafile, dim):
+    def _load_and_validate_file_of_dimentions(self, datafile, dim, header):
         """
         validates that the file contains a matrix from dimentions dim
         datafile is not None
+        header - True if file contains a header (first row, which values are the column names)
+             False if file doesn't contain an header
+             None - let the function infer if there is an header
         """
         if not isinstance(datafile, file):
             datafile = open(datafile, 'r')
   
         logging.info("Loading file %s..." % datafile.name)
 
-        data, samples_ids, cpgnames = common.load_data_file(datafile.name, dim)
+        data, cols_labels, rows_labels = common.load_data_file(datafile.name, dim, header=header)
         if data is None:
             common.terminate("There is a problem with the format of the file '%s'." % datafile.name)
-        return data, samples_ids, cpgnames
+        return data, cols_labels, rows_labels
 
 
     def _validate_samples_ids(self, matrix_sample_ids, samples_ids):
@@ -170,10 +179,11 @@ class MethylationData(Module):
 
     def _load_and_validate_samples_info(self, data_with_samples_info, samples_size, samples_ids):
         """
+        loading covariates and phenotypes
         data_with_samples_info - path to file containing information about samples (matrix where first column is sample_id)
         data_with_samples_info assumed to hold path (not None)
         """
-        data, header, new_samples_ids = self._load_and_validate_file_of_dimentions(data_with_samples_info, 2)
+        data, header, new_samples_ids = self._load_and_validate_file_of_dimentions(data_with_samples_info, 2, None)
         self._validate_samples_ids(new_samples_ids, samples_ids)
         validate_no_missing_values(data)
 
@@ -661,7 +671,7 @@ class MethylationDataLoader(MethylationData):
         """
         returns data (type=float without samples ids and cpgnames) and sample_ids list and cpgnames list
         """
-        data, samples_ids, cpgnames = self._load_and_validate_file_of_dimentions(datafile, 2)
+        data, samples_ids, cpgnames = self._load_and_validate_file_of_dimentions(datafile, 2, True)
 
         if cpgnames is None:
             common.terminate("There are no CpG identifiers for the sites in the datafile '%s'." % datafile.name)

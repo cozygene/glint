@@ -16,7 +16,7 @@ class Houseman(Module):
 
         # Load and extract the reference - cell-type specific methylation levels of a group of reference sites
         logging.info("Loading houseman refernece file %s..." % reference_file.name)
-        ref_data, self.names, ref_ids = common.load_data_file(reference_file.name, 2)
+        ref_data, self.names, ref_ids = common.load_data_file(reference_file.name, 2, header=True)
         if ref_data is None or ref_ids is None:
             common.terminate("There is a problem with the format of the reference file '%s'." % reference_file.name)
 
