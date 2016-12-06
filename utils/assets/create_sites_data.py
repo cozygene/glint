@@ -4,6 +4,8 @@ from pandas import Index, unique, read_csv, DataFrame
 
 """
 this script creates the HumanMethylationSites file (you can choose output file name with outputfile parameter)
+it also saves a list of cpg sites found in X and Y chromosomes in a seperate file
+
 it extracts the fields from the chip data
 it first reads the data from 850K than only adds information about new cpg sites from the rest of the files
 (it takes all the sites from file files[0] than adds the different sites between files[1] and files[0],
@@ -88,3 +90,14 @@ for i in range(data.shape[0]):
 print "saving output to %s" % outputfile
 
 savetxt(outputfile, data, delimiter=",",header = ",".join(t), fmt="%s")
+
+# save X Y chromosomes
+y_chr_ind = list(where(data[:,1]=='Y')[0])
+x_chr_ind = list(where(data[:,1]=='X')[0])
+xy_ind = y_chr_ind
+xy_ind.extend(x_chr_ind)
+xy_chr_output_file = outputfile +"_XY_chr_only"
+print "Saving cpg sites for X Y chromosomes only to %s" % xy_chr_output_file
+savetxt(xy_chr_output_file, data[xy_ind, 0].reshape(-1,1), fmt="%s")
+
+
