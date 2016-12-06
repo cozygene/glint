@@ -138,7 +138,10 @@ class MethylationDataParser(ModuleParser):
         if data.ndim == 0: # file contains only one item
             data = [data.item()]
         elif data.ndim == 2:
-            common.terminate("The file '%s' is not a %sd vector" % (fileobj.name, dim))
+            if len(data[:,0]) * len(data[0,:]) == data.size:
+                data = data.reshape(-1,)
+            else:
+                common.terminate("The file '%s' is not a %sd vector" % (fileobj.name, dim))
 
         data_set = set(data)
         if len(data) != len(data_set):
