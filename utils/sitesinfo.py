@@ -10,7 +10,7 @@ class SitesInfo(object):
     def __init__(self, cpgnames, chromosomes, positions, genes, categories):
         self.cpgnames = cpgnames
         self.chromosomes = chromosomes #could be int (1,2..) or string ('X', 'Y') therfore - string type
-        self.positions = positions.astype(int)
+        self.positions = positions
         self.genes = genes
         self.categories = categories
 
@@ -30,13 +30,29 @@ class SitesInfoGenerator(SitesInfo):
         logging.info("Loading information about methylation sites...")
         data = loadtxt(SITES_INFO_FILE, dtype = str, ndmin = 2, delimiter=',')
         all_cpgnames = data[:, self.CPGNAME_INDEX]
-        indices = self._get_cpgnames_indicis(all_cpgnames, cpgnames_list)
-        relevant_data = data[indices, :]
+        cpg_found_index, cpg_ref_index = self._get_cpgnames_indicis(all_cpgnames, cpgnames_list)
+        
+        chromosomes = empty((len(cpgnames_list)), dtype = data.dtype)
+        chromosomes.fill("")
+        chromosomes[cpg_found_index] = data[cpg_ref_index, self.CHROMOSOME_INDEX]
+        
+        positions = empty((len(cpgnames_list)), dtype = data.dtype)
+        positions.fill("")
+        positions[cpg_found_index] = data[cpg_ref_index, self.POSITION_INDEX]
+        
+        genes = empty((len(cpgnames_list)), dtype = data.dtype)
+        genes.fill("")
+        genes[cpg_found_index] = data[cpg_ref_index, self.GENE_INDEX]
+
+        categories = empty((len(cpgnames_list)), dtype = data.dtype)
+        categories.fill("")
+        categories[cpg_found_index] = data[cpg_ref_index, self.ISLAND_INDEX]
+
         super(SitesInfoGenerator, self).__init__(cpgnames_list,                        \
-                                                 relevant_data[:, self.CHROMOSOME_INDEX], \
-                                                 relevant_data[:, self.POSITION_INDEX],   \
-                                                 relevant_data[:, self.GENE_INDEX],       \
-                                                 relevant_data[:, self.ISLAND_INDEX])
+                                                 chromosomes, \
+                                                 positions,   \
+                                                 genes,       \
+                                                 categories)
         
 
 
@@ -48,12 +64,12 @@ class SitesInfoGenerator(SitesInfo):
         """
         logging.info("Searching for relevant methylation sites information...")
         
-        sorted_indices = cpgnames_list.argsort()  # the indexes of cpgnames_list when values are sorted
-        orderd_indices = empty((len(sorted_indices)), dtype = int)# will hold the indexes in the order of cpgnames_list
-
         # get the indexes of all_cpgnames where  cpgnames_list found by the order of cpgnames_list 
         assert type(cpgnames_list) == list or type(cpgnames_list) == ndarray
         assert type(all_cpgnames) == list or type(all_cpgnames) == ndarray
-        indexes_list = where(Index(unique(cpgnames_list)).get_indexer(all_cpgnames) >= 0)[0] # faster than np.where(np.in1d
-        orderd_indices[sorted_indices] = indexes_list
-        return orderd_indices
+        
+        indexes_list = Index(unique(all_cpgnames)).get_indexer(cpgnames_list)  # faster than np.where(np.in1d
+        where_found = where(indexes_list>=0)[0]
+        what_found = indexes_list[where_found]
+
+        return where_found, what_found

@@ -432,7 +432,7 @@ class MethylationData(Module):
         sites_info = sitesinfo.SitesInfoGenerator(self.cpgnames)
         sites_data = column_stack((self.cpgnames, sites_info.chromosomes, sites_info.positions, sites_info.genes, sites_info.categories))
         logging.info("Saving CpG names and info to %s..." % sites_filename)
-        savetxt(sites_filename, sites_data, delimiter='\t', fmt = '%-12s\t%-4s\t%-12s\t%-22s\t%-22s', header = "cpgid, chromosome, position, gene, category")
+        savetxt(sites_filename, sites_data, fmt = '%-12s,\t%-4s,\t%-12s,\t%-22s,\t%-22s', header = "cpgid, chromosome, position, gene, category")
         
         samples_filename = prefix + ".samples." + DATA_SUFFIX
         logging.info("Saving sample identifiers and their phenotypes and covariates to %s..." % samples_filename)
