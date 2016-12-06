@@ -462,7 +462,7 @@ class MethylationData(Module):
         save samples ids withe the covariates and phenotype
         save cpgnames with  information on each site
         """
-        if prefix is None:
+        if prefix is None or prefix == "":
             prefix = DEFAULT_PREFIX
         
         self.save_sites_and_samples(prefix)
@@ -484,7 +484,7 @@ class MethylationData(Module):
         serializes this object and saves it to methylation_data_filename
         assumes that methylation_data_filename is a valid file 
         """
-        if prefix is None:
+        if prefix is None or prefix == "":
             prefix = DEFAULT_PREFIX
 
         self.save_sites_and_samples(prefix)
