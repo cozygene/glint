@@ -71,13 +71,13 @@ will compute the ReFACTor components while accounting for the covariates c1, c2 
 
 **--stdth**
 
-Excludes sites with standard deviation lower than a specified value. This argument results in a speed-up of ReFACTor while ignoring sites with low variability that are less likely to contain cell composition information. The default value is 0.01.
+Excludes sites with standard deviation lower than a specified value. This argument results in a speed-up of ReFACTor while ignoring sites with low variability that are less likely to contain cell composition information. The default value is 0.02.
 
 For example::
 
-	python glint.py --datafile datafile.glint --refactor --k 6 --stdth 0.02
+	python glint.py --datafile datafile.glint --refactor --k 6 --stdth 0.01
 
-will remove all sites with standard deviation lower than 0.02 before computing the ReFACTor components.
+will remove all sites with standard deviation lower than 0.01 before computing the ReFACTor components.
 
 
 .. _--t:

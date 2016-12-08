@@ -4,9 +4,9 @@
 Input
 =====
 
-The following section describes arguments that allow to provide data files for GLINT, and the `--gsave`_ argument that allows to save and work with a binary version of the data (`GLINT files`_) for gaining computation speed-up.
+GLINT accepts as input array methylation data that were generated using the Illumina arrays (27K, 450K and EPIC). The following section describes the arguments that allow to provide data files for GLINT, and the `--gsave`_ argument that allows to save and work with a binary version of the data (`GLINT files`_) for gaining speed-up in computation.
 
-.. note:: GLINT does not work on raw data, but rather assumes data are given after raw data preprocessing.
+.. note:: GLINT assumes that input data are given after raw data preprocessing (i.e. after normalization).
 
 .. note:: GLINT currently does not allow NA values in the data. For users having NA values in their data files see `handling NA values`_.
 
@@ -18,7 +18,7 @@ The following section describes arguments that allow to provide data files for G
 Input files
 ^^^^^^^^^^^
 
-The `tutorial files`_ can be used as example files.
+We recommend using the `tutorial files`_ as an example for the required file formats.
 
 .. _tutorial files: blank
 
@@ -27,13 +27,19 @@ The `tutorial files`_ can be used as example files.
 
 **--datafile:**	
 
-Path to a file containing sites by samples matrix of methylation levels. The first row should include "ID" followed by sample identifiers and the first column should include CpG identifiers. The file can be either tab-delimited, comma-delimited or space-delimited.
+Path to a file containing sites by samples matrix of methylation levels. The first row should include sample identifiers and the first column should include CpG identifiers. The first row may include the field "ID" at the beginning. The file can be either tab-delimited, comma-delimited or space-delimited. The matrix entries are not allowed to include quotes.
 
 For example, adding the following to your GLINT command::
 
 	--datafile datafile.txt
 
 will load the methylation data matrix in the *datafile.txt* file. See the tutorial *datafile.txt* file as an example file.
+
+.. figure:: figs/datafile_screenshot.png
+    :width: 70%
+    :align: center
+
+    Figure 1: Example of a data file.
 
 .. note:: In order to speed-up GLINT, we recommend working with a binary version of the data. See `--gsave`_ for more details.
 
@@ -44,13 +50,19 @@ will load the methylation data matrix in the *datafile.txt* file. See the tutori
 
 **--covarfile**
 
-Path to a file containing samples by covariates matrix. The first row may be a row of headers - "ID" followed by the names of the covariates, and the first column should include sample identifiers. If a row of headers is not provided then GLINT will automatically generate a name for each covariate. The file can be either tab-delimited, comma-delimited or space-delimited.
+Path to a file containing samples by covariates matrix. The first row may be a row of headers - the names of the covariates, and the first column should include sample identifiers. The first row, if provided headers, may include the field "ID" at the beginning. If a row of headers is not provided then GLINT will automatically generate a name for each covariate. The file can be either tab-delimited, comma-delimited or space-delimited. The matrix entries are not allowed to include quotes.
 
 For example, adding the following to your GLINT command::
 
 	--covarfile covariates.txt
 
 will provide the covariates matrix in the *covariates.txt* file. See the tutorial *covariates.txt* file as an example file.
+
+.. figure:: figs/covarfile_screenshot.png
+    :width: 25%
+    :align: center
+
+    Figure 2: Example of a covariates file.
 
 .. note:: More than one covariates file can be provided, e.g. *--covarfile covariates1.txt covariates2.txt*.
 
@@ -60,13 +72,19 @@ will provide the covariates matrix in the *covariates.txt* file. See the tutoria
 
 **--phenofile**
 
-Path to a file containing samples by phenotypes matrix. The first row may be a row of headers - "ID" followed by the names of the phenotypes, and the first column should include sample identifiers. If a row of headers is not provided then GLINT will automatically generate a name for each phenotype. The file can be either tab-delimited, comma-delimited or space-delimited.
+Path to a file containing samples by phenotypes matrix. The first row may be a row of headers - the names of the phenotypes, and the first column should include sample identifiers. The first row, if provided headers, may include the field "ID" at the beginning. If a row of headers is not provided then GLINT will automatically generate a name for each phenotype. The file can be either tab-delimited, comma-delimited or space-delimited. The matrix entries are not allowed to include quotes.
 
 For example, adding the following to your GLINT command::
 
 	--phenofile phenotypes.txt
 
 will provide the phenotypes matrix in the *phenotypes.txt* file. See the tutorial *phenotypes.txt* file as an example file.
+
+.. figure:: figs/phenofile_screenshot.png
+    :width: 25%
+    :align: center
+
+    Figure 3: Example of a phenotypes file.
 
 .. note:: More than one phenotypes file can be provided, e.g. *--phenofile phenotypes1.txt phenotypes2.txt*.
 

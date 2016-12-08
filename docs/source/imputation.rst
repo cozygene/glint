@@ -13,6 +13,7 @@ The imputation is based on the EPISTRUCTURE paper by Rahmani et al. [1]_. As des
 
 .. note:: The linear models for imputation were fitted based on European individuals.
 
+.. note:: A/T and C/G SNPs are not used for the imputation, in order to avoid strand misspecification due to different genotyping platforms.
 
 .. _--impute:
 
@@ -30,7 +31,7 @@ will generate GLINT files with imputed methylation data for a group of methylati
 
 .. note:: --impute will automatically generate GLINT files with the imputed methylation levels, therefore there is no need to add the --gsave argument.
 
-.. note:: Polymorphic CpGs according to Chen et al. [2]_ are not imputed.
+.. note:: Polymorphic CpGs according to Chen et al. [2]_ are not imputed. In addition, methylation levels are imputed only for CpGs for which at least one of their predicting SNPs exists in the provided genotype data.
 
 .. note:: Use `--out`_ in order to change the default output name.
 

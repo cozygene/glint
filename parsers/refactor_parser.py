@@ -50,7 +50,7 @@ class RefactorParser( ModuleParser ):
       refactor.add_argument('--t',       type = int, default = 500, help = "The number of sites to use for computing the ReFACtor components (DEFAULT=500)")
       refactor.add_argument('--numcomp', type = int, help = "The number of ReFACTor components to output (DEFAULT=K)")
       refactor.add_argument('--fs',      type = str, default = 'normal', help = "Feature selection mode; options: normal, controls, phenotype (DEFAULT=normal)")
-      refactor.add_argument('--stdth',  type = float, default = 0.01, help = "Threshold for excluding low variance sites (DEFAULT=0.01) (all sites with std lower than this threshold will be excluded)") 
+      refactor.add_argument('--stdth',  type = float, default = 0.02, help = "Threshold for excluding low variance sites (DEFAULT=0.01) (all sites with std lower than this threshold will be excluded)") 
       refactor.add_argument('--covar', type = str, nargs='*', help = "List of covariate names to use.")
       refactor.add_argument('--pheno', type = str, nargs='*', help = "The phenotype name to use (if 'phenotype' was selected under --fs)")
         
