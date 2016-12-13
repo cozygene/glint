@@ -23,7 +23,7 @@ class Refactor(Module):
                   methylation_data,
                   k,
                   t = 500,
-                  minstd = 0.02,
+                  stdth = 0.02,
                   num_components = None,
                   use_covars = None,
                   use_phenos = None,
@@ -47,12 +47,12 @@ class Refactor(Module):
         self.fs_preprocessing =           self._validate_fs(feature_selection) 
         self.k =                          self._validate_k(k)
         self.t =                          self._validate_t(t)
-        self.minstd =                     self._validate_stdth(minstd)
+        self.stdth =                     self._validate_stdth(stdth)
         self.num_components =             self._validate_num_comp(num_components)
         self.bad_probes =                 bad_probes_list
         self.ranked_output_filename =     ranked_output_filename
         self.components_output_filename = components_output_filename
-        logging.info("ReFACTor's arguments: k=%s, t=%s, num of components=%s, minimal std=%s" %(self.k, self.t, self.num_components, self.minstd))
+        logging.info("ReFACTor's arguments: k=%s, t=%s, num of components=%s, minimal std=%s" %(self.k, self.t, self.num_components, self.stdth))
 
     def _validate_fs(self, feature_selection):
         if feature_selection not in self.FEATURE_SELECTION:
@@ -90,7 +90,7 @@ class Refactor(Module):
     """
     def _validate_stdth(self, stdth):
         if stdth > 1 or stdth < 0:
-            common.terminate("minstd cannot be greater than 1 and lower than 0. stdth = %s." % stdth)
+            common.terminate("stdth cannot be greater than 1 and lower than 0. stdth = %s." % stdth)
         return stdth
 
     """
@@ -124,7 +124,7 @@ class Refactor(Module):
         """
         self._exclude_bad_probes()
         # self.meth_data.remove_missing_values_sites() # nan are not supported TODO uncomment when supported
-        self.meth_data.remove_lowest_std_sites(self.minstd)
+        self.meth_data.remove_lowest_std_sites(self.stdth)
         # self.meth_data.replace_missing_values_by_mean() # nan are not supported TODO uncomment when supported
        
         # feature selection

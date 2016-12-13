@@ -69,7 +69,7 @@ class RefactorParser( ModuleParser ):
         self.module  = refactor.Refactor(methylation_data = meth_data, 
                               k = args.k, 
                               t = args.t, 
-                              minstd = args.stdth,
+                              stdth = args.stdth,
                               feature_selection = args.fs.lower().strip(), 
                               num_components = args.numcomp,
                               use_covars = args.covar,
