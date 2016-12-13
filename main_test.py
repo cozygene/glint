@@ -9,6 +9,7 @@ from tests.methylation_data import test_methylation_data
 from tests.imputing import test_imputing
 from tests.missing_values import replace_missing_values_test
 from tests.houseman import test_houseman
+from tests.tutorial import test_tutorial
 
 test_refactor.RefactorTester()
 test_refactor.SenariosTester()
@@ -24,3 +25,4 @@ test_imputing.ImputingTester()
 replace_missing_values_test.MissingValuesTester()
 test_ewas.LMMTester()
 test_houseman.HousemanTester()
+test_tutorial.TutorialTester()
