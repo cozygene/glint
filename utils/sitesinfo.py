@@ -8,11 +8,11 @@ SITES_INFO_FILE = os.path.join(os.path.dirname(__file__), "assets/HumanMethylati
 class SitesInfo(object):
 
     def __init__(self, cpgnames, chromosomes, positions, genes, categories):
-        self.cpgnames = cpgnames
-        self.chromosomes = chromosomes #could be int (1,2..) or string ('X', 'Y') therfore - string type
-        self.positions = positions
-        self.genes = genes
-        self.categories = categories
+        self.cpgnames = cpgnames.astype(str)
+        self.chromosomes = chromosomes.astype(str) #could be int (1,2..) or string ('X', 'Y') therfore - string type
+        self.positions = positions.astype(int)
+        self.genes = genes.astype(str)
+        self.categories = categories.astype(str)
 
 class SitesInfoGenerator(SitesInfo):
     """
