@@ -17,14 +17,23 @@ to add new chip, add another filepath (like filepath_850) and add it to the list
 where the first file (location 0) is considered the most updated data file
 """
 
-t=['IlmnID','CHR','MAPINFO','UCSC_RefGene_Name','Relation_to_UCSC_CpG_Island'] # the interesting fields
+# the interesting fields to extract
+headers=['IlmnID','CHR','MAPINFO','UCSC_RefGene_Name','Relation_to_UCSC_CpG_Island'] 
+ # the interesting fields to extrack from the 27K chip
+headers_27=['IlmnID','Chr','MapInfo','Gene_ID','CPG_ISLAND']
 repeat_field = 'UCSC_RefGene_Name'
 
 #paths to the chip dataset
 filepath_850 = '/Users/yedidimr/Downloads/MethylationEPIC_v-1-0_B2.csv'
 filepath_450 = '/Users/yedidimr/Downloads/HumanMethylation450_15017482_v1-2.csv'
 filepath_270 = '/Users/yedidimr/Downloads/humanmethylation27_270596_v1-2.bpm'
-files = [filepath_850, filepath_450]
+
+# a dictionary mapping a chip file to its interesting headers and in which line the header is found (index of that line where the first line in the file is indexed 0)
+files = {
+         filepath_850 : (headers, 7),
+         filepath_450 : (headers, 7),
+         # filepath_270 : (headers_27, 151),
+        }
 
 # path to the output file
 outputfile = "HumanMethylationSites_new"
@@ -33,17 +42,20 @@ outputfile = "HumanMethylationSites_new"
 def get_data(filepath):
     """
     reads a chip 
+    columns_to_extract - a list with the headers fields to extract
     """
+    columns_to_extract, header_index = files[filepath]
     f=open(filepath,'r')
-    i=0
-    while(i<8):
-         i+=1
-         dd = f.readline().split(",")
+
+    # get to one line before header
+    for i in range(header_index):
+         f.readline()   
+    header = f.readline().split(",")
     f.close()
 
     # first 7 rows are headers, skip them
     # read only the columns of interest
-    data = DataFrame.as_matrix(read_csv(filepath, dtype = str, sep=',', usecols=[dd.index(r) for r in t], skiprows = 7))    
+    data = DataFrame.as_matrix(read_csv(filepath, dtype = str, sep=',', usecols=[header.index(r) for r in columns_to_extract], skiprows = header_index))    
     data = data.astype(str)
     return data
 
@@ -64,7 +76,7 @@ def new_cpgs(old_data, new_data):
 read all the files
 """
 data = None
-for i,datafile in enumerate(files):
+for datafile in files:
     print "loading %s "% datafile
 
     if data is None:
@@ -83,13 +95,13 @@ for i,datafile in enumerate(files):
 remove repeats in the UCSC field:
 for example in cpg id cg00214611 the value is "TMSB4Y;TMSB4Y" so we'll change it to "TMSB4Y"
 """
-repeat_i = t.index(repeat_field)
+repeat_i = headers.index(repeat_field)
 for i in range(data.shape[0]):
     data[i, repeat_i] = ";".join(list(set(data[i,repeat_i].split(";"))))
 
 print "saving output to %s" % outputfile
 
-savetxt(outputfile, data, delimiter=",",header = ",".join(t), fmt="%s")
+savetxt(outputfile, data, delimiter=",",header = ",".join(headers), fmt="%s")
 
 # save X Y chromosomes
 y_chr_ind = list(where(data[:,1]=='Y')[0])
