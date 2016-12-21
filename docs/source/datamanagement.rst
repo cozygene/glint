@@ -138,7 +138,7 @@ will remove all sites with mean methylation level above 0.8.
 
 **--rmxy**
 
-Filters out non-autosomal sites (sites in chromsomes X and Y). This argument assumes that the data were collected using the Illumina 450K array.
+Filters out non-autosomal sites (sites in chromsomes X and Y).
 
 For example::
 
@@ -151,7 +151,7 @@ will remove all non-autosomal sites from the data.
 
 **--rmns**
 
-Filters out cross-reactive (non specific) sites according to Chen et al. [1]_. This argument assumes that the data were collected using the Illumina 450K array.
+Filters out cross-reactive (non specific) sites according to Chen et al. [1]_ and McCartney et al. [2]_.
 
 For example::
 
@@ -164,7 +164,7 @@ will remove all non specific sites from the data.
 
 **--rmpoly**
 
-Filters out polymorphic sites according to Chen et al. [1]_. This argument assumes that the data were collected using the Illumina 450K array.
+Filters out polymorphic sites according to Chen et al. [1]_ and McCartney et al. [2]_.
 
 For example::
 
@@ -184,3 +184,5 @@ will remove all polymorphic sites from the data.
 
 
 .. [1] Chen, Yi-an, Mathieu Lemire, Sanaa Choufani, Darci T. Butcher, Daria Grafodatskaya, Brent W. Zanke, Steven Gallinger, Thomas J. Hudson, and Rosanna Weksberg. "Discovery of cross-reactive probes and polymorphic CpGs in the Illumina Infinium HumanMethylation450 microarray." Epigenetics 8, no. 2 (2013): 203-209.
+
+.. [2] McCartney, Daniel L., Rosie M. Walker, Stewart W. Morris, Andrew M. McIntosh, David J. Porteous, and Kathryn L. Evans. "Identification of polymorphic and off-target probe binding sites on the Illumina Infinium MethylationEPIC BeadChip." Genomics Data 9 (2016): 22-24.

@@ -122,7 +122,7 @@ Finally, in our example we found a single significant association in chromosome 
 |
 
 
-.. _here: https://github.com/cozygene/glint/releases/download/1.0.0/Tutorial_files.zip
+.. _here: https://github.com/cozygene/glint/releases/download/1.0.2/Tutorial_files.zip
 
 .. _download GLINT: download.html
 
@@ -157,7 +157,7 @@ Finally, in our example we found a single significant association in chromosome 
 
 
 
-.. citations are in Chcago format
+.. citations are in Chicago format
 
 .. [1] Rahmani, Elior, Noah Zaitlen, Yael Baran, Celeste Eng, Donglei Hu, Joshua Galanter, Sam Oh et al. "Sparse PCA corrects for cell type heterogeneity in epigenome-wide association studies." Nature methods 13, no. 5 (2016): 443-445.
 .. [2] Jaffe, Andrew E., and Rafael A. Irizarry. "Accounting for cellular heterogeneity is critical in epigenome-wide association studies." Genome biology 15, no. 2 (2014): 1.

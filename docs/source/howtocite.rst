@@ -6,9 +6,15 @@ If you use GLINT in any published work, please cite the paper describing it (**c
 
 In addition:
 
-- If you use the `--rmns`_ argument or the `--rmpoly`_ argument please also cite:
+- If you use the `--rmns`_ argument or the `--rmpoly`_ argument please also cite the followings.
+
+For 450K data:
 
 Chen, Yi-an, Mathieu Lemire, Sanaa Choufani, Darci T. Butcher, Daria Grafodatskaya, Brent W. Zanke, Steven Gallinger, Thomas J. Hudson, and Rosanna Weksberg. "Discovery of cross-reactive probes and polymorphic CpGs in the Illumina Infinium HumanMethylation450 microarray." Epigenetics 8, no. 2 (2013): 203-209.
+
+and for 850K (EPIC) data:
+
+McCartney, Daniel L., Rosie M. Walker, Stewart W. Morris, Andrew M. McIntosh, David J. Porteous, and Kathryn L. Evans. "Identification of polymorphic and off-target probe binding sites on the Illumina Infinium MethylationEPIC BeadChip." Genomics Data 9 (2016): 22-24.
 
 - If you use the `--refactor`_ argument please also cite:
 

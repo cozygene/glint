@@ -31,6 +31,8 @@ will compute the EPISTRUCTURE components of the data.
 
 .. note:: EPISTRUCTURE leverages polymorphic sites in order to capture the genetic and therefore the ancesty information in the data better. Therefore, we recommend to avoid removing polymorphic sites (`--rmpoly`_) before applying EPISTRUCTURE.
 
+.. note:: In case of data from heterogeneous source (e.g., blood), we suggest to account for type composition (see `--covar`_).
+
 .. note:: Use `--epi`_ together with `--gsave`_ in order to generate a new version of GLINT files with the computed EPISTRUCTURE components (these will be included in the *datafile.samples.txt* file).
 
 .. note:: Use `--out`_ in order to change the default output name.
