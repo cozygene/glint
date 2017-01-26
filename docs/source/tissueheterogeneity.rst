@@ -30,7 +30,7 @@ Computes the ReFACTor components and generates two output files:
 
 .. note:: For best performance of ReFACTor we recommend adding known gneome-wide effectors as covariates using the `--covar`_ argument.
 
-.. note:: GLINT computes the ReFACTor components while automatically ignoring X and Y chromosomes sites, polymorphic sites and cross-reactive sites according to Chen et al. [3]_.
+.. note:: GLINT computes the ReFACTor components while automatically ignoring X and Y chromosomes sites, polymorphic sites and cross-reactive sites according to Chen et al. [3]_ for 450K array data and according to McCartney et al. [4]_ for 850K (EPIC) array data.
 
 .. note:: Use `--out`_ in order to change the default output name.
 
@@ -132,7 +132,7 @@ will compute the ReFACTor components using the *controls* feature selection base
 Houseman
 ^^^^^^^^
 
-The algorithm by Houseman et al. is a reference-based method for calculating cell count estimates. This method requires reference data of cell type specific mean methylation levels of sorted cell types from the studied tissue. The default reference data is based on whole-blood data by Reinius et al. [4]_, according to the eature selection proposed by Koestler et al [5]_.
+The algorithm by Houseman et al. is a reference-based method for calculating cell count estimates. This method requires reference data of cell type specific mean methylation levels of sorted cell types from the studied tissue. The default reference data is based on whole-blood data by Reinius et al. [5]_, according to the eature selection proposed by Koestler et al [6]_.
 
 .. note:: Reference data currently exist for 7 leukocyte cell types only.
 
@@ -196,6 +196,8 @@ will compute cell count estimates using the reference data in *reference.txt*.
 
 .. [3] Chen, Yi-an, Mathieu Lemire, Sanaa Choufani, Darci T. Butcher, Daria Grafodatskaya, Brent W. Zanke, Steven Gallinger, Thomas J. Hudson, and Rosanna Weksberg. "Discovery of cross-reactive probes and polymorphic CpGs in the Illumina Infinium HumanMethylation450 microarray." Epigenetics 8, no. 2 (2013): 203-209.
 
-.. [4] Reinius, Lovisa E., Nathalie Acevedo, Maaike Joerink, Göran Pershagen, Sven-Erik Dahlén, Dario Greco, Cilla Söderhäll, Annika Scheynius, and Juha Kere. "Differential DNA methylation in purified human blood cells: implications for cell lineage and studies on disease susceptibility." PloS one 7, no. 7 (2012): e41361.
+.. [4] McCartney, Daniel L., Rosie M. Walker, Stewart W. Morris, Andrew M. McIntosh, David J. Porteous, and Kathryn L. Evans. "Identification of polymorphic and off-target probe binding sites on the Illumina Infinium MethylationEPIC BeadChip." Genomics Data 9 (2016): 22-24.
 
-.. [5] Koestler, Devin C., Meaghan J. Jones, Joseph Usset, Brock C. Christensen, Rondi A. Butler, Michael S. Kobor, John K. Wiencke, and Karl T. Kelsey. "Improving cell mixture deconvolution by id entifying o ptimal DNA methylation l ibraries (IDOL)." BMC bioinformatics 17, no. 1 (2016): 1.
+.. [5] Reinius, Lovisa E., Nathalie Acevedo, Maaike Joerink, Göran Pershagen, Sven-Erik Dahlén, Dario Greco, Cilla Söderhäll, Annika Scheynius, and Juha Kere. "Differential DNA methylation in purified human blood cells: implications for cell lineage and studies on disease susceptibility." PloS one 7, no. 7 (2012): e41361.
+
+.. [6] Koestler, Devin C., Meaghan J. Jones, Joseph Usset, Brock C. Christensen, Rondi A. Butler, Michael S. Kobor, John K. Wiencke, and Karl T. Kelsey. "Improving cell mixture deconvolution by id entifying o ptimal DNA methylation l ibraries (IDOL)." BMC bioinformatics 17, no. 1 (2016): 1.
