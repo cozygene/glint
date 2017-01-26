@@ -2,7 +2,10 @@
 How to cite GLINT?
 ==================
 
-If you use GLINT in any published work, please cite the paper describing it (**comming soon**).
+If you use GLINT in any published work, please cite the paper describing it:
+
+Rahmani, Elior, Reut Yedidim, Liat Shenhav, Regev Schweiger, Omer Weissbrod, Noah Zaitlen, and Eran Halperin. "GLINT: a user-friendly toolset for the analysis of high-throughput DNA-methylation array data." Bioinformatics, *in press*.
+
 
 In addition:
 
