@@ -7,7 +7,7 @@ For more details about GLINT see the <a href="http://glint-epigenetics.readthedo
 ### Download and Installation
 
 1. Download the latest release of GLINT from <a href="https://github.com/cozygene/glint/releases" target="_blank">here</a>.
-2. Install the latest release of <a href="https://www.continuum.io/downloads" target="_blank">Anaconda for Python 2.7</a> which includes most of our dependencies.  
+2. Install the latest release of <a href="https://www.continuum.io/downloads" target="_blank">Anaconda for Python 2.7</a> which includes most of the dependencies required by GLINT. Note that GLINT requires Anaconda version >=4 (i.e. Anaconda2-4.X or above).
     - If you already have Python 2.7 and do not want to install Anaconda please see "Dependencies" bellow.
 3. Use your terminal to install the *cvxopt* package for Python using Anaconda   
     **Windows** run ```conda install -c omnia cvxop```  
