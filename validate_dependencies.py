@@ -136,35 +136,36 @@ print "Validating all dependencies are installed..."
 conda_path = spawn.find_executable("conda") # "conda" is the command line installed by anaconda
 # if anaconda wasnt found, tell the user to run installation script
 if not conda_path:
+    print "Anaconda wasn't found"
     install_without_anaconda()
-    sys.exit()
+else:
 
-#from now code assumes anaconda is installes
-		
-# see if we are running anaconda python
-anaconda_dir = os.path.dirname(conda_path).lower()
-
-if anaconda_dir in sys.executable.lower() or os.path.dirname(anaconda_dir) in sys.executable.lower():
-    print "You are now running Anaconda Python"
-    try:
-        for pkg in GLINT_OBLIGATORY_DEPENDENCIES_WITH_CONDA:
-            import_dependencies([pkg])
-    except:
-        # something is wrong since we are missing dependencies that included in anaconda
-        color_print("There was a problem with the dependency %s, " % pkg + TROUBLESHOOT, FOREGROUND.RED)
-        sys.exit()
-
-    try:
-        import_dependencies(GLINT_OBLIGATORY_DEPENDENCIES_NO_CONDA)
-    except:
-        print "Some dependencies are missing"
-        success = install_packages_with_conda(GLINT_OBLIGATORY_DEPENDENCIES_NO_CONDA)
-        if not success:
-            color_print("Could not install dependencies, ", TROUBLESHOOT, FOREGROUND.RED)
-            sys.exit()
+	#from now code assumes anaconda is installes
 			
-else: 
-    # we are not running anaconda python - execute it
-    run_me_with_anaconda()
+	# see if we are running anaconda python
+	anaconda_dir = os.path.dirname(conda_path).lower()
+
+	if anaconda_dir in sys.executable.lower() or os.path.dirname(anaconda_dir) in sys.executable.lower():
+	    print "You are now running Anaconda Python"
+	    try:
+	        for pkg in GLINT_OBLIGATORY_DEPENDENCIES_WITH_CONDA:
+	            import_dependencies([pkg])
+	    except:
+	        # something is wrong since we are missing dependencies that included in anaconda
+	        color_print("There was a problem with the dependency %s, " % pkg + TROUBLESHOOT, FOREGROUND.RED)
+	        sys.exit()
+
+	    try:
+	        import_dependencies(GLINT_OBLIGATORY_DEPENDENCIES_NO_CONDA)
+	    except:
+	        print "Some dependencies are missing"
+	        success = install_packages_with_conda(GLINT_OBLIGATORY_DEPENDENCIES_NO_CONDA)
+	        if not success:
+	            color_print("Could not install dependencies, ", TROUBLESHOOT, FOREGROUND.RED)
+	            sys.exit()
+				
+	else: 
+	    # we are not running anaconda python - execute it
+	    run_me_with_anaconda()
 
 print "All dependencies are installed"
