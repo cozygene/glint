@@ -164,7 +164,7 @@ will remove all non specific sites from the data.
 
 **--rmpoly**
 
-Filters out polymorphic sites according to Chen et al. [1]_ and McCartney et al. [2]_.
+Filters out polymorphic sites according to Chen et al. [1]_.
 
 For example::
 

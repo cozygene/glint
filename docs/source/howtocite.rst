@@ -9,23 +9,21 @@ Rahmani, Elior, Reut Yedidim, Liat Shenhav, Regev Schweiger, Omer Weissbrod, Noa
 
 In addition:
 
-- If you use the `--rmns`_ argument or the `--rmpoly`_ argument please also cite the followings.
-
-For 450K data:
-
-Chen, Yi-an, Mathieu Lemire, Sanaa Choufani, Darci T. Butcher, Daria Grafodatskaya, Brent W. Zanke, Steven Gallinger, Thomas J. Hudson, and Rosanna Weksberg. "Discovery of cross-reactive probes and polymorphic CpGs in the Illumina Infinium HumanMethylation450 microarray." Epigenetics 8, no. 2 (2013): 203-209.
-
-and for 850K (EPIC) data:
-
-McCartney, Daniel L., Rosie M. Walker, Stewart W. Morris, Andrew M. McIntosh, David J. Porteous, and Kathryn L. Evans. "Identification of polymorphic and off-target probe binding sites on the Illumina Infinium MethylationEPIC BeadChip." Genomics Data 9 (2016): 22-24.
-
 - If you use the `--refactor`_ argument please also cite:
 
 Rahmani, Elior, Noah Zaitlen, Yael Baran, Celeste Eng, Donglei Hu, Joshua Galanter, Sam Oh et al. "Sparse PCA corrects for cell type heterogeneity in epigenome-wide association studies." Nature methods 13, no. 5 (2016): 443-445.
 
 - If you use the `--epi`_ argument or the `--impute`_ argument please also cite: 
 
-Rahmani, Elior, Liat Shenhav, Regev Schweiger, Paul Yousefi, Karen Huen, Brenda Eskenazi, Celeste Eng et al. "Genome-wide methylation data mirror ancestry information." bioRxiv (2016): 066340.
+Rahmani, Elior, Liat Shenhav, Regev Schweiger, Paul Yousefi, Karen Huen, Brenda Eskenazi, Celeste Eng et al. "Genome-wide methylation data mirror ancestry information." Epigenetics & Chromatin 10, 1 (2017).
+
+- If you use the `--rmns`_ argument or the `--rmpoly`_ argument for 450K data please also cite:
+
+Chen, Yi-an, Mathieu Lemire, Sanaa Choufani, Darci T. Butcher, Daria Grafodatskaya, Brent W. Zanke, Steven Gallinger, Thomas J. Hudson, and Rosanna Weksberg. "Discovery of cross-reactive probes and polymorphic CpGs in the Illumina Infinium HumanMethylation450 microarray." Epigenetics 8, no. 2 (2013): 203-209.
+
+- If you use the `--rmns`_ argument for 850K (EPIC) data please cite:
+
+McCartney, Daniel L., Rosie M. Walker, Stewart W. Morris, Andrew M. McIntosh, David J. Porteous, and Kathryn L. Evans. "Identification of polymorphic and off-target probe binding sites on the Illumina Infinium MethylationEPIC BeadChip." Genomics Data 9 (2016): 22-24.
 
 - If you use the `--lmm`_ argument please also cite:
 

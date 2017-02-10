@@ -5,6 +5,14 @@ Versions
 The latest version of GLINT is available on github `here`_.
 Below are details about each of the versions released so far.
 
+GLINT 1.0.3
+^^^^^^^^^^^
+*February 10, 2017*
+
+* Fixed a problem with `--rmpoly`_ (the problem was introduced in GLINT 1.0.2 and caused performance issues with `--refactor`_)
+
+* Updated automatic setup of packages for non-Anaconda users
+
 GLINT 1.0.2
 ^^^^^^^^^^^
 *December 21, 2016*
