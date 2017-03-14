@@ -1,7 +1,7 @@
 import validate_dependencies
 from configuration import configurelogging
 import logging
-configurelogging.ConfigureLogging(loglevel = logging.DEBUG)
+configurelogging.Configure(loglevel = logging.DEBUG)
 from tests.refactor import test_refactor
 from tests.ewas import test_ewas
 from tests.utils import test_lin_reg, test_pca, test_tools

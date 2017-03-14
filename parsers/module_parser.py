@@ -58,7 +58,7 @@ class ModuleParser(object):
 
     def _validate_args_dependencies_in_group(self, group, args):
         """
-        errors if there is an argument in argument list (args) that is set but it's dependent argument are not set int that list
+        errors if there is an argument in argument list (args) that is set but its dependent argument are not set int that list
         """
         for arg, dependencies in group.get_args_dependencies().iteritems():
             if contains_arg(args, arg):

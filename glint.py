@@ -10,9 +10,9 @@ from numpy import loadtxt
 from utils import GlintArgumentParser
 from parsers import ModuleParser, RefactorParser, EWASParser, \
                     MethylationDataParser, ImputingParser, \
-                    EpistructureParser, LMMParser, PlotParser, HousemanParser  #dont remove this is imported in,,,
+                    EpistructureParser, PlotParser, HousemanParser  #dont remove this is imported in,,,
 
-LOGGER = configurelogging.ConfigureLogging()
+LOGGER = configurelogging.Configure()
 
 class GlintParser(ModuleParser):
     def __init__(self, parser):
@@ -68,17 +68,23 @@ class GlintParser(ModuleParser):
     
 
 class ModulesArgumentParsers(object):
+    # functional args are flags that does somthing, i.e if the user didnt choose one of them GLINT will do nothing and we should warn about that
+    # FUNCTIONALITY_ARGS - functional args that runs a module
     FUNCTIONALITY_ARGS = ['--plot', '--refactor', '--ewas', '--impute', '--houseman'] # TODO find better way to hold arguments that cause some functionality. glint is not supposed to be aware of those args
+    
+    # DATA_FUNC_ARGS - functional args that does something on the data (i.e running --minmean without --gsave means nothing)
+    # if user doesn't chose anythong from FUNCTIONALITY_ARGS but does choose to save his data, that's OK.
     DATA_FUNC_ARGS = ['--gsave', '--txtsave'] 
-    DATA_PREPROCESSING_NOT_RELEVANT_FOR_REFACTOR = ['--include', '--exclude', '--minmean', '--maxmean']
+    
+    #arguments that cannot be processed with arguments from FUNCTIONALITY_ARGS
     SOLE_ARGS = ['--epi'] # functilnality flags that cannot be specified with other functionaity flags
+    
+    DATA_PREPROCESSING_NOT_RELEVANT_FOR_REFACTOR = ['--include', '--exclude', '--minmean', '--maxmean']
 
     def __init__(self, user_args_selection):
         self.selected_args = user_args_selection
         self.parser = GlintArgumentParser(prog=os.path.basename(sys.argv[0]),
-                             description = "<<todo add help before >>",
-                             epilog = "<< todo add help after >>",
-                             add_help=False) # don't add help because it is added in 'optional group'
+                                        add_help=False) # don't add help because it is added in 'optional group'
 
         self.glint_parser = None
         self.meth_parser = None
@@ -112,7 +118,6 @@ class ModulesArgumentParsers(object):
         self.glint_parser.validate_args(self.args)
         optional_args.extend(self.glint_parser.all_args)
 
-
         # imputation runs without datafile
         if self.args.impute:
             self.imputing_parser.validate_args(self.args)
@@ -129,7 +134,7 @@ class ModulesArgumentParsers(object):
                 self.check_selected_args(optional_args)
                 return self.args
 
-    
+        # put here modules that require a datafile
 
         self.meth_parser.validate_args(self.args)
         optional_args.extend(self.meth_parser.all_args)    
@@ -174,8 +179,9 @@ class ModulesArgumentParsers(object):
         if len(func_args_chosen) == 0:
             common.terminate("Nothing to do with the data, select at least one argument from %s." % ", ".join(list(all_func_args)))
 
-        elif ((len(func_args_chosen) > (len(sole_args_chosen) + len(data_func_args))) and (len(sole_args_chosen) > 0))or (len(sole_args_chosen) > 1):
-            common.terminate("Options from %s cannot be specified with any other arguments in the same command. you chose %s." % (str(list(sole_args)), str(list(func_args_chosen))))
+        # check that a sole argumet wasn't chosen with any other arg.
+        elif ((len(func_args_chosen - data_func_args) > len(sole_args_chosen)) and (len(sole_args_chosen) > 0))or (len(sole_args_chosen) > 1):
+            common.terminate("Options from %s cannot be specified with any arguments from %s in the same command. you chose %s." % (str(list(sole_args)), str(list(self.FUNCTIONALITY_ARGS)), str(list(func_args_chosen))))
 
         differ = selected_args.difference(optional_args)
         if differ:
@@ -199,18 +205,24 @@ class ModulesArgumentParsers(object):
                 logging.warning("Selected data management arguments which are not relevant for ReFACTor: %s." % str(not_relevant_atgs))
 
     def run(self):
+        # put here modules that doesn't required a datafile
+
+        # imputation runs without datafile
         if self.args.impute:
             self.imputing_parser.run(args, output_perfix = self.args.out)
             return
 
+        # plot runs without datafile but could receive datafile if run with ewas
         if (self.args.qqplot or args.manhattan) and not self.args.ewas: # if user asked to run plot without running EWAS test, run plot and quit
             self.plot_parser.run(args)
             return
 
+        # put here modules that require a datafile
+
         self.meth_parser.run(self.args)
         self.meth_parser.preprocess_samples_data() # preprocess samples before refactor and before ewas
         self.meth_parser.preprocess_sites_data() #preprocess sites before refactor and before ewas
-        
+
         if self.args.refactor:
             refactor_meth_data = self.meth_parser.module.copy()
             self.refactor_parser.run(args = self.args,
@@ -233,7 +245,7 @@ class ModulesArgumentParsers(object):
             
             # add refactor components to the list of covariates to use:
             if self.args.covar is not None:
-                self.args.covar.append(refactor_comp_names)
+                self.args.covar.extend(refactor_comp_names)
             else:
                 self.args.covar = refactor_comp_names
 
@@ -251,7 +263,7 @@ class ModulesArgumentParsers(object):
 
             # add houseman components to the list of covariates to use:
             if self.args.covar is not None:
-                self.args.covar.append(houseman_comp_names)
+                self.args.covar.extend(houseman_comp_names)
             else:
                 self.args.covar = houseman_comp_names
         
@@ -293,7 +305,7 @@ if __name__ == '__main__':
     logging.info("Starting GLINT...")
     
     parser.add_arguments()
-    args = parser.parse_args()
+    args = parser.parse_args() # validate happens here
     LOGGER.setLoggerLevel(args.loglevel)
     LOGGER.setLoggerFile(args.out)
 

@@ -48,8 +48,6 @@ class SenariosTester():
             if refactor_module.ranked_sites[differ[i]] == ranked_list_to_compare[differ[i+1]] and refactor_module.ranked_sites[differ[i+1]] == ranked_list_to_compare[differ[i]]:
                 if abs (refactor_module.distances[differ[i]] - refactor_module.distances[differ[i+1]]) < 1e-4:
                     return True
-        import pdb
-        pdb.set_trace()
         logging.error("ranked lists not matched")
         return False
 

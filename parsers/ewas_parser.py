@@ -65,8 +65,7 @@ class EWASParser(ModuleParser):
         ewas.add_argument('--linreg', action = "store_true", help = "Runs linear regression analysis (executed by default if --ewas is selected)")
         ewas.add_argument('--logreg', action = "store_true", help = "Runs logistic regression analysis")
         ewas.add_argument('--wilc',   action = "store_true", help = "Runs Wilcoxon rank-sum test")
-        # Note: lmm module is handled not the very best way since there was no time. it appears here under "EWAS" but the glin.py handles it as 
-        # an independed module
+        # Note: lmm module is handled not the very best way since there was no time. 
         ewas.add_argument('--lmm', dependencies = ["--ewas"], action = "store_true", help = "Run linear mixed model test")
         
         self.lmm_parser = LMMParser(parser)

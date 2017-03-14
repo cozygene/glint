@@ -24,9 +24,9 @@ headers_27=['IlmnID','Chr','MapInfo','Gene_ID','CPG_ISLAND']
 repeat_field = 'UCSC_RefGene_Name'
 
 #paths to the chip dataset
-filepath_850 = '/Users/yedidimr/Downloads/MethylationEPIC_v-1-0_B2.csv'
-filepath_450 = '/Users/yedidimr/Downloads/HumanMethylation450_15017482_v1-2.csv'
-filepath_270 = '/Users/yedidimr/Downloads/humanmethylation27_270596_v1-2.bpm'
+filepath_850 = 'MethylationEPIC_v-1-0_B2.csv'
+filepath_450 = 'HumanMethylation450_15017482_v1-2.csv'
+filepath_270 = 'humanmethylation27_270596_v1-2.bpm'
 
 # a dictionary mapping a chip file to its interesting headers and in which line the header is found (index of that line where the first line in the file is indexed 0)
 files = {

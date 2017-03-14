@@ -45,7 +45,7 @@ class _ConsoleFormatter(_Formatter):
 
 
 
-class ConfigureLogging(object):
+class Configure(object):
     def __init__(self, loglevel=logging.INFO, prefix = ''):
         logging.raiseExceptions = 0
         logging.captureWarnings(True)

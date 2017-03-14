@@ -14,16 +14,16 @@ def check_tutorial_files_exist():
 
 class TutorialTester():
     TUTORIAL_CMDS = [
-                    # "python glint.py --datafile docs/datafile.txt --covarfile docs/covariates.txt --phenofile docs/phenotypes.txt --gsave",
-                    # "python glint.py --datafile datafile.glint --plot --plotpcs --numpcs 2 --out pcs_plot",
-                    # "python glint.py --datafile datafile.glint --maxpcstd 1 4 --gsave --out data_cleaned",
-                    # "python glint.py --datafile data_cleaned.glint --refactor --k 6 --covar age gender chip1 chip2 chip3 chip4 chip5 chip6 chip7 chip8 --gsave --out data_cleaned_v2",
-                    # "python glint.py --datafile data_cleaned_v2.glint --epi --covar rc1 rc2 rc3 rc4 rc5 rc6 --gsave --out data_final",
-                    # "python glint.py --datafile data_final.glint --ewas --linreg --pheno y1 --covar age gender rc1 rc2 rc3 rc4 rc5 rc6 epi1 --stdth 0.01 --rmxy --rmns --rmpoly",
-                    # "python glint.py --plot --qqplot --manhattan --results results.glint.linreg.txt",
-                    # "python glint.py --datafile data_final.glint --ewas --linreg --pheno y1 --covar age gender epi1 --stdth 0.01 --rmxy --rmns --rmpoly --plot --qqplot --manhattan --out unadjusted",
-                    # "python glint.py --datafile docs/datafile.txt --gsave --out newdata",
-                    # "python glint.py --datafile datafile.glint --txtsave",
+                    "python glint.py --datafile docs/datafile.txt --covarfile docs/covariates.txt --phenofile docs/phenotypes.txt --gsave",
+                    "python glint.py --datafile datafile.glint --plot --plotpcs --numpcs 2 --out pcs_plot",
+                    "python glint.py --datafile datafile.glint --maxpcstd 1 4 --gsave --out data_cleaned",
+                    "python glint.py --datafile data_cleaned.glint --refactor --k 6 --covar age gender chip1 chip2 chip3 chip4 chip5 chip6 chip7 chip8 --gsave --out data_cleaned_v2",
+                    "python glint.py --datafile data_cleaned_v2.glint --epi --covar rc1 rc2 rc3 rc4 rc5 rc6 --gsave --out data_final",
+                    "python glint.py --datafile data_final.glint --ewas --linreg --pheno y1 --covar age gender rc1 rc2 rc3 rc4 rc5 rc6 epi1 --stdth 0.01 --rmxy --rmns --rmpoly",
+                    "python glint.py --plot --qqplot --manhattan --results results.glint.linreg.txt",
+                    "python glint.py --datafile data_final.glint --ewas --linreg --pheno y1 --covar age gender epi1 --stdth 0.01 --rmxy --rmns --rmpoly --plot --qqplot --manhattan --out unadjusted",
+                    "python glint.py --datafile docs/datafile.txt --gsave --out newdata",
+                    "python glint.py --datafile datafile.glint --txtsave",
                     "python replace_missing_values.py --datafile docs/datafile.txt --chr NA --maxs 0.03 --maxi 0.03",
                     ]
     def __init__(self):
@@ -34,9 +34,10 @@ class TutorialTester():
 
     def run_tutorial_commands(self):
         for cmd in self.TUTORIAL_CMDS:
+            logging.info("running: %s" , cmd)
             res = os.system(cmd)
             if res != 0:
-                print "error in tutorial command: '%s'" % cmd
+                logging.error("error in tutorial command: '%s'" % cmd)
                 exit(2)
         print "PASS"
         
