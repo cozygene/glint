@@ -21,13 +21,13 @@ A detailed documentation of GLINT can be found <a href="http://glint-epigenetics
 
 GLINT was implemented for Python 2.7 and has the following dependencies:
 
-    numpy
-    scipy
-    sklearn
-    pandas
-    matplotlib
-    statsmodels
-    cvxopt (not included in Anaconda by default)
+    numpy (>=1.10.4)
+    scipy (>=0.17)
+    sklearn (>=0.17.1)
+    pandas (>=0.18)
+    matplotlib (>=1.5.1)
+    statsmodels (>=0.6.1)
+    cvxopt (>=1.1.8; not included in Anaconda by default)
     
 We recommend installing the latest release of <a href="https://www.continuum.io/downloads" target="_blank">Anaconda for Python 2.7</a>, which already includes most of the necessary dependencies. In case you already have Python 2.7 installed and do not want to install Anaconda Python, run the "install.py" script we provide:
 ```
