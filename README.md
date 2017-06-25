@@ -41,6 +41,7 @@ The script automatically tries to install missing dependencies that are required
 #### Missing dependency?
 1. Make sure you have Anaconda isntalled, see "Download and installation" for more details.  
   If you do not have Anaconda installed and running ```python install.py``` failed, then the easy solution is to install Anaconda. Otherwise, you will need to install all the Python packages listed under "Dependencies".
+  If you have Anaconda installed, make sure you have updated versions of the required dependencies (as detailed above under "Denpendencies").
 2. Make sure you run GLINT with the Anaconda Python command line (assuming you installed Anaconda Python):  
   **Windows**:  
     a. Find the path to Anaconda Python: press "Start" (win-key) and search for "conda". When you find it, do not open it but right click on it -> "properties", and extract the path written under "Location".  
