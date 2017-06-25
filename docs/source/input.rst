@@ -50,7 +50,7 @@ will load the methylation data matrix in the *datafile.txt* file. See the tutori
 
 **--covarfile**
 
-Path to a file containing samples by covariates matrix. The first row may be a row of headers - the names of the covariates, and the first column should include sample identifiers. The first row, if provided headers, may include the field "ID" at the beginning. If a row of headers is not provided then GLINT will automatically generate a name for each covariate. The file can be either tab-delimited, comma-delimited or space-delimited. The matrix entries are not allowed to include quotes.
+Path to a file containing samples by covariates matrix. The first row may be a row of headers - the names of the covariates, and the first column should include sample identifiers. The first row, if provided headers, may include the field "ID" at the beginning. If a row of headers is not provided then GLINT will automatically generate a name for each covariate. The file can be either tab-delimited, comma-delimited or space-delimited. The matrix entries are not allowed to include quotes, and covariates must be numeric (i.e. categorial covariates should be encoded numerically).
 
 For example, adding the following to your GLINT command::
 
@@ -72,7 +72,7 @@ will provide the covariates matrix in the *covariates.txt* file. See the tutoria
 
 **--phenofile**
 
-Path to a file containing samples by phenotypes matrix. The first row may be a row of headers - the names of the phenotypes, and the first column should include sample identifiers. The first row, if provided headers, may include the field "ID" at the beginning. If a row of headers is not provided then GLINT will automatically generate a name for each phenotype. The file can be either tab-delimited, comma-delimited or space-delimited. The matrix entries are not allowed to include quotes.
+Path to a file containing samples by phenotypes matrix. The first row may be a row of headers - the names of the phenotypes, and the first column should include sample identifiers. The first row, if provided headers, may include the field "ID" at the beginning. If a row of headers is not provided then GLINT will automatically generate a name for each phenotype. The file can be either tab-delimited, comma-delimited or space-delimited. The matrix entries are not allowed to include quotes, and phenotypes must be numeric (i.e. categorial phenotypes should be encoded numerically).
 
 For example, adding the following to your GLINT command::
 

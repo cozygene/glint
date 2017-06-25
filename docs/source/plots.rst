@@ -13,6 +13,7 @@ Plots
 
 This argument allows to plot several types of plots, as desribed bellow.
 
+.. note:: For using `--plot`_ when working on a remote server (e.g., via SSH), make sure X11-forwarding is enabled.
 
 .. note:: The example commands described bellow assume that the user generated `GLINT files`_ with covariates file and phenotypes file.
 

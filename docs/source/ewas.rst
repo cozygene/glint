@@ -155,12 +155,13 @@ Performs EWAS on the data using linear mixed model (LMM). This is an implementat
 
 The output file named *results.glint.lmm.txt** includes a list of the sites, sorted by their association p-value. The output file includes the following columns:  ID (CpG identifiers), chromosome (chromosome number of the site), MAPINFO (position of the site in the genome), p-value, q-value, intercept , V1 (coefficient of the first covariate),..., Vn (coefficient of the last covaraite, beta (the coefficient of the site under test), statistic (the test statistic), sigma-e (an estimate of sigma_e), sigma-g (an estimate of sigma_g), UCSC_RefGene_Name (name of the gene that is closest to this site), Relation_to_UCSC_CpG_Island (category)
 
+.. _--kinship:
 
 **--kinship**
 
 The kinship matrix for modelling the inter-individual similarity in the data that is required for the LMM. GLINT allows two options:
 
-- User-supplied kinship - users can suplly a text file with samples by samples kinship matrix (with no row or column headers). 
+- User-supplied kinship - users can suplly a text file with samples by samples kinship matrix (tab-delimited and with no row or column headers). 
 - *refactor* - the ReFACTor algorithm can be used for constructing the kinship matrix. If this option is used then ReFACTor is executed for selecting the top informative sites in the data. The kinship matrix is then constructed by calculatign the empirical covariance matrix of the samples based on the selected sites.
 
 For example::

@@ -5,6 +5,12 @@ Versions
 The latest version of GLINT is available on github `here`_.
 Below are details about each of the versions released so far.
 
+GLINT 1.0.4
+^^^^^^^^^^^
+*June 25, 2017*
+
+* Fixed a bug with the `--kinship`_ argument when using `--lmm`_
+
 GLINT 1.0.3
 ^^^^^^^^^^^
 *February 10, 2017*
@@ -43,6 +49,8 @@ The first release of GLINT!
 
 .. _here: https://github.com/cozygene/glint/releases/
 
+.. _--lmm: ewas.html#lmm
+.. _--kinship: ewas.html#kinship
 .. _--refactor: tissueheterogeneity.html#refactor
 .. _--houseman: tissueheterogeneity.html#houseman
 .. _--rmpoly: datamanagement.html#rmpoly

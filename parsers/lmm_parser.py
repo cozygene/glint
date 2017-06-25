@@ -82,7 +82,7 @@ class LMMParser(ModuleParser):
 
             if type(args.kinship) == file: #kinship is provided via file
                 logging.info("loading kinship from %s" % args.kinship.name)
-                kinship = common.loadtxt(args.kinship)
+                kinship = common.loadtxt(args.kinship, dtype = float)
 
             elif args.kinship == 'refactor': # kinship and data to test are the same
                 # todo if --lmm provided with --refactor there is no need to run refactor twice in order to find ranked sites.
