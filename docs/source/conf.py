@@ -55,7 +55,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'GLINT'
-copyright = u'2016, Elior Rahmani'
+copyright = u'2017, Elior Rahmani'
 author = u'Elior Rahmani'
 
 # The version info for the project you're documenting, acts as replacement for
