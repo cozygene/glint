@@ -12,11 +12,11 @@ def _replace_missing_values_in_matrix(all_data, missing_value_indicator, data_ma
     print "Replacing missing values by mean..."
     
     na_count_per_sample = npsum(isnan(all_data), axis=0)
-    samples_indices_to_keep = where(na_count_per_sample <= samples_max_missing_values*number_of_samples)[0]
+    samples_indices_to_keep = where(na_count_per_sample <= samples_max_missing_values*number_of_data)[0]
     print("%s samples were not replaced because they have more than %s missing values" % (number_of_samples - len(samples_indices_to_keep), samples_max_missing_values))
 
     na_count_per_site = npsum(isnan(all_data), axis=1)
-    sites_indices_to_keep = where(na_count_per_site <= data_max_missing_values*number_of_data)[0]
+    sites_indices_to_keep = where(na_count_per_site <= data_max_missing_values*number_of_samples)[0]
     print("%s sites were not replaced because they have more than %s missing values" % (number_of_data - len(sites_indices_to_keep), data_max_missing_values))
 
     print("replacing each missing value by it's site mean...")
